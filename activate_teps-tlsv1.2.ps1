@@ -693,7 +693,7 @@ write-host "INFO - main - Procedure successfully finished Elapsedtime:$($elapsed
 write-host " - Original files saved in folder $CANDLEHOME\$BACKUPFOLDER "
 write-host " - To restore the level before update run '$CANDLEHOME\$BACKUPFOLDER\BATrestoreBAT.bat' "
 write-host "----- POST script execution steps ---" -ForegroundColor Yellow
-write-host " - Reconfigure TEPS and verify connections for TEP, TEPS, HUB" 
+write-host " - Verify connections for TEP, TEPS, HUB" 
 write-host " - To check eWAS settings use: https://localhost:15206/ibm/console/login"
 write-host "------------------------------------------------------------------------------------------"
 
