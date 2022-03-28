@@ -818,7 +818,7 @@ echo "INFO - main - Procedure successfully finished Elapsedtime: $etm min "
 echo " - Original files saved in folder $CANDLEHOME\$BACKUPFOLDER "
 echo " - To restore the level before update run '$CANDLEHOME\$BACKUPFOLDER\BATrestoreBAT.bat' "
 echo "----- POST script execution steps ---" -ForegroundColor Yellow
-echo " - Reconfigure TEPS and verify connections for TEP, TEPS, HUB" 
+echo " - Verify connections for TEP, TEPS, HUB" 
 echo " - To check eWAS settings use: https://localhost:15206/ibm/console/login"
 echo " - To check TEP WebStart  use: https://localhost:15201/tep.jnlp"
 echo "------------------------------------------------------------------------------------------"
