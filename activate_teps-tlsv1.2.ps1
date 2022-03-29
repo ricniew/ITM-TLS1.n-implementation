@@ -1,4 +1,4 @@
-﻿#
+#
 # Usage: Copy script to a directory, for examle C:\myfolder and run script in a Powershell window: 
 #   PS C:\myfolder> .\activate_teps-tlsv1.2.ps1 [ -h ITMHOME ]
 #
@@ -694,13 +694,15 @@ EnableICSLIte "false"
 
 write-host ""
 $elapsedTime = new-timespan $startTime $(get-date) 
+$myhost = Invoke-Expression -Command "hostname"
 write-host "------------------------------------------------------------------------------------------"
 write-host "INFO - main - Procedure successfully finished Elapsedtime:$($elapsedTime.ToString("hh\:mm\:ss")) " -ForegroundColor Green
 write-host " - Original files saved in folder $CANDLEHOME\$BACKUPFOLDER "
 write-host " - To restore the level before update run '$CANDLEHOME\$BACKUPFOLDER\BATrestoreBAT.bat' "
 write-host "----- POST script execution steps ---" -ForegroundColor Yellow
 write-host " - Reconfigure TEPS and verify connections for TEP, TEPS, HUB" 
-write-host " - To check eWAS settings use: https://localhost:15206/ibm/console/login"
+write-host " - To check eWAS settings use: https://$myhost:15206/ibm/console/login"
+write-host " - To check WenStart Client: https://$myhost:15201/tep.jnlp"
 write-host "------------------------------------------------------------------------------------------"
 
 exit
