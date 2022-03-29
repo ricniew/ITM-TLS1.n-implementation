@@ -191,10 +191,10 @@ modhttpconf ()
           echo "#${line}" >> $newhttpdfile
           continue
       fi
-      tregex='^Listen.*15200'
+      tregex='^Listen[[:space:]]*15200'
       if [[ $line =~ $tregex ]] ; then
           echo "Listen 127.0.0.1:15200" >> $newhttpdfile
-          echo "${line}" >> $newhttpdfile
+          #echo "${line}" >> $newhttpdfile
           continue
       fi
       if [ $foundsslcfg -eq 1 ] ; then  
@@ -202,7 +202,7 @@ modhttpconf ()
               #echo Debug -modhttpconf-----line= $line -- foundsslcfg= $foundsslcfg 
               foundsslcfg=0
               echo "$line" >> $newhttpdfile
-              temp="  DocumentRoot + ${CANDLEHOME}/$ARCH/cw"
+              temp="  DocumentRoot \"${CANDLEHOME}/$ARCH/cw\""
               echo $temp >> $newhttpdfile
               echo "  SSLEnable" >> $newhttpdfile
               echo "  SSLProtocolDisable SSLv2" >> $newhttpdfile
@@ -328,9 +328,11 @@ modtepjnlpt ()
       do
           if [[ $line =~ \<\!--.Custom.parameters.*--\> ]] ; then
               echo "$line" >> $tempfile
+              echo "    <Custom parameters>" >> $tempfile
               if [ $foundprotocol -eq 1 ] ; then echo '    <property name="jnlp.tep.connection.protocol" value="https"/> ' >> $tempfile ; fi
               if [ $foundport -eq 1 ] ;     then echo '    <property name="jnlp.tep.connection.protocol.url.port" value="15201"/> '  >> $tempfile ; fi
               if [ $foundTLS12 -eq 1 ] ;    then echo '    <property name="jnlp.tep.sslcontext.protocol" value="TLSv1.2"/> ' >> $tempfile ; fi
+              echo "    </Custom parameters>" >> $tempfile
           else 
                echo "${line}"  >> $tempfile 
           fi
@@ -695,7 +697,7 @@ WSADMIN="$CANDLEHOME/$ARCH/iw/bin/wsadmin.sh"
 
 if [ -d "${CANDLEHOME}/${BACKUPFOLDER}" ]; then
     echo "ERROR - main - This script was started already and the folder $BACKUPFOLDER exists already! To avoid data loss, "
-    echo "before executing this script again, you must restore the original content by using the '$RESTORESCRIPT' script and delete/rename the backup folder."
+    echo "before executing this script again, you must restore the original content by using the '$CANDLEHOME/$BACKUPFOLDER/$RESTORESCRIPT' script and delete/rename the backup folder."
     usage
     exit 1
 else
@@ -807,14 +809,15 @@ EnableICSLite "false"
 
 echo ""
 etm=$((SECONDS/60))
+host=`hostname`
 echo "------------------------------------------------------------------------------------------"
 echo "INFO - main - Procedure successfully finished Elapsedtime: $etm min " 
-echo " - Original files saved in folder $CANDLEHOME\$BACKUPFOLDER "
-echo " - To restore the level before update run '$CANDLEHOME\$BACKUPFOLDER\BATrestoreBAT.bat' "
-echo "----- POST script execution steps ---" -ForegroundColor Yellow
+echo " - Original files saved in folder $CANDLEHOME/$BACKUPFOLDER "
+echo " - To restore the level before update run '$CANDLEHOME/$BACKUPFOLDER/$RESTORESCRIPT' "
+echo "----- POST script execution steps ---" 
 echo " - Reconfigure TEPS and verify connections for TEP, TEPS, HUB" 
-echo " - To check eWAS settings use: https://localhost:15206/ibm/console/login"
-echo " - To check TEP WebStart  use: https://localhost:15201/tep.jnlp"
+echo " - To check eWAS settings use: https://${host}:15206/ibm/console/login"
+echo " - To check TEP WebStart  use: https://${host}:15201/tep.jnlp"
 echo "------------------------------------------------------------------------------------------"
 
 exit 0
