@@ -3,7 +3,7 @@
 ###################################################################
 # R. Niewolik IBM AVP
 # This script  performs configuration steps to implement a TLSv1.2 only configuration
-# 29.03.2022: Version 1.2 by R. Niewolik EMEA AVP Team
+# 29.03.2022: Version 1.3 by R. Niewolik EMEA AVP Team
 ## 
 SECONDS=0
 
