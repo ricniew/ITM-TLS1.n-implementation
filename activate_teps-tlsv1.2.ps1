@@ -560,7 +560,7 @@ $COMPONENTT = backupfile $HFILES["component.jnlpt"]
 $APPLET = backupfile $HFILES["applet.html.updateparams"] 
 $KCJ = backupfile $HFILES["kcjparms.txt"] 
 $JAVASEC = backupfile $HFILES["java.security"] 
-$TRUSTÜ = backupfile $HFILES["trust.p12"]
+$TRUST = backupfile $HFILES["trust.p12"]
 $JEYP = backupfile $HFILES["key.p12"]
 $SSLPROPS = backupfile $HFILES["ssl.client.props"]
 
