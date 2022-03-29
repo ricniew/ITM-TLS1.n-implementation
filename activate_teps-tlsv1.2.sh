@@ -122,7 +122,7 @@ restartTEPS ()
       while [ $wait -eq 1 ] 
       do
           c=$(( $c + 1 ))
-          grep 'Waiting for requests. Startup complete' $CANDLEHOME/logs/kfwservices.msg
+          grep 'Waiting for requests. Startup complete' $CANDLEHOME/logs/kfwservices.msg > /dev/null
           if [ $? -eq 0 ] ; then
               echo ""
               echo "INFO - restartTEPS - TEPS restarted successfully."
@@ -306,13 +306,13 @@ modtepjnlpt ()
       #echo "$line"
       if [[ $line =~ codebase.*http://\$HOST\$:\$PORT\$ ]] ; then
           echo '  codebase="https://$HOST$:15201/"> ' >> $newtepjnlpt 
-      elif [[ $line =~ property.name=\"jnlp.tep.connection.protocol\".*value=  ]] ; then
+      elif [[ $line =~ ^[[:space:]]*property.name=\"jnlp.tep.connection.protocol\".*value=  ]] ; then
           echo '    <property name="jnlp.tep.connection.protocol" value="https"/> '  >> $newtepjnlpt 
           foundprotocol=0
-      elif [[ $line =~ property.name=\"jnlp.tep.connection.protocol.url.port\".*value= ]] ; then
+      elif [[ $line =~ ^[[:space:]]*property.name=\"jnlp.tep.connection.protocol.url.port\".*value= ]] ; then
           echo '    <property name="jnlp.tep.connection.protocol.url.port" value="15201"/> '  >> $newtepjnlpt 
           foundport=0
-      elif [[ $line =~ property.name=\"jnlp.tep.sslcontext.protocol\".*value ]] ; then
+      elif [[ $line =~ ^[[:space:]]*property.name=\"jnlp.tep.sslcontext.protocol\".*value ]] ; then
           echo '    <property name="jnlp.tep.sslcontext.protocol" value="TLSv1.2"/> '  >> $newtepjnlpt 
           foundTLS12=0
       else 
