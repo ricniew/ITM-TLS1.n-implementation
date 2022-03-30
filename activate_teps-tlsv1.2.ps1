@@ -2,7 +2,8 @@
 # Usage: Copy script to a directory, for examle C:\myfolder and run script in a Powershell window: 
 #   PS C:\myfolder> .\activate_teps-tlsv1.2.ps1 [ -h ITMHOME ]
 #
-# 29.03.2022: Version 1.3 by R. Niewolik EMEA AVP Team
+# 16.03.2022: Initial version  by R. Niewolik EMEA AVP Team
+# 29.03.2022: Version 1.3      by R. Niewolik EMEA AVP Team
 #
 param($h)
 
