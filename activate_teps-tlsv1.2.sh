@@ -3,7 +3,8 @@
 ###################################################################
 # R. Niewolik IBM AVP
 # This script  performs configuration steps to implement a TLSv1.2 only configuration
-# 29.03.2022: Version 1.3 by R. Niewolik EMEA AVP Team
+# 16.03.2022: Initial version by R. Niewolik EMEA AVP Team
+# 30.03.2022: Version 1.4     by R. Niewolik EMEA AVP Team
 ## 
 SECONDS=0
 
@@ -176,7 +177,7 @@ modhttpconf ()
   savehttpdfile=$SAVEORGFILE
   foundsslcfg=1
   #echo "DEBUG - modhttpconf - $NEWORGFILE $SAVEORGFILE " ; exit
-  while IFS= read -r line
+  while IFS= read -r line || [[ -n "$line" ]]
   do
       #echo -- $foundsslcfg
       if [ "${line:0:1}" = "#" ] ; then
@@ -251,7 +252,7 @@ modcqini ()
   foundTLS10=1
   foundTLS11=1
   foundTLS12=1
-  while IFS= read -r line
+  while IFS= read -r line || [[ -n "$line" ]]
   do
       #echo "$line"
       if [ ${line:0:1} = '#' ] ; then
@@ -301,7 +302,7 @@ modtepjnlpt ()
   foundport=1
   foundTLS12=1
   
-  while IFS= read -r line
+  while IFS= read -r line || [[ -n "$line" ]]
   do
       #echo "$line"
       if [[ $line =~ codebase.*http://\$HOST\$:\$PORT\$ ]] ; then
@@ -324,7 +325,7 @@ modtepjnlpt ()
   if [ $count -gt 0 ] ; then
       #echo  "-DEBUG-modtepjnlpt----- c=$count --$foundprotocol = $foundport = $foundTLS12"
       tempfile="$newtepjnlpt.temporaryfile" 
-      while IFS= read -r line
+      while IFS= read -r line || [[ -n "$line" ]]
       do
           if [[ $line =~ \<\!--.Custom.parameters.*--\> ]] ; then
               echo "$line" >> $tempfile
@@ -356,14 +357,17 @@ modcompjnlpt ()
   fi
   newcompjnlpt=$NEWORGFILE
   savecompjnlpt=$SAVEORGFILE
-  
-  while IFS= read -r line
+  cat $savecompjnlpt
+  echo "---"
+  cat $savecompjnlpt|wc -l
+  echo "----"
+  while IFS= read -r line || [[ -n "$line" ]]
   do
       if [[ $line =~ codebase.*http://\$HOST\$:\$PORT\$ ]] ; then
           echo '  codebase="https://$HOST$:15201/"> ' >> $newcompjnlpt 
-      else
-          echo "${line}" >> $newcompjnlpt 
-      fi 
+          continue
+      fi
+      echo "${line}" >> $newcompjnlpt  
   done < $savecompjnlpt
   
   cp -p $newcompjnlpt $compjnlpt
@@ -386,7 +390,7 @@ modapplethtmlupdateparams ()
   foundprotocol=1
   foundport=1
   foundTLS12=1
-  while IFS= read -r line
+  while IFS= read -r line || [[ -n "$line" ]]
   do
       if [ "${line:0:1}" = "#" ] ; then
           echo "$line"  >> $newapplethtmlupdateparams
@@ -435,7 +439,7 @@ modkcjparmstxt ()
   foundprotocol=1
   foundport=1
   foundTLS12=1
-  while IFS= read -r line
+  while IFS= read -r line || [[ -n "$line" ]]
   do
       if [ "${line:0:1}" = "#" ] ; then
           echo  "$line"  >> $newkcjparmstxt   
@@ -479,7 +483,7 @@ modsslclientprops ()
   savesslclientprops=$SAVEORGFILE
   foundproto=1
   
-  while IFS= read -r line
+  while IFS= read -r line || [[ -n "$line" ]]
   do  
       if [ "${line:0:1}" = "#" ] ; then
           echo  "$line"  >> $newsslclientprops   
@@ -521,7 +525,7 @@ modjavasecurity ()
   
   nextline=1
   foundAlgo=1
-  while IFS= read -r line
+  while IFS= read -r line || [[ -n "$line" ]]
   do  
       #echo "DEBUG - modjavasecurity - after copy "
       tline=`echo $line | awk '{$1=$1};1'` # trim leadin and trailing white spaces 
@@ -718,6 +722,7 @@ declare -A AFILES=(
   ["key.p12"]="${CANDLEHOME}/$ARCH/iw/profiles/ITMProfile/config/cells/ITMCell/nodes/ITMNode/key.p12" \
   ["ssl.client.props"]="${CANDLEHOME}/$ARCH/iw/profiles/ITMProfile/properties/ssl.client.props" \
 )
+
 
 # enable ICSLite in eWAS
 EnableICSLite "true"
