@@ -329,11 +329,11 @@ modtepjnlpt ()
       do
           if [[ $line =~ \<\!--.Custom.parameters.*--\> ]] ; then
               echo "$line" >> $tempfile
-              echo "    <Custom parameters>" >> $tempfile
+              #echo "    <Custom parameters>" >> $tempfile
               if [ $foundprotocol -eq 1 ] ; then echo '    <property name="jnlp.tep.connection.protocol" value="https"/> ' >> $tempfile ; fi
               if [ $foundport -eq 1 ] ;     then echo '    <property name="jnlp.tep.connection.protocol.url.port" value="15201"/> '  >> $tempfile ; fi
               if [ $foundTLS12 -eq 1 ] ;    then echo '    <property name="jnlp.tep.sslcontext.protocol" value="TLSv1.2"/> ' >> $tempfile ; fi
-              echo "    </Custom parameters>" >> $tempfile
+              #echo "    </Custom parameters>" >> $tempfile
           else 
                echo "${line}"  >> $tempfile 
           fi
