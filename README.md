@@ -9,8 +9,7 @@
 
 **Download the scripts:**
 
-Download scripts to a temp folder
-
+Use "Download ZIP" to save scripts to a temp folder. Then unzip it.
 
 <img src="https://media.github.ibm.com/user/85313/files/a8ede000-b0df-11ec-86d9-bf7e122e6f83" width="60%" height="60%">
 
