@@ -6,15 +6,17 @@
     - **Unix**: `$CANDLEHOME/{archdir}/iw/scripts/updateTEPSEPass.sh wasadmin {yourpass}` (e.g. _/opt/IBM/ITM/lx8266/iw/scripts/ updateTEPSEPass.sh wasadmin itmuser_ )
     - **Windows**: `%CANDLE_HOME%\CNPSJ\scripts\updateTEPSEPass.bat wasadmin {yourpass}` (e.g. _c:\IBM\ITM\CNPSJ\scripts\updateTEPSEPass.bat wasadmin itmuser_ )
 
+**Download the scripts:**
+Download scripts to a temp folder
+![image](https://media.github.ibm.com/user/85313/files/a8ede000-b0df-11ec-86d9-bf7e122e6f83)
+
+**Execution:**
 Windows: 
-- Download the `activate_teps-tlsv1.2.ps1` script to a temp folder
 - Open PowerShell cmd prompt and go to the temp directory
 - launch script via `.\activate_teps-tlsv1.2.ps1`
 
 After script finished reconfigure TEPS, CNP (TEP Destopt CLient) and CNB (TEP Browser/WebStart CLient) component using MTEMS
 
 Unix/Linux
-Windows: 
-- Download the `activate_teps-tlsv1.2.sh` script to a temp folder
-- Open PowerShell cmd prompt and go to the temp directory
+- Open shell prompt and go to the temp directory
 - launch script via `./activate_teps-tlsv1.2.sh`
