@@ -10,9 +10,9 @@ Revision: 1.0
 
 [1 General](#1-general)
 
-[2 Tivoli Enterprise Portal Server](#2-teps)
+[2 Tivoli Enterprise Management Server](#2-tems)
 
-[3 Tivoli Enterprise Management Server](#3-tems)
+[3 Tivoli Enterprise Portal Server](#3-teps)
 
 [4 Tivoli Enterprise Management Agent](#4-agents)
 
@@ -30,7 +30,8 @@ This Github entry provides automation scripts for the TEPS related configuration
 
 .... in construction
 
-3 TEMS
+
+2 TEMS
 ==============
 
 .... in construction
