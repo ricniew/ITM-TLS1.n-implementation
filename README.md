@@ -29,12 +29,19 @@ in construction
 2 TEPS
 ==============
 
+A step by step description was provided by IBM Support: https://www.ibm.com/support/pages/sites/default/files/inline-files/$FILE/ITMTEPSeWASTLSv12_ref_2_1.pdf
+The process was automated and two scripts have been created, one PowerShell script for Windows and a Bash shell script for Linux:
+- activate_teps-tlsv1.2.ps1
+- activate_teps-tlsv1.2.sh
+The Bash shell script was tested on RedHat linux only, but should run on other Linux distribution and Unix as well-
+
 **Prereqs:**
 
 - Before staring the script, please verify that the TEPS is started and **connected to TEMS using IP.SPIPE**
 - Update the `wasadmin` password if **not** done so far
     - **Unix**: `$CANDLEHOME/{archdir}/iw/scripts/updateTEPSEPass.sh wasadmin {yourpass}` (e.g. _/opt/IBM/ITM/lx8266/iw/scripts/ updateTEPSEPass.sh wasadmin itmuser_ )
-    - **Windows**: `%CANDLE_HOME%\CNPSJ\scripts\updateTEPSEPass.bat wasadmin {yourpass}` (e.g. _c:\IBM\ITM\CNPSJ\scripts\updateTEPSEPass.bat wasadmin itmuser_ )
+    - **Windows**: `%CANDLE_HOME%\CNPSJ\scripts\updateTEPSEPass.bat wasadmin {yourpass}` (e.g. _c:\IBM\ITM\CNPSJ\scripts\updateTEPSEPass.bat wasadmin itmuser_ 
+- PowerShell on Windows and Bash Shell on Linux must exists
 
 **Download the scripts:**
 
@@ -44,15 +51,17 @@ Use "Download ZIP" to save scripts to a temp folder. Then unzip it.
 
 **Execution:**
 
+Both scripts are looking for the ITMHOME folder variables (%CANDLE_HOME on Windows and $CANDLEHOME on Linux). If not existing you need to use the `-h [ITMHOME]` option. The Shell script tries also to find the required "arch" folder (e.g. lx8266) but you can use the `a [ arch ]` to provide the directory name.
+
 Windows: 
 - Open PowerShell cmd prompt and go to the temp directory
-- launch script via `.\activate_teps-tlsv1.2.ps1`
+- launch script via `.\activate_teps-tlsv1.2.ps1 [-h ITMHOME ]`
 
 After script finished reconfigure TEPS, CNP (TEP Destopt CLient) and CNB (TEP Browser/WebStart CLient) component using MTEMS
 
 Unix/Linux
 - Open shell prompt and go to the temp directory
-- launch script via `./activate_teps-tlsv1.2.sh`
+- launch script via `./activate_teps-tlsv1.2.sh [-h ITMHOME] -a [ arch ]`
 
 
 3 TEMS
