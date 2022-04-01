@@ -30,15 +30,20 @@ This Github entry provides automation scripts for the TEPS related configuration
 
 .... in construction
 
-2 TEPS
+3 TEMS
+==============
+
+.... in construction
+
+
+3 TEPS
 ==============
 
 The manual process described in the "_TLS v1.2 only configuration - TEP, IHS, TEPS, TEPS/eWAS components_" section of ITMTEPSeWASTLSv12_ref_2_1.pdf documented, was automated and two scripts have been created, one PowerShell script for Windows and a Bash shell script for Linux:
-
 1. _activate_teps-tlsv1.2.ps1_
 1. _activate_teps-tlsv1.2.sh_
 
-The Bash shell script was tested on RedHat linux only, but should run on other Linux distribution and Unix as well-
+The Bash shell script was tested on RedHat linux only, but should run on other Linux Distributions and Unix systems as well.
 
 **Prereqs:**
 
@@ -67,11 +72,6 @@ After script finished reconfigure TEPS, CNP (TEP Destopt CLient) and CNB (TEP Br
 Unix/Linux
 - Open shell prompt and go to the temp directory
 - launch script via `./activate_teps-tlsv1.2.sh [-h ITMHOME] -a [ arch ]`
-
-.... in construction
-
-3 TEMS
-==============
 
 .... in construction
 
