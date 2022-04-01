@@ -1,5 +1,34 @@
 # ITM-TLS1.2-implementation
 
+Author: Richard Niewolik
+
+Contact: niewolik@de.ibm.com
+
+Revision: 1.0
+
+#
+
+[1 General](#1-general)
+
+[2 Tivoli Enterprise Portal Server](#2-teps)
+
+[3 Tivoli Enterprise Management Server](#3-tems)
+
+[4 Tivoli Enterprise Management Agent](#4-agents)
+
+[5 Appendixes](#5-appendixes)
+
+
+
+#
+
+1 General
+=========
+in construction
+
+2 TEPS
+==============
+
 **Prereqs:**
 
 - Before staring the script, please verify that the TEPS is started and **connected to TEMS using IP.SPIPE**
@@ -24,3 +53,22 @@ After script finished reconfigure TEPS, CNP (TEP Destopt CLient) and CNB (TEP Br
 Unix/Linux
 - Open shell prompt and go to the temp directory
 - launch script via `./activate_teps-tlsv1.2.sh`
+
+
+3 TEMS
+==============
+
+in construction
+
+
+4 Agents
+==============
+
+in construction
+
+5 Appendixes
+============
+
+in construction
+
+
