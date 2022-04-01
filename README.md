@@ -31,8 +31,8 @@ in construction
 
 A step by step description was provided by IBM Support: https://www.ibm.com/support/pages/sites/default/files/inline-files/$FILE/ITMTEPSeWASTLSv12_ref_2_1.pdf
 The process was automated and two scripts have been created, one PowerShell script for Windows and a Bash shell script for Linux:
-- activate_teps-tlsv1.2.ps1
-- activate_teps-tlsv1.2.sh
+1 _activate_teps-tlsv1.2.ps1_
+1 _activate_teps-tlsv1.2.sh_
 The Bash shell script was tested on RedHat linux only, but should run on other Linux distribution and Unix as well-
 
 **Prereqs:**
