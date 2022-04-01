@@ -39,7 +39,14 @@ If others needs to be used, you **must** modify the TEPS scripts and use them ev
 2 TEMS
 ==============
 
-.... in construction
+.... in **construction** 
+
+To use TLS and specifically TLSV1.2 all TEMS (HUB and remote TEMS) must use IP.SPIPE (HTTPS) for cummunication. 
+
+If all your TEMS are already using IP.SPIPE you need first configure your Agents to use TLSV1.2 and the specific ciphers.
+
+If your ITM environment uses IP.PIPE you need first configure your TEMS to use IP.SPIPE and IP:PIPE (TLSV1.2 and the specific ciphers.
+
 
 
 3 TEPS
