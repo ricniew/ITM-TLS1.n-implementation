@@ -357,18 +357,9 @@ modcompjnlpt ()
   fi
   newcompjnlpt=$NEWORGFILE
   savecompjnlpt=$SAVEORGFILE
-  cat $savecompjnlpt
-  echo "---"
-  cat $savecompjnlpt|wc -l
-  echo "----"
-  while IFS= read -r line || [[ -n "$line" ]]
-  do
-      if [[ $line =~ codebase.*http://\$HOST\$:\$PORT\$ ]] ; then
-          echo '  codebase="https://$HOST$:15201/"> ' >> $newcompjnlpt 
-          continue
-      fi
-      echo "${line}" >> $newcompjnlpt  
-  done < $savecompjnlpt
+  
+  cp $savecompjnlpt $newcompjnlpt
+  sed -i -e 's/http:\/\/\$HOST\$:\$PORT\$/https:\/\/\$HOST\$:15201/g' $newcompjnlpt
   
   cp -p $newcompjnlpt $compjnlpt
   echo  "INFO - modcompjnlpt - $newcompjnlpt created and copied on $compjnlpt"
@@ -826,3 +817,4 @@ echo " - To check TEP WebStart  use: https://${host}:15201/tep.jnlp"
 echo "------------------------------------------------------------------------------------------"
 
 exit 0
+
