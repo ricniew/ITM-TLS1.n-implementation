@@ -82,7 +82,7 @@ As soon **all ITM components are connected to TEMS using IP.SPIPE with TLSV1.2**
    - Windows: [ITMHOME]\CMS\KBBENV 
    - Linux/AIX: [ITMHOME]/table/[TEMSNAME]/KBBENV (**Note:**: As soon you reconfigure your TEMS at one point in the future, the KBBENV will be rebuild and you chages are gone. To avoid this you can edit the  [ITMHOME]/config/ms.ini file instead and reconfigure your TEMS) 
 
-2. Check if the following statements exist, if they do not, add them.
+2. Check if the following statements exist and modify or add them.
     
     ```
     KDEBE_TLS10_ON=NO
