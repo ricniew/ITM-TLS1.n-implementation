@@ -72,9 +72,10 @@ To use TLS and specifically TLSV1.2 all TEMS (HUB and remote TEMS) **must** use 
 To do so you need to reconfigure your TEMS:
 
   - Windows: Use MTEMS tool to configure and **add** IP.SPIPE protocol to your TEMS 
- <img src="(https://media.github.ibm.com/user/85313/files/567d2e00-b415-11ec-9930-33bc3a4c462e)" width="25%" height="25%">
-
+ <img src="https://media.github.ibm.com/user/85313/files/567d2e00-b415-11ec-9930-33bc3a4c462e" width="25%" height="25%">
+ 
   - Linux/AIX: Use `itmcmd config -S -t TEMS` tool to configure and **add** IP.SPIPE protocol to your TEMS 
+  - Restart TEMS
   - Now you can configure TEPS and agents to connect to the TEMS using IP.SPIPE
 
 
