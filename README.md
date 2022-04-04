@@ -68,9 +68,9 @@ To use TLS and specifically TLSV1.2 all TEMS (HUB and remote TEMS) **must** use 
 
 To do so you need to reconfigure your TEMS:
 
-    - Windows: Use MTEMS tool to configure and **add** IP.SPIPE protocol to your TEMS 
-    - Linux/AIX: Use `itmcmd config -S -t TEMS` tool to configure and **add** IP.SPIPE protocol to your TEMS 
-    - Now you can configure TEPS and agents to connect to the TEMS using IP.SPIPE
+  - Windows: Use MTEMS tool to configure and **add** IP.SPIPE protocol to your TEMS 
+  - Linux/AIX: Use `itmcmd config -S -t TEMS` tool to configure and **add** IP.SPIPE protocol to your TEMS 
+  - Now you can configure TEPS and agents to connect to the TEMS using IP.SPIPE
 
 
 **THEN:**
@@ -79,8 +79,8 @@ As soon **all ITM components are connected to TEMS using IP.SPIPE with TLSV1.2**
 
 1. In the TEMS config file: 
 
-     - Windows: [ITMHOME]\CMS\KBBENV 
-     - Linux/AIX: [ITMHOME]/table/[TEMSNAME]/KBBENV (**Note:**: As soon you reconfigure your TEMS at one point in the future, the KBBENV will be rebuild and you chages are gone. To avoid this you can edit the  [ITMHOME]/config/ms.ini file instead and reconfigure your TEMS) 
+   - Windows: [ITMHOME]\CMS\KBBENV 
+   - Linux/AIX: [ITMHOME]/table/[TEMSNAME]/KBBENV (**Note:**: As soon you reconfigure your TEMS at one point in the future, the KBBENV will be rebuild and you chages are gone. To avoid this you can edit the  [ITMHOME]/config/ms.ini file instead and reconfigure your TEMS) 
 
 2. Check if the following statements exist, if they do not, add them.
     
