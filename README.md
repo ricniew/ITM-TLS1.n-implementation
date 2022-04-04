@@ -173,6 +173,8 @@ If IP.SPIPE was already used: <BR>
 **Important Notes:** 
 - **(1)**: You can **only** use the `tacmd` when the OS Agent is running. 
 - **(2)**:  The `tacmd setagentconnection` commands are **only** working on Windows agents when the agent is running with **administration** rigths.
+- **(3)**:  The option `-a` of `tacmdsetagentconnection` command **does not work** in Windows.You would need to use the `-t ` to modify the agents (e.c. "-t lz hd sy") 
+ `tacmd setagentconnection -n falcate1:LZ -t nt hd sy -p SERVER=myprimary1 PROTOCOL=IP.SPIPE IP_PIPE_PORT=3660`
 - **(3)**:  The option `-a` of `tacmdsetagentconnection` command **does not work** in Windows.You would need to use the `-t ` to modify the agents (e.c. "-t lz hd sy") <BR> `tacmd setagentconnection -n falcate1:LZ -t nt hd sy -p SERVER=myprimary1 PROTOCOL=IP.SPIPE IP_PIPE_PORT=3660`
 
 ALTERNATIVE **B** ---------------
