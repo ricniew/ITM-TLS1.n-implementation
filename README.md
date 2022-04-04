@@ -42,31 +42,37 @@ If others needs to be used, you **must** modify the TEPS scripts and use them ev
 
 .... in **construction** 
 
-To use TLS and specifically TLSV1.2 all TEMS (HUB and remote TEMS) **must** use IP.SPIPE (HTTPS) for cummunication. To do so you need to reconfigure your TEMS:
+To use TLS and specifically TLSV1.2 all TEMS (HUB and remote TEMS) **must** use IP.SPIPE (HTTPS) for cummunication.
+
+**CONFIGURE IP.SPIPE on TEMS:**
+
+To do so you need to reconfigure your TEMS:
     - Windows: Use MTEMS tool to configure and add IP.SPIPE protocol to your TEMS 
     - Linux/AIX: Use `itmcmd config -S -t TEMS` tool to configure and add IP.SPIPE protocol to your TEMS 
 
+**APPROACHES**
 
-If all your TEMS and Agents are **already using IP.SPIPE** you need:
+**A.** If all your TEMS and Agents are **already using IP.SPIPE** you need:
 
-  1. Configure all your Agents to use TLSV1.2 and the specific ciphers for the TEMS connenction
-  2. Configure your TEPS to use IP.SPIPE with TLSV1.2 and the specific ciphers for the TEMS connection (**Note**: See TEPS section for further config TEPS actions related to TLSv1.2 only usage)
+  1. Configure all your Agents to use TLSV1.2 and the specific ciphers for the TEMS connenction (**how to**: see Agents section)
+  2. Configure your TEPS to use IP.SPIPE with TLSV1.2 and the specific ciphers for the TEMS connection (**how to**: See TEPS section for further config TEPS actions related to TLSv1.2 only usage)
 
-If all your TEMS and Agents **uses only IP.PIPE** you need:
+**B.** If all your TEMS and Agents **uses only IP.PIPE** you need:
 
   1. First configure your TEMS to use IP.SPIPE and IP:PIPE (By default TLSV1.x and the specific ciphers are allowed to be used).
-  2. Configure all your Agents to use IP.SPIPE with  TLSV1.2 and the specific ciphers only for the TEMS connenction
-  3. Configure your TEPS to use IP.SPIPE with TLSV1.2 and the specific ciphers for the TEMS connection (**Note**: See TEPS section for further config TEPS actions related to TLSv1.2 only usage)
+  2. Configure all your Agents to use IP.SPIPE with  TLSV1.2 and the specific ciphers only for the TEMS connenction (**how to**: see Agents section)
+  3. Configure your TEPS to use IP.SPIPE with TLSV1.2 and the specific ciphers for the TEMS connection (**how to**: See TEPS section for further config TEPS actions related to TLSv1.2 only usage)
 
+**C.**
 If all your TEMS uses **both IP:SPIPE and IP.PIPE** and **some Agents uses PIPE and others SPIPE** you need:
 
   1. Leave the TEMS configuration as it is.
-  2. Configure all your Agents to use IP.SPIPE with TLSV1.2 and the specific ciphers only for the TEMS connenction
-  3. Configure your TEPS to use IP.SPIPE with TLSV1.2 and the specific ciphers for the TEMS connection (**Note**: See TEPS section for further config TEPS actions related to TLSv1.2 only usage)
+  2. Configure all your Agents to use IP.SPIPE with TLSV1.2 and the specific ciphers only for the TEMS connenction (**how to**: see Agents section)
+  3. Configure your TEPS to use IP.SPIPE with TLSV1.2 and the specific ciphers for the TEMS connection (**how to**: See TEPS section for further config TEPS actions related to TLSv1.2 only usage)
 
 **THEN:**
 
-**As soon all ITM components are connecting to TEMS using IP.SPIPE IP.SPIPE with TLSV1.2 and the specific ciphers you can disable TLS10 + TLS11 on all TEMS.** (as described above)
+As soon **all ITM components are connected to TEMS using IP.SPIPE with TLSV1.2** and **the specific ciphers** you can disable TLS10 + TLS11 on all TEMS.
 
 1. In the TEMS config file: 
 
