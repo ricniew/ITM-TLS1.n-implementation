@@ -43,10 +43,39 @@ If others needs to be used, you **must** modify the TEPS scripts and use them ev
 .... in **construction** 
 
 To use TLS and specifically TLSV1.2 all TEMS (HUB and remote TEMS) must use IP.SPIPE (HTTPS) for cummunication. 
+**If all your TEMS and Agents are already using IP.SPIPE you need:**
 
-If all your TEMS are already using IP.SPIPE you need first configure your Agents to use TLSV1.2 and the specific ciphers.
+    1. Configure all your Agents to use TLSV1.2 and the specific ciphers for the TEMS connenction
+    2. Configure your TEPS to use IP.SPIPE with TLSV1.2 and the specific ciphers for the TEMS connenction (**Note**: See TEPS section for further config TEPS actions related to TLSv1.2 only usage)
 
-If your ITM environment uses IP.PIPE you need first configure your TEMS to use IP.SPIPE and IP:PIPE (TLSV1.2 and the specific ciphers.
+**If all your TEMS and Agents uses IP.PIPE you need:**
+
+    1. First onfigure your TEMS to use IP.SPIPE and IP:PIPE (By default TLSV1.x and the specific ciphers are allowed to be used).
+    2. Configure all your Agents to use IP.SPIPE with  TLSV1.2 and the specific ciphers only for the TEMS connenction
+    3. Configure your TEPS to use IP.SPIPE with TLSV1.2 and the specific ciphers for the TEMS connenction (**Note**: See TEPS section for further config TEPS actions related to TLSv1.2 only usage)
+
+**If all your TEMS uses both IP:SPIPE and IP.PIPE and some Agents uses PIPE and others SPIPE you need:**
+
+    1. Leave the TEMS configuration as it is.
+    2. Configure all your Agents to use IP.SPIPE with TLSV1.2 and the specific ciphers only for the TEMS connenction
+    3. Configure your TEPS to use IP.SPIPE with TLSV1.2 and the specific ciphers for the TEMS connenction (**Note**: See TEPS section for further config TEPS actions related to TLSv1.2 only usage)
+
+**As soon all ITM components are connecting to TEMS using IP.SPIPE IP.SPIPE with TLSV1.2 and the specific ciphers yoo can disable all other ciphers on all TEMS.**
+
+1. In the TEMS config file: 
+
+     - Windows: [ITMHOME]\CMS\KBBENV 
+     - Linux/AIX: [ITMHOME]/table/[TEMSNAME]/KBBENV
+
+2. Check if the following statements exist, if they do not, add them.
+    
+    ```
+    KDEBE_TLS10_ON=NO
+    KDEBE_TLS11_ON=NO
+    KDEBE_TLSV12_CIPHER_SPECS=TLS_RSA_WITH_AES_128_CBC_SHA256,TLS_RSA_WITH_AES_256_CBC_SHA256
+    ```
+    
+3. Restart the TEMSs
 
 
 
