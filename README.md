@@ -154,25 +154,26 @@ Unix/Linux
 
 **.... in construction**
 
-ALTERNATIVE **A**
+ALTERNATIVE **A** ---------------
 
-Use ITM `tacmd` commands
+Use ITM `tacmd setagentconnection` command.
+
 Sample:
  .....
 
-**Note1:** You can **only** use the `tacmd` when the OS Agent is running. 
-
+**Note1:** You can **only** use the `tacmd` when the OS Agent is running. <BR>
 **Note1:** The `tacmd` commands are **only** working on Windows agents when the agent is running with **administration** rigths. 
 
 
-ALTERNATIVE **B**
+ALTERNATIVE **B** ---------------
 
 Manually Use local ITM silent configuration
+
 Sample:
  .....
 
 
-ALTERNATIVE **C**
+ALTERNATIVE **C** ---------------
 
 Reconfigure Agents using your own distribution tools by using local ITM silent configuration.
 
