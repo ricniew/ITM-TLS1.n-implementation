@@ -18,6 +18,8 @@ Revision: 1.0
 
 [5 Appendixes](#5-appendixes)
 
+[6 Troubleshooting](#6-Troubleshooting)
+
 
 
 #
@@ -144,3 +146,7 @@ Unix/Linux
 **.... in construction**
 
 
+6 Troubleshooting
+=================
+
+**.... in construction**
