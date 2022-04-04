@@ -42,20 +42,23 @@ If others needs to be used, you **must** modify the TEPS scripts and use them ev
 
 .... in **construction** 
 
-To use TLS and specifically TLSV1.2 all TEMS (HUB and remote TEMS) **must** use IP.SPIPE (HTTPS) for cummunication. 
+To use TLS and specifically TLSV1.2 all TEMS (HUB and remote TEMS) **must** use IP.SPIPE (HTTPS) for cummunication. To do so you need to reconfigure your TEMS:
+    - Windows: Use MTEMS tool to configure and add IP.SPIPE protocol to your TEMS 
+    - Linux/AIX: Use `itmcmd config -S -t TEMS` tool to configure and add IP.SPIPE protocol to your TEMS 
 
-**If all your TEMS and Agents are already using IP.SPIPE you need:**
+
+If all your TEMS and Agents are **already using IP.SPIPE** you need:
 
   1. Configure all your Agents to use TLSV1.2 and the specific ciphers for the TEMS connenction
   2. Configure your TEPS to use IP.SPIPE with TLSV1.2 and the specific ciphers for the TEMS connenction (**Note**: See TEPS section for further config TEPS actions related to TLSv1.2 only usage)
 
-**If all your TEMS and Agents uses IP.PIPE you need:**
+If all your TEMS and Agents **uses only IP.PIPE** you need:
 
-  1. First onfigure your TEMS to use IP.SPIPE and IP:PIPE (By default TLSV1.x and the specific ciphers are allowed to be used).
+  1. First configure your TEMS to use IP.SPIPE and IP:PIPE (By default TLSV1.x and the specific ciphers are allowed to be used).
   2. Configure all your Agents to use IP.SPIPE with  TLSV1.2 and the specific ciphers only for the TEMS connenction
   3. Configure your TEPS to use IP.SPIPE with TLSV1.2 and the specific ciphers for the TEMS connenction (**Note**: See TEPS section for further config TEPS actions related to TLSv1.2 only usage)
 
-**If all your TEMS uses both IP:SPIPE and IP.PIPE and some Agents uses PIPE and others SPIPE you need:**
+If all your TEMS uses **both IP:SPIPE and IP.PIPE** and **some Agents uses PIPE and others SPIPE** you need:
 
   1. Leave the TEMS configuration as it is.
   2. Configure all your Agents to use IP.SPIPE with TLSV1.2 and the specific ciphers only for the TEMS connenction
@@ -68,7 +71,7 @@ To use TLS and specifically TLSV1.2 all TEMS (HUB and remote TEMS) **must** use 
 1. In the TEMS config file: 
 
      - Windows: [ITMHOME]\CMS\KBBENV 
-     - Linux/AIX: [ITMHOME]/table/[TEMSNAME]/KBBENV
+     - Linux/AIX: [ITMHOME]/table/[TEMSNAME]/KBBENV (**Note:**: As soon you reconfigure your TEMS at one point in the future, the KBBENV will be rebuild and you chages are gone. To avoid this you can edit the  [ITMHOME]/config/ms.ini file instead and reconfigure your TEMS) 
 
 2. Check if the following statements exist, if they do not, add them.
     
