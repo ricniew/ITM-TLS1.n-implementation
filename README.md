@@ -51,17 +51,17 @@ To use TLS and specifically TLSV1.2 all TEMS (HUB and remote TEMS) **must** use 
 
 **If all your TEMS and Agents uses IP.PIPE you need:**
 
-    1. First onfigure your TEMS to use IP.SPIPE and IP:PIPE (By default TLSV1.x and the specific ciphers are allowed to be used).
-    2. Configure all your Agents to use IP.SPIPE with  TLSV1.2 and the specific ciphers only for the TEMS connenction
-    3. Configure your TEPS to use IP.SPIPE with TLSV1.2 and the specific ciphers for the TEMS connenction (**Note**: See TEPS section for further config TEPS actions related to TLSv1.2 only usage)
+  1. First onfigure your TEMS to use IP.SPIPE and IP:PIPE (By default TLSV1.x and the specific ciphers are allowed to be used).
+  2. Configure all your Agents to use IP.SPIPE with  TLSV1.2 and the specific ciphers only for the TEMS connenction
+  3. Configure your TEPS to use IP.SPIPE with TLSV1.2 and the specific ciphers for the TEMS connenction (**Note**: See TEPS section for further config TEPS actions related to TLSv1.2 only usage)
 
 **If all your TEMS uses both IP:SPIPE and IP.PIPE and some Agents uses PIPE and others SPIPE you need:**
 
-    1. Leave the TEMS configuration as it is.
-    2. Configure all your Agents to use IP.SPIPE with TLSV1.2 and the specific ciphers only for the TEMS connenction
-    3. Configure your TEPS to use IP.SPIPE with TLSV1.2 and the specific ciphers for the TEMS connenction (**Note**: See TEPS section for further config TEPS actions related to TLSv1.2 only usage)
+  1. Leave the TEMS configuration as it is.
+  2. Configure all your Agents to use IP.SPIPE with TLSV1.2 and the specific ciphers only for the TEMS connenction
+  3. Configure your TEPS to use IP.SPIPE with TLSV1.2 and the specific ciphers for the TEMS connenction (**Note**: See TEPS section for further config TEPS actions related to TLSv1.2 only usage)
 
-**As soon all ITM components are connecting to TEMS using IP.SPIPE IP.SPIPE with TLSV1.2 and the specific ciphers yoo can disable all other ciphers on all TEMS.**
+**THEN As soon all ITM components are connecting to TEMS using IP.SPIPE IP.SPIPE with TLSV1.2 and the specific ciphers yoo can disable all other ciphers on all TEMS.** (as described above)
 
 1. In the TEMS config file: 
 
