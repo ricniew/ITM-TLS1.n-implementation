@@ -157,8 +157,10 @@ ALTERNATIVE **A** ---------------
 
 Use ITM `tacmd setagentconnection` command.
 
-Sample:
- .....
+Samples:
+- If you use failover RTEMS: <BR>`tacmd setagentconnection -n falcate1:LZ -t hd -p SERVER=myprimary1 PROTOCOL1=IP.SPIPE IP_PIPE_PORT=3660 BACKUP=Y BSERVER=mysecondary1 BPROTOCOL1=IP.SPIPE BIP_SPIPE_PORT=3660`
+- If you don't use failover RTEMS (agent connects to one TEMS only): <BR>`tacmd setagentconnection -n falcate1:LZ -t hd -p SERVER=myprimary1 PROTOCOL=IP.SPIPE IP_PIPE_PORT=1918 BACKUP=Y BSERVER=mysecondary1 BPROTOCOL1=IP.SPIPE BIP_SPIPE_PORT=3660`
+
 
 **Note1:** You can **only** use the `tacmd` when the OS Agent is running. <BR>
 **Note1:** The `tacmd` commands are **only** working on Windows agents when the agent is running with **administration** rigths. 
