@@ -158,11 +158,11 @@ ALTERNATIVE **A** ---------------
 Use ITM `tacmd setagentconnection` command.
 
 If you use failover RTEMS and IP.PIPE was used: <BR>
-- `tacmd setagentconnection -n falcate1:LZ -a -p SERVER=myprimary1 PROTOCOL1=IP.SPIPE IP_PIPE_PORT=3660 BACKUP=Y BSERVER=mysecondary1 BPROTOCOL1=IP.SPIPE BIP_SPIPE_PORT=3660` <BR>([ITMHOME]/config/.ConfigDate/[pc]env file is modified, agents are reconfigured and restartet)
+- `tacmd setagentconnection -n falcate1:LZ -a -p SERVER=myprimary1 PROTOCOL1=IP.SPIPE IP_SPIPE_PORT=3660 BACKUP=Y BSERVER=mysecondary1 BPROTOCOL1=IP.SPIPE BIP_SPIPE_PORT=3660` <BR>([ITMHOME]/config/.ConfigDate/[pc]env file is modified, agents are reconfigured and restartet)
 - `tacmd setagentconnection -n falcate1:LZ -a -e  KDEBE_TLS10_ON=NO KDEBE_TLS11_ON=NO KDEBE_TLSV12_CIPHER_SPECS=TLS_RSA_WITH_AES_128_CBC_SHA256,TLS_RSA_WITH_AES_256_CBC_SHA256` <BR>([ITMHOME]/config/[pc].environment file is created with the KDEBE settings for each agent running on the system, agents are restarted)
 
 If you don't use failover RTEMS (agent connects to one TEMS only) and IP.PIPE was used: <BR>
-- `tacmd setagentconnection -n falcate1:LZ -a -p SERVER=myprimary1 PROTOCOL=IP.SPIPE IP_PIPE_PORT=3660` <BR>([ITMHOME]/config/.ConfigDate/[pc]env file is modified, agents are reconfigured and restartet)
+- `tacmd setagentconnection -n falcate1:LZ -a -p SERVER=myprimary1 PROTOCOL=IP.SPIPE IP_SPIPE_PORT=3660` <BR>([ITMHOME]/config/.ConfigDate/[pc]env file is modified, agents are reconfigured and restartet)
 - `tacmd setagentconnection -n falcate1:LZ -a -e KDEBE_TLS10_ON=NO KDEBE_TLS11_ON=NO KDEBE_TLSV12_CIPHER_SPECS=TLS_RSA_WITH_AES_128_CBC_SHA256,TLS_RSA_WITH_AES_256_CBC_SHA256` <BR>([ITMHOME]/config/[pc].environment file is created with the KDEBE settings for each agent running on the system, agents are restarted)
  
 If IP.SPIPE was already used: <BR>
