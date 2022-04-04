@@ -33,10 +33,10 @@ A step by step description was provided by IBM Support: https://www.ibm.com/supp
 - automation scripts for the TEPS related configuration changes 
 - and some additional details.
 
-Following ciphers are refered in this document,  the provided TEPS scripts and sample respose files:
+Following ciphers are refered in this document, in the provided TEPS scripts and the attached sample respose files:
 - `KDEBE_TLSV12_CIPHER_SPECS=TLS_RSA_WITH_AES_128_CBC_SHA256,TLS_RSA_WITH_AES_256_CBC_SHA256"`
 
-If others needs to be used, you **must** modify the TEPS scripts and use them everywhere they are set in this document.
+**Note:** If others cipher specs needs to be used, you **must** modify the TEPS scripts and use them everywhere they are set in this document.
 
 **APPROACHES**
 
