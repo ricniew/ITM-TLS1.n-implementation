@@ -78,7 +78,7 @@ To do so you need to reconfigure your TEMS:
 
 **THEN:**
 
-As soon **all ITM components are connected to TEMS using IP.SPIPE with TLSV1.2** and **the specific ciphers** you can disable TLS10 + TLS11 on all TEMS.
+As soon **all ITM components are connected to TEMS using IP.SPIPE with TLSV1.2** and **the specific ciphers** you can disable IP.PIPE + TLS10 + TLS11 on all TEMS.
 
 1. In the TEMS config file: 
 
