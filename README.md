@@ -30,7 +30,7 @@ Revision: 1.0
 A step by step description was provided by IBM Support: https://www.ibm.com/support/pages/sites/default/files/inline-files/$FILE/ITMTEPSeWASTLSv12_ref_2_1.pdf. 
 This Github entry provides automation scripts for the TEPS related configuration changes and some additional information.
 
-Following ciphers are refered in this document and the provided TEPS scripts:
+Following ciphers are refered in this document,  the provided TEPS scripts and sample respose files:
 - `KDEBE_TLSV12_CIPHER_SPECS=TLS_RSA_WITH_AES_128_CBC_SHA256,TLS_RSA_WITH_AES_256_CBC_SHA256"`
 
 If others needs to be used, you **must** modify the TEPS scripts and use them everywhere they are set in this document.
