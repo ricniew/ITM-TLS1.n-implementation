@@ -149,4 +149,34 @@ Unix/Linux
 6 Troubleshooting
 =================
 
-**.... in construction**
+Content from: https://www.ibm.com/support/pages/sites/default/files/inline-files/$FILE/ITMTEPSeWASTLSv12_ref_2_1.pdf
+
+**Trace settings for both IHS and the TEPS/eWAS**
+
+For the TEPS/eWAS, they should use the TEPS/e Administration Console to set the trace options for their run-time environment (they don't have to save these TEPS/eWAS tracing options in their configuration).
+Here are the steps to perform against the files on the TEPS machine:
+
+1. Edit the httpd.conf file (see IHS 1.)
+Locate the LogLevel directive in the file, and change the assigned value from “warn” to
+“debug”
+Save the changes to the file.
+2. Edit the plugin-cfg.xml file. (see Appendix B 8.)
+Locate the string "<Log LogLevel=" in the file, and change the assigned value from "Error" to
+"Detail" (leave all other variables as is)
+Save the changes to the file.
+3. Activate and login to the TEPS/e Administration Console:
+4.  From the TEPS/e Admin Console, select
+“Troubleshooting” -> “Logs and Trace” -> ITMServer -> “Diagnostic Trace” -> “Change Log
+Level Details” -> Click the "Runtime” tab.
+In the entry panel, you will see the default trace string of *=info. Replace that string with
+the following (best to copy-and-paste to avoid typing errors):
+*=info:TCPChannel=all:HTTPChannel=all:com.ibm.ws.jaxrs.=all:com.ibm.websphere.jaxrs.=all:org.apache.wink.=all:com.ibm.ws.http.HttpConnection=finest:com.ibm.ws.http.HttpRequest=finest:com.ibm.ws.http.HttpResponse=finest:com.ibm.ws.ssl.*=finest
+5. Click “OK” at the bottom of the screen to save the changes to the Runtime tab. That level of tracing is now enabled for the TEPS/eWAS. You should not restart the TEPS.
+6. Re-run the failing scenario where attempts to login to the TEPS using the TEP JWS client. Once the failure occurs, run a pdcollect against the TEPS server machine and upload the resulting pdcollect archive to ecurep for review. Please also include the updated
+plugin-cfg.xml and httpd.conf file that was edited for this test in step 1&2 above.
+
+**Unable to login to Tivoli Enterprise Portal (TEP) webstart client**
+Please read the technote
+https://www.ibm.com/support/pages/unable-login-tivoli-enterprise-portal-tep-webstart-client
+
+
