@@ -42,11 +42,12 @@ If others needs to be used, you **must** modify the TEPS scripts and use them ev
 
 .... in **construction** 
 
-To use TLS and specifically TLSV1.2 all TEMS (HUB and remote TEMS) must use IP.SPIPE (HTTPS) for cummunication. 
+To use TLS and specifically TLSV1.2 all TEMS (HUB and remote TEMS) **must** use IP.SPIPE (HTTPS) for cummunication. 
+
 **If all your TEMS and Agents are already using IP.SPIPE you need:**
 
-    1. Configure all your Agents to use TLSV1.2 and the specific ciphers for the TEMS connenction
-    2. Configure your TEPS to use IP.SPIPE with TLSV1.2 and the specific ciphers for the TEMS connenction (**Note**: See TEPS section for further config TEPS actions related to TLSv1.2 only usage)
+  1. Configure all your Agents to use TLSV1.2 and the specific ciphers for the TEMS connenction
+  2. Configure your TEPS to use IP.SPIPE with TLSV1.2 and the specific ciphers for the TEMS connenction (**Note**: See TEPS section for further config TEPS actions related to TLSv1.2 only usage)
 
 **If all your TEMS and Agents uses IP.PIPE you need:**
 
