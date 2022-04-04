@@ -80,21 +80,31 @@ To do so you need to reconfigure your TEMS:
 
 As soon **all ITM components are connected to TEMS using IP.SPIPE with TLSV1.2** and **the specific ciphers** you can disable IP.PIPE + TLS10 + TLS11 on all TEMS.
 
-1. In the TEMS config file: 
+WINDOWS:
 
-   - Windows: [ITMHOME]\CMS\KBBENV 
-   - Linux/AIX: [ITMHOME]/table/[TEMSNAME]/KBBENV (**Note:**: As soon you reconfigure your TEMS at one point in the future, the KBBENV will be rebuild and you chages are gone. To avoid this you can edit the  [ITMHOME]/config/ms.ini file instead and reconfigure your TEMS) 
+  1.  In: [ITMHOME]\CMS\KBBENV add or modify the following options <BR>
+```
+  KDEBE_TLS10_ON=NO
+  KDEBE_TLS11_ON=NO
+  KDEBE_TLSV12_CIPHER_SPECS=TLS_RSA_WITH_AES_128_CBC_SHA256,TLS_RSA_WITH_AES_256_CBC_SHA256
+```
+  2. Reconfigure TEMS using MTEMS tool and disable IP.PIPE protocol
+  <img src="https://media.github.ibm.com/user/85313/files/3d25b300-b410-11ec-8f0b-36670dee661b" width="25%" height="25%">
+  
+  3. Restart the TEMSs
 
-2. Check if the following statements exist and modify or add them.
+LINUX/AIX
+
+  1.  In [ITMHOME]/table/[TEMSNAME]/KBBENV.   
+```
+  KDEBE_TLS10_ON=NO
+  KDEBE_TLS11_ON=NO
+  KDEBE_TLSV12_CIPHER_SPECS=TLS_RSA_WITH_AES_128_CBC_SHA256,TLS_RSA_WITH_AES_256_CBC_SHA256
+```
+  (**Note:**: As soon you reconfigure your TEMS at one point in the future, the KBBENV will be rebuild and you chages are gone. To avoid this you can edit the  [ITMHOME]/config/ms.ini file instead and reconfigure your TEMS)
     
-    ```
-    KDEBE_TLS10_ON=NO
-    KDEBE_TLS11_ON=NO
-    KDEBE_TLSV12_CIPHER_SPECS=TLS_RSA_WITH_AES_128_CBC_SHA256,TLS_RSA_WITH_AES_256_CBC_SHA256
-    ```
-    
-3. Restart the TEMSs
-
+  2.  Reconfigure TEMS using `itmcmd config -S -t TEMS` disable IP.PIPE protocol
+  3.  Restart the TEMSs
 
 
 3 TEPS
@@ -120,7 +130,7 @@ The Bash shell script was tested on RedHat linux only, but should run on other L
 
 Use "Download ZIP" to save scripts to a temp folder. Then unzip it.
 
-<img src="https://media.github.ibm.com/user/85313/files/a8ede000-b0df-11ec-86d9-bf7e122e6f83" width="60%" height="60%">
+<img src="https://media.github.ibm.com/user/85313/files/a8ede000-b0df-11ec-86d9-bf7e122e6f83" width="55%" height="55%">
 
 **Execution:**
 
