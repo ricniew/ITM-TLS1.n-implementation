@@ -50,19 +50,19 @@ To use TLS and specifically TLSV1.2 all TEMS (HUB and remote TEMS) **must** use 
 If all your TEMS and Agents are **already using IP.SPIPE** you need:
 
   1. Configure all your Agents to use TLSV1.2 and the specific ciphers for the TEMS connenction
-  2. Configure your TEPS to use IP.SPIPE with TLSV1.2 and the specific ciphers for the TEMS connenction (**Note**: See TEPS section for further config TEPS actions related to TLSv1.2 only usage)
+  2. Configure your TEPS to use IP.SPIPE with TLSV1.2 and the specific ciphers for the TEMS connection (**Note**: See TEPS section for further config TEPS actions related to TLSv1.2 only usage)
 
 If all your TEMS and Agents **uses only IP.PIPE** you need:
 
   1. First configure your TEMS to use IP.SPIPE and IP:PIPE (By default TLSV1.x and the specific ciphers are allowed to be used).
   2. Configure all your Agents to use IP.SPIPE with  TLSV1.2 and the specific ciphers only for the TEMS connenction
-  3. Configure your TEPS to use IP.SPIPE with TLSV1.2 and the specific ciphers for the TEMS connenction (**Note**: See TEPS section for further config TEPS actions related to TLSv1.2 only usage)
+  3. Configure your TEPS to use IP.SPIPE with TLSV1.2 and the specific ciphers for the TEMS connection (**Note**: See TEPS section for further config TEPS actions related to TLSv1.2 only usage)
 
 If all your TEMS uses **both IP:SPIPE and IP.PIPE** and **some Agents uses PIPE and others SPIPE** you need:
 
   1. Leave the TEMS configuration as it is.
   2. Configure all your Agents to use IP.SPIPE with TLSV1.2 and the specific ciphers only for the TEMS connenction
-  3. Configure your TEPS to use IP.SPIPE with TLSV1.2 and the specific ciphers for the TEMS connenction (**Note**: See TEPS section for further config TEPS actions related to TLSv1.2 only usage)
+  3. Configure your TEPS to use IP.SPIPE with TLSV1.2 and the specific ciphers for the TEMS connection (**Note**: See TEPS section for further config TEPS actions related to TLSv1.2 only usage)
 
 **THEN:**
 
@@ -102,7 +102,7 @@ The Bash shell script was tested on RedHat linux only, but should run on other L
 - Update the `wasadmin` password if **not** done so far
     - **Unix**: `$CANDLEHOME/{archdir}/iw/scripts/updateTEPSEPass.sh wasadmin {yourpass}` (e.g. _/opt/IBM/ITM/lx8266/iw/scripts/ updateTEPSEPass.sh wasadmin itmuser_ )
     - **Windows**: `%CANDLE_HOME%\CNPSJ\scripts\updateTEPSEPass.bat wasadmin {yourpass}` (e.g. _c:\IBM\ITM\CNPSJ\scripts\updateTEPSEPass.bat wasadmin itmuser_ 
-- PowerShell on Windows and Bash Shell on Linux must exists
+- PowerShell on Windows and Bash Shell on Linux must exists )
 
 **Download the scripts:**
 
