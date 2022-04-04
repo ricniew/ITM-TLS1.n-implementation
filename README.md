@@ -98,14 +98,13 @@ WINDOWS:
 
 LINUX/AIX
 
-  1.  In [ITMHOME]/table/[TEMSNAME]/KBBENV add or modify the following options
+  1.  In `[ITMHOME]/table/[TEMSNAME]/config/ms.ini` add or modify the following options
 ```
   KDEBE_TLS10_ON=NO
   KDEBE_TLS11_ON=NO
   KDEBE_TLSV12_CIPHER_SPECS=TLS_RSA_WITH_AES_128_CBC_SHA256,TLS_RSA_WITH_AES_256_CBC_SHA256
 ```
-  (**Note:**: As soon you reconfigure your TEMS at one point in the future, the KBBENV will be rebuild and you chages are gone. To avoid this you can edit the  [ITMHOME]/config/ms.ini file instead and reconfigure your TEMS)
-    
+     
   2.  Reconfigure TEMS using `itmcmd config -S -t TEMS` disable IP.PIPE protocol
   3.  Restart the TEMSs
 
