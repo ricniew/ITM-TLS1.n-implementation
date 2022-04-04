@@ -115,8 +115,6 @@ Windows:
 - Open PowerShell cmd prompt and go to the temp directory
 - launch script via `.\activate_teps-tlsv1.2.ps1 [-h ITMHOME ]`
 
-After script finished reconfigure TEPS, CNP (TEP Destopt CLient) and CNB (TEP Browser/WebStart CLient) component using MTEMS
-
 Unix/Linux
 - Open shell prompt and go to the temp directory
 - launch script via `./activate_teps-tlsv1.2.sh [-h ITMHOME] -a [ arch ]`
