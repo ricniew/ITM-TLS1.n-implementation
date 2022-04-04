@@ -34,7 +34,7 @@ A step by step description was provided by IBM Support: https://www.ibm.com/supp
 - and some additional details.
 
 Following ciphers are refered in this document, in the provided TEPS scripts and the attached sample respose files:
-- `KDEBE_TLSV12_CIPHER_SPECS=TLS_RSA_WITH_AES_128_CBC_SHA256,TLS_RSA_WITH_AES_256_CBC_SHA256"`
+- `KDEBE_TLSV12_CIPHER_SPECS=TLS_RSA_WITH_AES_128_CBC_SHA256,TLS_RSA_WITH_AES_256_CBC_SHA256`
 
 **Note:** If others cipher specs needs to be used, you **must** modify the TEPS scripts and use them everywhere they are set in this document.
 
