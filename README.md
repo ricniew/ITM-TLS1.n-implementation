@@ -48,12 +48,12 @@ Following ciphers are refered in this document, in the provided TEPS scripts and
 
 **B.** If all your TEMS and Agents **uses only IP.PIPE** you need:
 
-  1. First configure your TEMS to use IP.SPIPE and IP:PIPE (**how to**: see TEMS section). By default TLSV1.x and all existing ciphers are allowed to be used.
+  1. First configure your TEMS to use IP.SPIPE and IP.PIPE (**how to**: see TEMS section). By default TLSV1.x and all existing ciphers are allowed to be used.
   2. Configure all your Agents to use IP.SPIPE with  TLSV1.2 and the specific ciphers only for the TEMS connenction (**how to**: see Agents section)
   3. Configure your TEPS to use IP.SPIPE with TLSV1.2 and the specific ciphers for the TEMS connection (**how to**: See TEPS section for further config TEPS actions related to TLSv1.2 only usage)
 
 **C.**
-If all your TEMS uses **both IP:SPIPE and IP.PIPE** and **some Agents uses PIPE and others SPIPE** you need:
+If all your TEMS uses **both IP.SPIPE and IP.PIPE** and **some Agents uses PIPE and others SPIPE** you need:
 
   1. Leave the TEMS configuration as it is.
   2. Configure all your Agents to use IP.SPIPE with TLSV1.2 and the specific ciphers only for the TEMS connenction (**how to**: see Agents section)
