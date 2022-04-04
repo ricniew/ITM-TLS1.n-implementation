@@ -153,7 +153,7 @@ Unix/Linux
 
 **.... in construction**
 
-ALTERNATIVE **A** ---------------
+**ALTERNATIVE A** ---------------
 
 Use ITM `tacmd setagentconnection` command.
 
@@ -176,17 +176,47 @@ If IP.SPIPE was already used: <BR>
 - **(3)**:  The option `-a` of `tacmdsetagentconnection` command **does not work** on Windows. You would need to use the `-t ` to modify the agents (e.c. "-t lz hd sy"). For example: `tacmd setagentconnection -n Primary:myhost:NT -t nt hd sy -p SERVER=myprimary1 PROTOCOL=IP.SPIPE IP_PIPE_PORT=3660`
 - **(4)**:  The option `-e` of `tacmdsetagentconnection` command with multiple variable settings **does not work** on Windows. You would need to execute one comamnd for each KDEBE variable. For example <BR> `tacmd setagentconnection -n Primary:myhost:NT -t nt hd sy -e KDEBE_TLS10_ON=NO` <BR> `tacmd setagentconnection -n Primary:myhost:NT -t nt hd sy -e KDEBE_TLS11_ON=NO` <BR> `tacmd setagentconnection -n Primary:myhost:NT -t nt hd sy -e KDEBE_TLSV12_CIPHER_SPECS=TLS_RSA_WITH_AES_128_CBC_SHA256,TLS_RSA_WITH_AES_256_CBC_SHA256`
 
-ALTERNATIVE **B** ---------------
+**ALTERNATIVE B** ---------------
 
-Manually Use local ITM silent configuration
+Reconfigure Agents using local ITM silent configuration.
 
-Sample:
- .....
+ON WINDOWS:
+1. Modifiy the correspondig **ITMHOME\TMAITM6_64\k[pc]cma.ini** file. If the `[Override Local Settings]`, create one at the end of the **_k[pc]cma.ini_** file. For example `kntcma.ini`. Add or modifythe following settings:
 
+```[Override Local Settings]
+CTIRA_HIST_DIR=@LogPath@\History\@CanProd@
+KDEBE_TLSV12_CIPHER_SPECS=TLS_RSA_WITH_AES_128_CBC_SHA256, TLS_RSA_WITH_AES_256_CBC_SHA256
+KDEBE_TLS11_ON=NO
+KDEBE_TLS10_ON=YES
+CT_CMSLIST=IP.SPIPE:MINUTEST1;IP.SPIPE:MINUTEST2
+KDC_FAMILIES=IP.SPIPE PORT:3660 IP use:n SNA use:n IP.PIPE use:n IP6 use:n IP6.PIPE use:n IP6.SPIPE use:n
+```
 
-ALTERNATIVE **C** ---------------
+2. Stop the agent using **_net stop [servicename]_** `net stop KNTCMA_Primary'
+3. Reconfigure the agent by executing `kinconfg -n -r K[pc]`, for example `kinconfg -n -rKNT`. And wait until kinconfg.exe process finishes (no more the 10 seconds)
+4. Start the agent using **_net start [servicename]_** `net stop KNTCMA_Primary'
 
-Reconfigure Agents using your own distribution tools by using local ITM silent configuration.
+**Important notes:**
+- The variables you add into the ini file `[Override Local Settings]` section, will be added or modified in the exsiting Registry key `HKEY_LOCAL_MACHINE\SOFTWARE\Candle\K[pc]\Ver610\Primary\Environment`. This behavior may differ for subnode or instance agents.
+- Before mass rollout settings for each agent needs to be successfully tested 
+
+ON LINUX/UNIX:
+
+1. Create a silent config response file, e.g. _resposefile.txt_ with following content
+```
+NETWORKPROTOCOL=ip.spipe
+HSNETWORKPROTOCOL=ip.spipe
+HOSTNAME=RTEMS-PRIMARY
+IP6HOSTNAME=RTEMS-PRIMARY
+MIRROR=RTEMS-BACKUP
+IP6MIRROR=RTEMS-BACKUP
+KDEBE_TLS10_ON=NO
+KDEBE_TLS11_ON=NO
+KDEBE_TLSV12_CIPHER_SPECS=TLS_RSA_WITH_AES_128_CBC_SHA256, TLS_RSA_WITH_AES_256_CBC_SHA256
+```
+
+2. Execute **_ITMHOME/bin/itmcmd config -A [pc]_**. For examle `itmcmd config -A -p resposefile.txt lz`
+3. Restart the agent using **_ITMHOME/bin/itmcmd agent stop/start [pc]**, for example `itmcmd agent stop/start lz ; itmcmd agent start lz`
 
 
 5 Appendixes
