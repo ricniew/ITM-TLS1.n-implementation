@@ -173,8 +173,8 @@ If IP.SPIPE was already used: <BR>
 **Important Notes:** 
 - **(1)**: You can **only** use the `tacmd` when the OS Agent is running. 
 - **(2)**:  The `tacmd setagentconnection` commands are **only** working on Windows agents when the agent is running with **administration** rigths.
-- **(3)**:  The option `-a` of `tacmdsetagentconnection` command **does not work** in Windows. You would need to use the `-t ` to modify the agents (e.c. "-t lz hd sy"). For example: `tacmd setagentconnection -n Primary:myhost:NT -t nt hd sy -p SERVER=myprimary1 PROTOCOL=IP.SPIPE IP_PIPE_PORT=3660`
-- **(4)**:  The option `-e` of `tacmdsetagentconnection` command with multiple variable settings **does not work** in Windows. You would need to execute one comamnd for each KDEBE variable. For example <BR> `tacmd setagentconnection -n Primary:myhost:NT -t nt hd sy -e KDEBE_TLS10_ON=NO` <BR> `tacmd setagentconnection -n Primary:myhost:NT -t nt hd sy -e KDEBE_TLS11_ON=NO` <BR> `tacmd setagentconnection -n Primary:myhost:NT -t nt hd sy -e KDEBE_TLSV12_CIPHER_SPECS=TLS_RSA_WITH_AES_128_CBC_SHA256,TLS_RSA_WITH_AES_256_CBC_SHA256`
+- **(3)**:  The option `-a` of `tacmdsetagentconnection` command **does not work** on Windows. You would need to use the `-t ` to modify the agents (e.c. "-t lz hd sy"). For example: `tacmd setagentconnection -n Primary:myhost:NT -t nt hd sy -p SERVER=myprimary1 PROTOCOL=IP.SPIPE IP_PIPE_PORT=3660`
+- **(4)**:  The option `-e` of `tacmdsetagentconnection` command with multiple variable settings **does not work** on Windows. You would need to execute one comamnd for each KDEBE variable. For example <BR> `tacmd setagentconnection -n Primary:myhost:NT -t nt hd sy -e KDEBE_TLS10_ON=NO` <BR> `tacmd setagentconnection -n Primary:myhost:NT -t nt hd sy -e KDEBE_TLS11_ON=NO` <BR> `tacmd setagentconnection -n Primary:myhost:NT -t nt hd sy -e KDEBE_TLSV12_CIPHER_SPECS=TLS_RSA_WITH_AES_128_CBC_SHA256,TLS_RSA_WITH_AES_256_CBC_SHA256`
 
 ALTERNATIVE **B** ---------------
 
