@@ -183,18 +183,19 @@ Reconfigure Agents using local ITM silent configuration.
 ON WINDOWS:
 1. Modifiy the correspondig **ITMHOME\TMAITM6_64\k[pc]cma.ini** file. If the `[Override Local Settings]`, create one at the end of the **_k[pc]cma.ini_** file. For example `kntcma.ini`. Add or modifythe following settings:
 
-```[Override Local Settings]
+```
+[Override Local Settings]
 CTIRA_HIST_DIR=@LogPath@\History\@CanProd@
 KDEBE_TLSV12_CIPHER_SPECS=TLS_RSA_WITH_AES_128_CBC_SHA256, TLS_RSA_WITH_AES_256_CBC_SHA256
 KDEBE_TLS11_ON=NO
 KDEBE_TLS10_ON=YES
-CT_CMSLIST=IP.SPIPE:MINUTEST1;IP.SPIPE:MINUTEST2
+CT_CMSLIST=IP.SPIPE:RTEMS-MINUTEST1;IP.SPIPE:RTEMS-MINUTEST2
 KDC_FAMILIES=IP.SPIPE PORT:3660 IP use:n SNA use:n IP.PIPE use:n IP6 use:n IP6.PIPE use:n IP6.SPIPE use:n
 ```
 
-2. Stop the agent using **_net stop [servicename]_** `net stop KNTCMA_Primary'
-3. Reconfigure the agent by executing `kinconfg -n -r K[pc]`, for example `kinconfg -n -rKNT`. And wait until kinconfg.exe process finishes (no more the 10 seconds)
-4. Start the agent using **_net start [servicename]_** `net stop KNTCMA_Primary'
+2. Stop the agent using **_net stop [servicename]_** , for example `net stop KNTCMA_Primary`
+3. Reconfigure the agent by executing `kinconfg -n -r K[pc]`, for example `kinconfg -n -rKNT`. And wait until _kinconfg.exe_ process finishes (no more the 10 seconds)
+4. Start the agent using **_net start [servicename]_** , for example `net stop KNTCMA_Primary`
 
 **Important notes:**
 - The variables you add into the ini file `[Override Local Settings]` section, will be added or modified in the exsiting Registry key `HKEY_LOCAL_MACHINE\SOFTWARE\Candle\K[pc]\Ver610\Primary\Environment`. This behavior may differ for subnode or instance agents.
@@ -207,15 +208,15 @@ ON LINUX/UNIX:
 NETWORKPROTOCOL=ip.spipe
 HSNETWORKPROTOCOL=ip.spipe
 HOSTNAME=RTEMS-PRIMARY
-IP6HOSTNAME=RTEMS-PRIMARY
+IP6HOSTNAME=RTEMS-MINUTEST1
 MIRROR=RTEMS-BACKUP
-IP6MIRROR=RTEMS-BACKUP
+IP6MIRROR=RTEMS-MINUTEST1
 KDEBE_TLS10_ON=NO
 KDEBE_TLS11_ON=NO
 KDEBE_TLSV12_CIPHER_SPECS=TLS_RSA_WITH_AES_128_CBC_SHA256, TLS_RSA_WITH_AES_256_CBC_SHA256
 ```
 
-2. Execute **_ITMHOME/bin/itmcmd config -A [pc]_**. For examle `itmcmd config -A -p resposefile.txt lz`
+2. Execute **_ITMHOME/bin/itmcmd config -A -p [respfile]  [pc]_**. For examle `itmcmd config -A -p resposefile.txt lz`
 3. Restart the agent using **_ITMHOME/bin/itmcmd agent stop/start [pc]**, for example `itmcmd agent stop/start lz ; itmcmd agent start lz`
 
 
