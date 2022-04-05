@@ -178,9 +178,12 @@ If IP.SPIPE was already used: <BR>
 
 **Important Notes:** 
 - **(1)**: You can **only** use the `tacmd` when the OS Agent is running. 
-- **(2)**:  The `tacmd setagentconnection` commands are **only** working on Windows agents when the agent is running with **administration** rigths.
-- **(3)**:  The option `-a` of `tacmdsetagentconnection` command **does not work** on Windows. You would need to use the `-t ` to modify the agents (e.c. "-t lz hd sy"). For example: `tacmd setagentconnection -n Primary:myhost:NT -t nt hd sy -p SERVER=myprimary1 PROTOCOL=IP.SPIPE IP_PIPE_PORT=3660`
-- **(4)**:  The option `-e` of `tacmdsetagentconnection` command with multiple variable settings **does not work** on Windows. You would need to execute one comamnd for each KDEBE variable. For example <BR> `tacmd setagentconnection -n Primary:myhost:NT -t nt hd sy -e KDEBE_TLS10_ON=NO` <BR> `tacmd setagentconnection -n Primary:myhost:NT -t nt hd sy -e KDEBE_TLS11_ON=NO` <BR> `tacmd setagentconnection -n Primary:myhost:NT -t nt hd sy -e KDEBE_TLSV12_CIPHER_SPECS=TLS_RSA_WITH_AES_128_CBC_SHA256,TLS_RSA_WITH_AES_256_CBC_SHA256`
+- **(2)**: On windows the `tacmd setagentconnection` commands are **only** working when the agent is running with **administration** rigths.
+- **(3)**: On Windows the option `-a` of `tacmdsetagentconnection` command **does not work**. You would need to use the `-t ` to modify the agents (e.c. "-t nt "). For example: `tacmd setagentconnection -n Primary:myhost:NT -t nt -p SERVER=myprimary1 PROTOCOL=IP.SPIPE IP_PIPE_PORT=3660`
+- **(4)**: On Windows the option `-e` of `tacmdsetagentconnection` command with multiple variable settings **does not work**. You would need to execute one comamnd for each KDEBE variable. For example <BR> `tacmd setagentconnection -n Primary:myhost:NT -t nt -e KDEBE_TLS10_ON=NO` <BR> `tacmd setagentconnection -n Primary:myhost:NT -t nt -e KDEBE_TLS11_ON=NO` <BR> `tacmd setagentconnection -n Primary:myhost:NT -t sy -e KDEBE_TLSV12_CIPHER_SPECS=TLS_RSA_WITH_AES_128_CBC_SHA256,TLS_RSA_WITH_AES_256_CBC_SHA256`
+
+- **(5)**: On windows the option `-e` option creates an `[Override Local Settings]` section in the `ITMHOME\TMAITM6_64\k[pc]cma.ini` and adds a registry entry in  `HKEY_LOCAL_MACHINE\SOFTWARE\Candle\K[pc]\Ver610\Primary\Environment` (for example for  KDEBE_TLSV12_CIPHER_SPECS). This means that in future, every manuall change in that registry key, will be overwritten by the overide section.
+- **(6)**: On windows the option `-a` is overriding the CT_CMSLIST and KDC_FAMILIES registry keys.
 
 **ALTERNATIVE B** ---------------
 
