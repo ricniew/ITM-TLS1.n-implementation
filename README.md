@@ -33,6 +33,11 @@ A step by step description was provided by IBM Support: https://www.ibm.com/supp
 - automation scripts for the TEPS related configuration changes 
 - and some additional details.
 
+**PREREQUISITES**
+
+Your environment **must be at least at ITM 6.3 FP7** and a **WAS 855 uplift must have been performed** before implementing TLSv1.2. If a WAS 855 uplift was not performed as described in the update readme files, you must execute _Appendix B_ action as described in above document. To check if a WAS uplift was made use `ITMHOME/[arch]/iw/bin/versionInfo.sh` or `ITMHOME\CNPSJ\bin\versionInfo.bat`. The version must be at least `8.5.5.16`
+
+
 Following ciphers are refered in this document, in the provided TEPS scripts and the attached sample respose files:
 - `KDEBE_TLSV12_CIPHER_SPECS=TLS_RSA_WITH_AES_128_CBC_SHA256,TLS_RSA_WITH_AES_256_CBC_SHA256`
 
@@ -58,6 +63,7 @@ If all your TEMS uses **both IP.SPIPE and IP.PIPE** and **some Agents uses PIPE 
   1. Leave the TEMS configuration as it is.
   2. Configure all your Agents to use IP.SPIPE with TLSV1.2 and the specific ciphers only for the TEMS connenction (**how to**: see Agents section)
   3. Configure your TEPS to use IP.SPIPE with TLSV1.2 and the specific ciphers for the TEMS connection (**how to**: See TEPS section for further config TEPS actions related to TLSv1.2 only usage)
+
 
 
 2 TEMS
