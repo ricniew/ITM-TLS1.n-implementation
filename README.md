@@ -190,15 +190,26 @@ If IP.SPIPE was already used: <BR>
 Reconfigure Agents using local ITM silent configuration.
 
 ON WINDOWS:
-1. Modifiy the correspondig **ITMHOME\TMAITM6_64\k[pc]cma.ini** file. If the `[Override Local Settings]`, create one at the end of the **_k[pc]cma.ini_** file. For example `kntcma.ini`. Add or modifythe following settings:
+1. Modifiy the correspondig **ITMHOME\TMAITM6_64\k[pc]cma.ini** file. If the `[Override Local Settings]`, create one at the end of the **_k[pc]cma.ini_** file. For example `kntcma.ini`. Add or modifythe following settings.
 
+If you  use failover RTEMS:
 ```
 [Override Local Settings]
 CTIRA_HIST_DIR=@LogPath@\History\@CanProd@
 KDEBE_TLSV12_CIPHER_SPECS=TLS_RSA_WITH_AES_128_CBC_SHA256, TLS_RSA_WITH_AES_256_CBC_SHA256
 KDEBE_TLS11_ON=NO
-KDEBE_TLS10_ON=YES
+KDEBE_TLS10_ON=NO
 CT_CMSLIST=IP.SPIPE:RTEMS-MINUTEST1;IP.SPIPE:RTEMS-MINUTEST2
+KDC_FAMILIES=IP.SPIPE PORT:3660 IP use:n SNA use:n IP.PIPE use:n IP6 use:n IP6.PIPE use:n IP6.SPIPE use:n
+```
+If you NOT use failover RTEMS:
+```
+[Override Local Settings]
+CTIRA_HIST_DIR=@LogPath@\History\@CanProd@
+KDEBE_TLSV12_CIPHER_SPECS=TLS_RSA_WITH_AES_128_CBC_SHA256, TLS_RSA_WITH_AES_256_CBC_SHA256
+KDEBE_TLS11_ON=NO
+KDEBE_TLS10_ON=NO
+CT_CMSLIST=IP.SPIPE:RTEMS-MINUTEST1
 KDC_FAMILIES=IP.SPIPE PORT:3660 IP use:n SNA use:n IP.PIPE use:n IP6 use:n IP6.PIPE use:n IP6.SPIPE use:n
 ```
 
