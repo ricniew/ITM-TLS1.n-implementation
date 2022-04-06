@@ -208,7 +208,7 @@ KDC_FAMILIES=IP.SPIPE PORT:3660 IP use:n SNA use:n IP.PIPE use:n IP6 use:n IP6.P
 
 **Important notes:**
 - The variables you add into the ini file `[Override Local Settings]` section, will be added or modified in the exsiting Registry key `HKEY_LOCAL_MACHINE\SOFTWARE\Candle\K[pc]\Ver610\Primary\Environment`. This behavior may differ for subnode or instance agents.
-- Before mass rollout settings for each agent needs to be successfully tested 
+- Before amass rollout, you must successfully test it for each agent type you want to modify
 
 ON LINUX/UNIX:
 
