@@ -6,6 +6,10 @@ Contact: niewolik@de.ibm.com
 
 Revision: 1.0
 
+
+.... **in construction**
+
+
 #
 
 [1 General](#1-general)
@@ -27,8 +31,6 @@ Revision: 1.0
 1 General
 =========
 
-.... **in construction**
-
 A step by step description was provided by IBM Support: https://www.ibm.com/support/pages/sites/default/files/inline-files/$FILE/ITMTEPSeWASTLSv12_ref_2_1.pdf. **This** Github entry provides 
 - automation scripts for the TEPS related configuration changes 
 - and some additional details.
@@ -37,8 +39,7 @@ A step by step description was provided by IBM Support: https://www.ibm.com/supp
 
 Your environment **must be at least at ITM 6.3 FP7** and a **WAS 855 uplift must have been performed** before implementing TLSv1.2. If a WAS 855 uplift was not performed as described in the update readme files, you must execute _Appendix B_ action as described in above document. To check if a WAS uplift was made use `ITMHOME/[arch]/iw/bin/versionInfo.sh` or `ITMHOME\CNPSJ\bin\versionInfo.bat`. The version must be at least `8.5.5.16`
 
-
-Following ciphers are refered in this document, in the provided TEPS scripts and the attached sample respose files:
+Following ciphers are refered in this document, in the provided TEPS scripts and the attached sample sample files (see Agent section):
 - `KDEBE_TLSV12_CIPHER_SPECS=TLS_RSA_WITH_AES_128_CBC_SHA256,TLS_RSA_WITH_AES_256_CBC_SHA256`
 
 **Note:** If others cipher specs needs to be used, you **must** modify the TEPS scripts and use them everywhere they are set in this document.
@@ -64,12 +65,10 @@ If all your TEMS uses **both IP.SPIPE and IP.PIPE** and **some Agents uses PIPE 
   2. Configure all your Agents to use IP.SPIPE with TLSV1.2 and the specific ciphers only for the TEMS connenction (**how to**: see Agents section)
   3. Configure your TEPS to use IP.SPIPE with TLSV1.2 and the specific ciphers for the TEMS connection (**how to**: See TEPS section for further config TEPS actions related to TLSv1.2 only usage)
 
-
-
+<BR>
+  
 2 TEMS
 ==============
-
-.... in **construction** 
 
 To use TLS and specifically TLSV1.2 all TEMS (HUB and remote TEMS) **must** use IP.SPIPE (HTTPS) for cummunication.
 
@@ -83,7 +82,6 @@ To do so you need to reconfigure your TEMS:
   - Linux/AIX: Use `itmcmd config -S -t TEMS` tool to configure and **add** IP.SPIPE protocol to your TEMS 
   - Restart TEMS
   - Now you can configure TEPS and agents to connect to the TEMS using IP.SPIPE
-
 
 **THEN:**
 
@@ -114,11 +112,10 @@ LINUX/AIX
   2.  Reconfigure TEMS using `itmcmd config -S -t TEMS` disable IP.PIPE protocol
   3.  Restart the TEMSs
 
+<BR>
 
 3 TEPS
 ==============
-
-.... in **construction** 
 
 The manual process described in the "_TLS v1.2 only configuration - TEP, IHS, TEPS, TEPS/eWAS components_" section of ITMTEPSeWASTLSv12_ref_2_1.pdf documented, was automated and two scripts have been created, one PowerShell script for Windows and a Bash shell script for Linux:
 1. _activate_teps-tlsv1.2.ps1_
@@ -152,12 +149,10 @@ Unix/Linux
 - Open shell prompt and go to the temp directory
 - launch script via `./activate_teps-tlsv1.2.sh [-h ITMHOME] -a [ arch ]`
 
-
+<BR>
 
 4 Agents
 ==============
-
-**.... in construction**
 
 **ALTERNATIVE A** ---------------
 
@@ -256,11 +251,14 @@ KDEBE_TLSV12_CIPHER_SPECS=TLS_RSA_WITH_AES_128_CBC_SHA256, TLS_RSA_WITH_AES_256_
 **Important notes:**
 - Before a mass rollout, you must successfully test it for each agent type you want to modify
 
+<BR>
+
 5 Appendixes
 ============
 
-**.... in construction**
+.....
 
+<BR>
 
 6 Troubleshooting
 =================
