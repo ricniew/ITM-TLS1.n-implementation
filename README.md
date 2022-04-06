@@ -127,11 +127,11 @@ The Bash shell script was tested on RedHat linux only, but should run on other L
 
 **Prereqs:**
 
-- Before staring the script, please verify that the TEPS is started and **connected to TEMS using IP.SPIPE**
+- Before starting the script, please verify that the TEPS is started and **connected to TEMS using IP.SPIPE**
 - Update the `wasadmin` password if **not** done so far
     - **Unix**: `$CANDLEHOME/{archdir}/iw/scripts/updateTEPSEPass.sh wasadmin {yourpass}` (e.g. _/opt/IBM/ITM/lx8266/iw/scripts/ updateTEPSEPass.sh wasadmin itmuser_ )
     - **Windows**: `%CANDLE_HOME%\CNPSJ\scripts\updateTEPSEPass.bat wasadmin {yourpass}` (e.g. _c:\IBM\ITM\CNPSJ\scripts\updateTEPSEPass.bat wasadmin itmuser_ 
-- PowerShell on Windows and Bash Shell on Linux must exists )
+- PowerShell on Windows and Bash Shell on Linux must exists
 
 **Download the scripts:**
 
@@ -145,11 +145,11 @@ Both scripts are looking for the ITMHOME folder variables (%CANDLE_HOME on Windo
 
 Windows: 
 - Open PowerShell cmd prompt and go to the temp directory
-- launch script via `.\activate_teps-tlsv1.2.ps1 [-h ITMHOME ]`
+- Launch script via `.\activate_teps-tlsv1.2.ps1 [-h ITMHOME ]`
 
 Unix/Linux
 - Open shell prompt and go to the temp directory
-- launch script via `./activate_teps-tlsv1.2.sh [-h ITMHOME] -a [ arch ]`
+- Launch script via `./activate_teps-tlsv1.2.sh [-h ITMHOME] -a [ arch ]`
 
 <BR>
 
