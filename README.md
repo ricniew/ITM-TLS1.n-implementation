@@ -214,12 +214,12 @@ KDC_FAMILIES=IP.SPIPE PORT:3660 IP use:n SNA use:n IP.PIPE use:n IP6 use:n IP6.P
 ```
 
 2. Stop the agent using **_net stop [servicename]_** , for example `net stop KNTCMA_Primary`
-3. Reconfigure the agent by executing `kinconfg -n -r K[pc]`, for example `kinconfg -n -rKNT`. And wait until _kinconfg.exe_ process finishes (no more the 10 seconds)
+3. Reconfigure the agent by executing `kinconfg -n -rK[pc]`, for example `kinconfg -n -rKNT`. And wait until _kinconfg.exe_ process finishes (no more the 10 seconds). For instance agents you may use `kinconfg -n -riK[pc][instance]`
 4. Start the agent using **_net start [servicename]_** , for example `net stop KNTCMA_Primary`
 
 **Important notes:**
 - The variables you add into the ini file `[Override Local Settings]` section, will be added or modified in the exsiting Registry key `HKEY_LOCAL_MACHINE\SOFTWARE\Candle\K[pc]\Ver610\Primary\Environment`. This behavior may differ for subnode or instance agents.
-- Before amass rollout, you must successfully test it for each agent type you want to modify
+- Before a mass rollout, you must successfully test it for each agent type you want to modify
 
 ON LINUX/UNIX:
 
@@ -250,9 +250,11 @@ KDEBE_TLS11_ON=NO
 KDEBE_TLSV12_CIPHER_SPECS=TLS_RSA_WITH_AES_128_CBC_SHA256, TLS_RSA_WITH_AES_256_CBC_SHA256
 ```
 
-2. Execute **_ITMHOME/bin/itmcmd config -A -p [respfile]  [pc]_**. For examle `itmcmd config -A -p resposefile.txt lz`
-3. Restart the agent using **_ITMHOME/bin/itmcmd agent stop/start [pc]**, for example `itmcmd agent stop/start lz ; itmcmd agent start lz`
+2. Execute `ITMHOME/bin/itmcmd config -A -p [respfile] [pc]`. For examle `itmcmd config -A -p resposefile.txt lz`. For instance agent use `itmcmd config -A -p [respfile] -o [instance] [pc]`
+3. Restart the agent using `ITMHOME/bin/itmcmd agent stop/start [pc]`, for example `itmcmd agent stop lz ; itmcmd agent start lz`. For instance agents use `itmcmd agent -p [instance] -f stop [pc] ; itmcmd agent -p [instance] -f start [pc]`
 
+**Important notes:**
+- Before a mass rollout, you must successfully test it for each agent type you want to modify
 
 5 Appendixes
 ============
