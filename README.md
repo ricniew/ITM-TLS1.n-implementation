@@ -218,7 +218,8 @@ KDC_FAMILIES=IP.SPIPE PORT:3660 IP use:n SNA use:n IP.PIPE use:n IP6 use:n IP6.P
 4. Start the agent using **_net start [servicename]_** , for example `net stop KNTCMA_Primary`
 
 **Important notes:**
-- **(1)** The variables you add into the ini file `[Override Local Settings]` section, will be added or modified in the exsiting Registry key `HKEY_LOCAL_MACHINE\SOFTWARE\Candle\K[pc]\Ver610\Primary\Environment`. This behavior may differ for subnode or instance agents.
+- **(1)** The variables you add into the ini file `[Override Local Settings]` section, will be added or modified in the exsiting Registry key `HKEY_LOCAL_MACHINE\SOFTWARE\Candle\K[pc]\Ver610\Primary\Environment`. In future, every manuall change in that registry key or MTEMS configuration tool, will be overwritten by the override section regardless what you set in the MTEMS tool. 
+This behavior may differ for subnode or instance agents.
 - **(2)** Before a mass rollout, you must successfully test it for each agent type you want to modify
 
 ON LINUX/UNIX:
