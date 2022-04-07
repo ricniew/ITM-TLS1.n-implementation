@@ -182,7 +182,7 @@ If IP.SPIPE was already used: <BR>
 - **(5)**: On windows the option `-e` option creates an `[Override Local Settings]` section in the `ITMHOME\TMAITM6_64\k[pc]cma.ini` with the new variable settings. Then it reconfigures the agent and adds a registry entry into  `HKEY_LOCAL_MACHINE\SOFTWARE\Candle\K[pc]\Ver610\Primary\Environment` (for example for  KDEBE_TLSV12_CIPHER_SPECS). This means that in future, every manuall change in that registry key, will be overwritten by the override section regardless what you set in the MTEMS tool.
 - **(6)**: On Limux/Unix the option `-e` option creates an `ITMHOME/config/[pc].environment` file with the new variable settings. Then it restarts the agent. This means that in future, when configuring the agent for the same values, it will be overwritten by the `[pc].environment` settings.
 - **(7)**: On windows the option `-p SERVER=myprimary1 PROTOCOL=IP.SPIPE ...` is overriding the CT_CMSLIST and KDC_FAMILIES registry keys. Hence if you ever used the `[Override Local Settings]` section in the `ITMHOME\TMAITM6_64\k[pc]cma.ini` to set these variables in that file, the `tacmd` command will not change anything, because they will be overwritten by the override section.
-- **(7)**: On Limux the option `-p SERVER=myprimary1 PROTOCOL=IP.SPIPE ...` is configuring and overiding the TEMS and KDC_FAMILIES values in `ITMHOME/config/.ConfigData/[pc]env` file. Hence if you ever used the `ITMHOME/config/[pc].environment` to set same varaibles the `tacmd` command will not change anything, because they will be overwritten by the `[pc].environment` file settings.
+- **(8)**: On Limux the option `-p SERVER=myprimary1 PROTOCOL=IP.SPIPE ...` is configuring and overiding the TEMS and KDC_FAMILIES values in `ITMHOME/config/.ConfigData/[pc]env` file. Hence if you ever used the `ITMHOME/config/[pc].environment` to set same varaibles the `tacmd` command will not change anything, because they will be overwritten by the `[pc].environment` file settings.
 
 **ALTERNATIVE B** ---------------
 
@@ -217,8 +217,8 @@ KDC_FAMILIES=IP.SPIPE PORT:3660 IP use:n SNA use:n IP.PIPE use:n IP6 use:n IP6.P
 4. Start the agent using **_net start [servicename]_** , for example `net stop KNTCMA_Primary`
 
 **Important notes:**
-- The variables you add into the ini file `[Override Local Settings]` section, will be added or modified in the exsiting Registry key `HKEY_LOCAL_MACHINE\SOFTWARE\Candle\K[pc]\Ver610\Primary\Environment`. This behavior may differ for subnode or instance agents.
-- Before a mass rollout, you must successfully test it for each agent type you want to modify
+- **(1)** The variables you add into the ini file `[Override Local Settings]` section, will be added or modified in the exsiting Registry key `HKEY_LOCAL_MACHINE\SOFTWARE\Candle\K[pc]\Ver610\Primary\Environment`. This behavior may differ for subnode or instance agents.
+- **(2)** Before a mass rollout, you must successfully test it for each agent type you want to modify
 
 ON LINUX/UNIX:
 
