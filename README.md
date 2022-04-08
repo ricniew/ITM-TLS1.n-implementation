@@ -256,7 +256,11 @@ CUSTOM#KDEBE_TLS11_ON=NO
 
 **Important notes:**
 - Before a mass rollout, you must successfully test it for each agent type you want to modify
+- When executing config as shown above `ITMHOME/config/.ConfigData/[pc]env` file is updated and `ITMHOME/config/[pc].environment` updated or created if not existing before.
 
+**OTHER ALTERNATIVE** ---------------
+
+You perform local config steps or modify/create the correspondig config files by using remote commands. For examle tacmd executecommnad, getfile, putfile or use your own distribution tools.
 <BR>
 
 5 Appendixes
