@@ -154,6 +154,30 @@ Unix/Linux
 - Launch script via `./activate_teps-tlsv1.2.sh [-h ITMHOME] -a [ arch ]`
 
 <BR>
+  
+ To verify ports change `[port]` 15206 and 15201:
+- Command `openssl s_client -crlf -connect localhost:[port)  -servername localhost -tls1_2 < /dev/null | egrep "Secure Renegotiation|Server public key | SSL handshake"`. 
+```
+depth=1 C = US, O = IBM, OU = ITMNode, OU = ITMCell, OU = Root Certificate, CN = falcate1
+verify error:num=19:self signed certificate in certificate chain
+DONE
+Server public key is 2048 bit
+Secure Renegotiation IS supported
+```
+- Command `openssl s_client  -connect localhost:15206 2>/dev/null |  openssl x509 -noout -dates`
+```
+notBefore=Mar 31 15:22:36 2022 GMT
+notAfter=Mar 31 15:22:36 2023 GMT
+```
+- Commnad `openssl s_client  -connect localhost:15206 2>/dev/null |  openssl x509 -noout -issuer -nameopt multiline`
+```issuer=
+    countryName               = US
+    organizationName          = IBM
+    organizationalUnitName    = ITMNode
+    organizationalUnitName    = ITMCell
+    organizationalUnitName    = Root Certificate
+    commonName                = falcate1
+```
 
 4 Agents
 ==============
