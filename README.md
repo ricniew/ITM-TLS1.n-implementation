@@ -156,6 +156,7 @@ Unix/Linux
 <BR>
   
 **Verification**
+
 Test TEP login:
 
 - Access `https://[yourhost]:15201/tep.jnlp` to test Webstart client (you may need to delete the Java cache)
