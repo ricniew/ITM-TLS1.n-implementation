@@ -155,8 +155,12 @@ Unix/Linux
 
 <BR>
   
- To verify ports change `[port]` 15206 and 15201:
-- Command `openssl s_client -crlf -connect localhost:[port)  -servername localhost -tls1_2 < /dev/null | egrep "Secure Renegotiation|Server public key | SSL handshake"`. 
+**Verification**
+To verify ports change `[port]` to 15206 (eWas Console) or 15201 (TEPS HTTPS). 
+
+Sample outputs for port 15206:
+
+- Command `openssl s_client -crlf -connect localhost:15206  -servername localhost -tls1_2 < /dev/null | egrep "Secure Renegotiation|Server public key | SSL handshake"`. 
 ```
 depth=1 C = US, O = IBM, OU = ITMNode, OU = ITMCell, OU = Root Certificate, CN = falcate1
 verify error:num=19:self signed certificate in certificate chain
