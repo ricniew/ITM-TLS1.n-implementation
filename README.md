@@ -293,7 +293,7 @@ CUSTOM#KDEBE_TLS11_ON=NO
 
 **OTHER ALTERNATIVE** ---------------
 
-You perform local config steps or modify/create the correspondig config files by using remote commands. For examle tacmd executecommnad, getfile, putfile or use your own distribution tools.
+You can perform local config steps or modify/create the correspondig config files by using remote commands. For examle tacmd executecommnad, getfile, putfile or use your own distribution tools.
 
 On Windows you may try to edit or add configuration settings directly in the registry  `HKEY_LOCAL_MACHINE\SOFTWARE\Candle\K[pc]\Ver610\Primary\Environment`:
 
