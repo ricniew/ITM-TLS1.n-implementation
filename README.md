@@ -31,7 +31,7 @@ Revision: 1.0
 1 General
 =========
 
-A step by step description was provided by IBM Support: https://www.ibm.com/support/pages/sites/default/files/inline-files/$FILE/ITMTEPSeWASTLSv12_ref_2_1.pdf. **This** Github entry provides 
+A step by step description was provided by IBM Support: https://www.ibm.com/support/pages/tivoli-monitoring-v6307-tls-v12-only-configuration-tep-ihs-teps-teps-ewas-components-and-ewas-default-certificate-renewal. **This** Github entry provides 
 - automation scripts for the TEPS related configuration changes 
 - and some additional details.
 
@@ -119,7 +119,8 @@ LINUX/AIX
 3 TEPS
 ==============
 
-The manual process described in the "_TLS v1.2 only configuration - TEP, IHS, TEPS, TEPS/eWAS components_" section of ITMTEPSeWASTLSv12_ref_2_1.pdf documented, was automated and two scripts have been created, one PowerShell script for Windows and a Bash shell script for Linux:
+The manual process described in  "_TLS v1.2 only configuration - TEP, IHS, TEPS, TEPS/eWAS components_" section of the PDF file provided (https://www.ibm.com/support/pages/tivoli-monitoring-v6307-tls-v12-only-configuration-tep-ihs-teps-teps-ewas-components-and-ewas-default-certificate-renewal), was automated and two scripts have been created, one PowerShell script for Windows and a Bash shell script for Linux:
+
 1. Windows [activate_teps-tlsv1.2.ps1](https://github.ibm.com/NIEWOLIK/ITM-TLS1.2-implementation/blob/main/activate_teps-tlsv1.2.ps1)
 1. Linux/Unix [activate_teps-tlsv1.2.sh](https://github.ibm.com/NIEWOLIK/ITM-TLS1.2-implementation/blob/main/activate_teps-tlsv1.2.sh)
 
@@ -314,7 +315,7 @@ On Linux/Unix you could add the required variables directly into the ITMHOME/con
 6 Troubleshooting
 =================
 
-Content from: https://www.ibm.com/support/pages/sites/default/files/inline-files/$FILE/ITMTEPSeWASTLSv12_ref_2_1.pdf
+Content from PFD file: https://www.ibm.com/support/pages/tivoli-monitoring-v6307-tls-v12-only-configuration-tep-ihs-teps-teps-ewas-components-and-ewas-default-certificate-renewal
 
 **Trace settings for both IHS and the TEPS/eWAS**
 
