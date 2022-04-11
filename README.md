@@ -40,7 +40,7 @@ A step by step description was provided by IBM Support: https://www.ibm.com/supp
 Your environment **must be at least at ITM 6.3 FP7** and a **WAS 855 uplift must have been performed** before implementing TLSv1.2. 
 If a WAS 855 uplift was not performed in the TEPS host as described in the update readme files, you must execute _Appendix B_ action as described in above document. To check if a WAS uplift was made use `ITMHOME/[arch]/iw/bin/versionInfo.sh` or `ITMHOME\CNPSJ\bin\versionInfo.bat`. The version must be at least `8.5.5.16`
 
-Following ciphers are refered in this document, in the provided TEPS scripts and the attached sample sample files (see Agent section):
+Following ciphers are refered in this document, in the provided TEPS scripts and the sample response files (see Agent section):
 - `KDEBE_TLSV12_CIPHER_SPECS=TLS_RSA_WITH_AES_128_CBC_SHA256,TLS_RSA_WITH_AES_256_CBC_SHA256`
 
 **Note:** If others cipher specs needs to be used, you **must** modify the TEPS scripts and use them everywhere they are set in this document.
