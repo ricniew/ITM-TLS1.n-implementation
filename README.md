@@ -156,9 +156,11 @@ Unix/Linux
 <BR>
   
 **Verification**
-To verify ports change `[port]` to 15206 (eWas Console) or 15201 (TEPS HTTPS). 
+Test TEP login:
 
-Sample outputs for port 15206:
+- Access `https://[yourhost]:15201/tep.jnlp` to test Webstart client (you may need to delete the Java cache)
+
+To verify certs usage for ports 15206 (eWas Console) or 15201 (TEPS HTTPS). Sample outputs for port 15206:
 
 - Command `openssl s_client -crlf -connect localhost:15206  -servername localhost -tls1_2 < /dev/null | egrep "Secure Renegotiation|Server public key | SSL handshake"`. 
 ```
