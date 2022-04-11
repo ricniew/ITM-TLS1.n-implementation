@@ -263,8 +263,10 @@ CUSTOM#KDEBE_TLS11_ON=NO
 You perform local config steps or modify/create the correspondig config files by using remote commands. For examle tacmd executecommnad, getfile, putfile or use your own distribution tools.
 
 On Windows you may try to edit or add configuration settings directly in the registry  `HKEY_LOCAL_MACHINE\SOFTWARE\Candle\K[pc]\Ver610\Primary\Environment`:
+
 <img src="https://media.github.ibm.com/user/85313/files/b72bde00-b9b4-11ec-98cb-f210ff3d4edb" width="55%" height="55%">
-Please always always check if the registry settings are picked up by the agents after restart.
+
+Please always  check if the registry settings are picked up by the agents after restart. Also always check if the `ITMHOME\TMAITM6_64\k[pc]cma.ini` file does not contain an `[Override Local Settings]` section with the same variables names as those you have manually set in the reagistry. The `[Override Local Settings]` section will override your manual registry changes the next time an agent is reconfigured by the MTEMS tools.  
 
 On Linux/Unix you could add the required variables directly into the ITMHOME/config/[pc].ini file. That way you do not need the [pc].environemnt file. But this is not working for instance agents, where the instance config file must be modified.
 
