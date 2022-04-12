@@ -213,19 +213,20 @@ If IP.SPIPE was already used: <BR>
 - **(3)**: On Windows the option `-a` of `tacmdsetagentconnection` command **does not work**. You would need to use the `-t ` to modify the agents (e.c. "-t nt "). For example: `tacmd setagentconnection -n Primary:myhost:NT -t nt -p SERVER=myprimary1 PROTOCOL=IP.SPIPE IP_PIPE_PORT=3660`
 - **(4)**: On Windows the option `-e` of `tacmdsetagentconnection` command with multiple variable settings **does not work**. You would need to execute one comamnd for each KDEBE variable. For example <BR> `tacmd setagentconnection -n Primary:myhost:NT -t nt -e KDEBE_TLS10_ON=NO` <BR> `tacmd setagentconnection -n Primary:myhost:NT -t nt -e KDEBE_TLS11_ON=NO` <BR> `tacmd setagentconnection -n Primary:myhost:NT -t sy -e KDEBE_TLSV12_CIPHER_SPECS=TLS_RSA_WITH_AES_128_CBC_SHA256,TLS_RSA_WITH_AES_256_CBC_SHA256`
 
-- **(5)**: On windows the option `-e` option creates an `[Override Local Settings]` section in the `ITMHOME\TMAITM6_64\k[pc]cma.ini` with the new variable settings. Then it reconfigures the agent and adds a registry entry into  `HKEY_LOCAL_MACHINE\SOFTWARE\Candle\K[pc]\Ver610\Primary\Environment` (for example for  KDEBE_TLSV12_CIPHER_SPECS). This means that in future, every manuall change in that registry key, will be overwritten by the override section regardless what you set in the MTEMS tool.
-- **(6)**: On Linux/Unix the option `-e` option creates an `ITMHOME/config/[pc].environment` file with the new variable settings. Then it restarts the agent. This means that in future, when configuring the agent for the same values, it will be overwritten by the `[pc].environment` settings.
-- **(7)**: On windows the option `-p SERVER=myprimary1 PROTOCOL=IP.SPIPE ...` is overriding the CT_CMSLIST and KDC_FAMILIES registry keys. Hence if you ever used the `[Override Local Settings]` section in the `ITMHOME\TMAITM6_64\k[pc]cma.ini` to set these variables in that file, the `tacmd` command will not change anything, because they will be overwritten by the override section.
-- **(8)**: On Linux the option `-p SERVER=myprimary1 PROTOCOL=IP.SPIPE ...` is configuring and overiding the TEMS and KDC_FAMILIES values in `ITMHOME/config/.ConfigData/[pc]env` file. Hence if you ever used the `ITMHOME/config/[pc].environment` to set same varaibles the `tacmd` command will not change anything, because they will be overwritten by the `[pc].environment` file settings.
+- **(5)**: On Windows, the `-e` option creates a `[Overwrite local settings]` section in the `ITMHOME\TMAITM6_64\k[pc]cma.ini` file with the new variable settings. Then the agent is reconfigured and a registry entry is added to `HKEY_LOCAL_MACHINE\SOFTWARE\Candle\K[pc]\Ver610\Primary\Environment` for the specified variable (for example KDEBE_TLSV12_CIPHER_SPECS). This means that in the future, any manual change to the registry key of this variable will be overwritten by the override section, regardless of what you have specified.
+
+- **(6)**:On Linux/Unix, the `-e` option creates an `ITMHOME/config/[pc].environment` file with the new variable settings. Then the agent will be reconfigured and restarted. This means that in the future, if you configure the agent for the same values but set them in the [pc].ini file, they will be overwritten by the `[pc].environment` settings.
+- **(7)**: On Windows, the `-p SERVER=myprimary1 PROTOCOL=IP.SPIPE ...` option overrides the CT_CMSLIST and KDC_FAMILIES registry keys. If you have ever used the `Override Local Settings` section of the `ITMHOME\TMAITM6_64\k[pc]cma.ini` file to set the same variables, the `tacmd` command will not change anything because the new settings will be overwritten by the `Override Local Settings` section.
+- **(8)**: On Linux the option `-p SERVER=myprimary1 PROTOCOL=IP.SPIPE ...` is configuring and overiding the TEMS and KDC_FAMILIES values in `ITMHOME/config/.ConfigData/[pc]env` file. Hence if you ever used the `ITMHOME/config/[pc].environment` to set same varaibles, the `tacmd` command will not change anything, because they will be overwritten by the `[pc].environment` file settings.
 
 **ALTERNATIVE B** ---------------
 
 Reconfigure Agents using local ITM silent configuration.
 
 ON WINDOWS:
-1. Modifiy the correspondig **ITMHOME\TMAITM6_64\k[pc]cma.ini** file. If the `[Override Local Settings]`, create one at the end of the **_k[pc]cma.ini_** file. For example `kntcma.ini`. Add or modifythe following settings.
+1. Modifiy the correspondig **ITMHOME\TMAITM6_64\k[pc]cma.ini** file. If the `[Override Local Settings]` doesn't exists, create one at the end of the **_k[pc]cma.ini_** file. For example `kntcma.ini`. Add or modify the following settings.
 
-If you  use failover RTEMS:
+If you use failover RTEMS:
 ```
 [Override Local Settings]
 CTIRA_HIST_DIR=@LogPath@\History\@CanProd@
@@ -251,9 +252,9 @@ KDC_FAMILIES=IP.SPIPE PORT:3660 IP use:n SNA use:n IP.PIPE use:n IP6 use:n IP6.P
 4. Start the agent using **_net start [servicename]_** , for example `net stop KNTCMA_Primary`
 
 **Important notes:**
-- **(1)** The variables you add into the ini file `[Override Local Settings]` section, will be added or modified in the exsiting Registry key `HKEY_LOCAL_MACHINE\SOFTWARE\Candle\K[pc]\Ver610\Primary\Environment`. In future, every manuall change in that registry key or MTEMS configuration tool, will be overwritten by the override section regardless what you set in the MTEMS tool. 
+- **(1)** The variables you add into the ini file `[Override Local Settings]` section, will be added or modified in the exsiting Registry key `HKEY_LOCAL_MACHINE\SOFTWARE\Candle\K[pc]\Ver610\Primary\Environment` after reconfiguration. In future, every manuall change in that registry key or MTEMS configuration tool, will be overwritten by the override section and your changes will be ignored. 
 This behavior may differ for subnode or instance agents.
-- **(2)** Before a mass rollout, you must successfully test it for each agent type you want to modify
+- **(2)** Before a mass rollout, you must successfully test new settings for each agent type you want to modify
 
 ON LINUX/UNIX:
 
