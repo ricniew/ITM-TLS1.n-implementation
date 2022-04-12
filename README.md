@@ -298,9 +298,9 @@ On Windows you may try to edit or add configuration settings directly in the reg
 
 <img src="https://media.github.ibm.com/user/85313/files/b72bde00-b9b4-11ec-98cb-f210ff3d4edb" width="55%" height="55%">
 
-Please always  check if the registry settings are picked up by the agents after restart. Also always check if the `ITMHOME\TMAITM6_64\k[pc]cma.ini` file does not contain an `[Override Local Settings]` section with the same variables names as those you have manually set in the reagistry. The `[Override Local Settings]` section will override your manual registry changes the next time an agent is reconfigured by the MTEMS tools.  
+Please always check if the registry settings are taken over by the agents after reboot. Also, always check that the `ITMHOME\TMAITM6_64\k[pc]cma.ini` file does not contain an `[Override Local Settings]` section with the same variable names as the ones you manually set in the registry. The `[Override Local Settings]` section overrides your manual registry changes the next time an agent is reconfigured by the MTEMS tools.  
 
-On Linux/Unix you could add the required variables directly into the ITMHOME/config/[pc].ini file. That way you do not need the [pc].environemnt file. But this is not working for instance agents, where the instance config file must be modified.
+On Linux/Unix you could add the required variables directly into the ITMHOME/config/[pc].ini file. That way you do not need the [pc].environemnt file. But this is not working for instance agents, here the instance config file `[pc]_[inst].config` must be modified.
 
 <BR>
 
