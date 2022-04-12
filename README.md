@@ -164,7 +164,7 @@ Test TEP login:
 
 To verify certs usage for ports 15206 (eWas Console) or 15201 (TEPS HTTPS). Sample outputs for port 15206:
 
-- Command `openssl s_client -crlf -connect localhost:15206  -servername localhost -tls1_2 < /dev/null | egrep "Secure Renegotiation|Server public key | SSL handshake"`. 
+- Command `openssl s_client -crlf -connect localhost:15206  -servername localhost -tls1_2 < /dev/null | egrep "Secure Renegotiation|Server public key | SSL handshake"`. Output:
     ```
     depth=1 C = US, O = IBM, OU = ITMNode, OU = ITMCell, OU = Root Certificate, CN = falcate1
     verify error:num=19:self signed certificate in certificate chain
@@ -172,12 +172,12 @@ To verify certs usage for ports 15206 (eWas Console) or 15201 (TEPS HTTPS). Samp
     Server public key is 2048 bit
     Secure Renegotiation IS supported
     ```
-- Command `openssl s_client  -connect localhost:15206 2>/dev/null |  openssl x509 -noout -dates`
+- Command `openssl s_client  -connect localhost:15206 2>/dev/null |  openssl x509 -noout -dates`. Output:
     ```
     notBefore=Mar 31 15:22:36 2022 GMT
     notAfter=Mar 31 15:22:36 2023 GMT
     ```
-- Commnad `openssl s_client  -connect localhost:15206 2>/dev/null |  openssl x509 -noout -issuer -nameopt multiline`
+- Commnad `openssl s_client  -connect localhost:15206 2>/dev/null |  openssl x509 -noout -issuer -nameopt multiline`. Output:
     ```issuer=
         countryName               = US
         organizationName          = IBM
