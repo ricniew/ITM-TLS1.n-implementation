@@ -144,7 +144,7 @@ Use "Download ZIP" to save scripts to a temp folder. Then unzip it.
 
 **Execution:**
 
-Both scripts are looking for the ITMHOME folder variables (%CANDLE_HOME on Windows and $CANDLEHOME on Linux). If not existing you need to use the `-h [ITMHOME]` option. The Shell script tries also to find the required "arch" folder (e.g. lx8266) but you can use the `a [ arch ]` to provide the directory name.
+Both scripts are looking for the ITMHOME folder variables (%CANDLE_HOME% on Windows and $CANDLEHOME on Linux). If not existing you need to use the `-h [ITMHOME]` option. The Shell script tries also to find the required "arch" folder (e.g. lx8266) but you can use the `-a [ arch ]` to provide the directory name.
 
 Windows: 
 - Open PowerShell cmd prompt and go to the temp directory
