@@ -259,31 +259,31 @@ This behavior may differ for subnode or instance agents.
 ON LINUX/UNIX:
 
 1. Create a silent config response file, e.g. _resposefile.txt_ with following content
-If you use failover RTEMS:
-```
-CMSCONNECT=YES
-FTO=YES
-NETWORKPROTOCOL=ip.spipe
-IPSPIPEPORTNUMBER=3660
-HSNETWORKPROTOCOL=ip.spipe
-HSIPSPIPEPORTNUMBER=3660
-HOSTNAME=rtems-falcate1.my.dom.com
-MIRROR=rtems-minutest1.my.dom.com
-CUSTOM#KDEBE_TLSV12_CIPHER_SPECS=TLS_RSA_WITH_AES_128_CBC_SHA256,TLS_RSA_WITH_AES_256_CBC_SHA256
-CUSTOM#KDEBE_TLS10_ON=NO
-CUSTOM#KDEBE_TLS11_ON=NO
-```
+    If you use failover RTEMS:
+    ```
+    CMSCONNECT=YES
+    FTO=YES
+    NETWORKPROTOCOL=ip.spipe
+    IPSPIPEPORTNUMBER=3660
+    HSNETWORKPROTOCOL=ip.spipe
+    HSIPSPIPEPORTNUMBER=3660
+    HOSTNAME=rtems-falcate1.my.dom.com
+    MIRROR=rtems-minutest1.my.dom.com
+    CUSTOM#KDEBE_TLSV12_CIPHER_SPECS=TLS_RSA_WITH_AES_128_CBC_SHA256,TLS_RSA_WITH_AES_256_CBC_SHA256
+    CUSTOM#KDEBE_TLS10_ON=NO
+    CUSTOM#KDEBE_TLS11_ON=NO
+    ```
 
-If you NOT use failover RTEMS:
-```
-CMSCONNECT=YES
-NETWORKPROTOCOL=ip.spipe
-IPSPIPEPORTNUMBER=3660
-HOSTNAME=rtems-falcate1.my.dom.com
-CUSTOM#KDEBE_TLSV12_CIPHER_SPECS=TLS_RSA_WITH_AES_128_CBC_SHA256,TLS_RSA_WITH_AES_256_CBC_SHA256
-CUSTOM#KDEBE_TLS10_ON=NO
-CUSTOM#KDEBE_TLS11_ON=NO
-```
+    If you NOT use failover RTEMS:
+    ```
+    CMSCONNECT=YES
+    NETWORKPROTOCOL=ip.spipe
+    IPSPIPEPORTNUMBER=3660
+    HOSTNAME=rtems-falcate1.my.dom.com
+    CUSTOM#KDEBE_TLSV12_CIPHER_SPECS=TLS_RSA_WITH_AES_128_CBC_SHA256,TLS_RSA_WITH_AES_256_CBC_SHA256
+    CUSTOM#KDEBE_TLS10_ON=NO
+    CUSTOM#KDEBE_TLS11_ON=NO
+    ```
 
 2. Execute `ITMHOME/bin/itmcmd config -A -p [respfile] [pc]`. For examle `itmcmd config -A -p resposefile.txt lz`. For instance agent use `itmcmd config -A -p [respfile] -o [instance] [pc]`
 3. Restart the agent using `ITMHOME/bin/itmcmd agent stop/start [pc]`, for example `itmcmd agent stop lz ; itmcmd agent start lz`. For instance agents use `itmcmd agent -p [instance] -f stop [pc] ; itmcmd agent -p [instance] -f start [pc]`
