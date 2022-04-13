@@ -5,7 +5,7 @@
 # This script  performs configuration steps to implement a TLSv1.2 only configuration
 # 16.03.2022: Initial version by R. Niewolik EMEA AVP Team
 # 30.03.2022: Version 1.4     by R. Niewolik EMEA AVP Team
-# 30.03.2022: Version 1.41    by R. Niewolik EMEA AVP Team
+# 13.04.2022: Version 1.41    by R. Niewolik EMEA AVP Team
 #             - Add check if TEPS and eWas are at the required Level
 #             - Backupfolder now created in ITMHOME/backup/.. directory                
 ## 
