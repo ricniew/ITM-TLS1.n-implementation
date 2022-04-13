@@ -5,6 +5,9 @@
 # This script  performs configuration steps to implement a TLSv1.2 only configuration
 # 16.03.2022: Initial version by R. Niewolik EMEA AVP Team
 # 30.03.2022: Version 1.4     by R. Niewolik EMEA AVP Team
+# 30.03.2022: Version 1.41    by R. Niewolik EMEA AVP Team
+#             - Add check if TEPS and eWas are at the required Level
+#             - Backupfolder now created in ITMHOME/backup/.. directory                
 ## 
 SECONDS=0
 
@@ -25,7 +28,7 @@ backupfile ()
   filen=$1
   if [ -f $filen  ] ; then 
       echo "INFO - backupfile - Saving $filen in $BACKUPFOLDER "
-      cp -p $filen $CANDLEHOME/$BACKUPFOLDER/.
+      cp -p $filen $BACKUPFOLDER/.
   else
       if [[ $filen =~ "kcjparms" ]] ; then
           echo "WARNING - backupfile - file $filen does NOT exists and not saved. KCJ componenent probably not installed. Continue..."
@@ -41,16 +44,16 @@ backupfile ()
   
 backupewasAndKeyfiles() 
 {
-  echo "INFO - backup - Saving Directory $CANDLEHOME/$ARCH/iw in $CANDLEHOME/$BACKUPFOLDER. This can take a while..." 
-  cp -pR $CANDLEHOME/$ARCH/iw  $CANDLEHOME/$BACKUPFOLDER/ 
+  echo "INFO - backup - Saving Directory $CANDLEHOME/$ARCH/iw in $BACKUPFOLDER. This can take a while..." 
+  cp -pR $CANDLEHOME/$ARCH/iw  $BACKUPFOLDER/ 
   if [ $? -ne 0 ]; then
-      echo "ERROR - backup - Could not backup  $CANDLEHOME/$ARCH/iw to folder $CANDLEHOME\$BACKUPFOLDER. Check permissions and space."
+      echo "ERROR - backup - Could not backup  $CANDLEHOME/$ARCH/iw to folder $BACKUPFOLDER. Check permissions and space."
       exit 1
   fi 
-  echo "INFO - backup - Saving Directory $CANDLEHOME/$ARCH/iw in $CANDLEHOME/$BACKUPFOLDER. This can take a while..." 
-  cp -pR  $CANDLEHOME/keyfiles/ $CANDLEHOME/$BACKUPFOLDER/ 
+  echo "INFO - backup - Saving Directory $CANDLEHOME/$ARCH/iw in $BACKUPFOLDER. This can take a while..." 
+  cp -pR  $CANDLEHOME/keyfiles/ $BACKUPFOLDER/ 
   if [ $? -ne 0 ]; then
-      echo "ERROR - backup - Could not backup  $CANDLEHOME/keyfiles/ to folder $CANDLEHOME\$BACKUPFOLDER. Check permissions and space."
+      echo "ERROR - backup - Could not backup  $CANDLEHOME/keyfiles/ to folder $BACKUPFOLDER. Check permissions and space."
       exit 1
   fi 
   return 0
@@ -58,7 +61,7 @@ backupewasAndKeyfiles()
 
 createRestoreScript () 
 {
-  restorebatfull="$CANDLEHOME/$BACKUPFOLDER/$RESTORESCRIPT"
+  restorebatfull="$BACKUPFOLDER/$RESTORESCRIPT"
   if [ -f  $restorebatfull ] ; then
        echo "WARNING - createRestoreScript - Script $restorebatfull exists already and will be deleted"
        rm -f $restorebatfull
@@ -66,7 +69,7 @@ createRestoreScript ()
   touch $restorebatfull 
   chmod 755 $restorebatfull
   echo "set -x" >>  $restorebatfull 
-  echo "cd $CANDLEHOME/$BACKUPFOLDER" >> $restorebatfull
+  echo "cd $BACKUPFOLDER" >> $restorebatfull
   echo "" >>  $restorebatfull 
   echo "cp -pR iw $CANDLEHOME/$ARCH/." >> $restorebatfull
   echo "cp -pR keyfiles $CANDLEHOME/." >> $restorebatfull
@@ -684,25 +687,39 @@ else
     exit 1
 fi
 
+tepsver=`${CANDLEHOME}/bin/cinfo -t cq| grep "^cq"|awk '{print $7}'|sed 's/\.//g'`
+ewasver=`${CANDLEHOME}/bin/cinfo -t iw| grep "^iw"|awk '{print $9}'|sed 's/\.//g'`
+if [ $tepsver -lt 06300700 ] ; then
+    echo "ERROR - main - TEPS Server must be at least at version 06.30.07.00. You must update your TEPS server to <= 06.30.07.00 ."
+    exit
+elif [ $ewasver -lt 08551600 ] ; then
+    echo "ERROR - main - eWAS server must be at least at version 08.55.16.00. Please perform an eWAS and IHS uplift as described in the udpate readme files" 
+    exit
+fi
+echo "INFO - main - TEPS = $tepsver eWAS = $ewasver"
+
+
 PROGNAME=$(basename $0)
 USRCMD="$0 $*"
-BACKUPFOLDER="backup_before_TLS1.2"
+BACKUPFOLDER="${CANDLEHOME}/backup/backup_before_TLS1.2"
 RESTORESCRIPT="SCRIPTrestore.sh"
 WSADMIN="$CANDLEHOME/$ARCH/iw/bin/wsadmin.sh"
 
-if [ -d "${CANDLEHOME}/${BACKUPFOLDER}" ]; then
+if [ ! -d "${CANDLEHOME}/backup/" ]; then
+    echo "ERROR - main - Default backup folder ${CANDLEHOME}/backup does not exists! Please check. "
+    exit 1
+fi
+if [ -d "${BACKUPFOLDER}" ]; then
     echo "ERROR - main - This script was started already and the folder $BACKUPFOLDER exists already! To avoid data loss, "
-    echo "before executing this script again, you must restore the original content by using the '$CANDLEHOME/$BACKUPFOLDER/$RESTORESCRIPT' script and delete/rename the backup folder."
-    usage
+    echo "before executing this script again, you must restore the original content by using the '$BACKUPFOLDER/$RESTORESCRIPT' script and delete/rename the backup folder."
     exit 1
 else
-    mkdir ${CANDLEHOME}/${BACKUPFOLDER}
-    echo "INFO - main - Backup directory is: ${CANDLEHOME}/${BACKUPFOLDER}"
+    mkdir ${BACKUPFOLDER}
+    echo "INFO - main - Backup directory is: ${BACKUPFOLDER}"
 fi
 
-
 declare -A AFILES=( 
-  ["httpd.conf"]="${CANDLEHOME}/$ARCH//iu/ihs/HTTPServer/conf/httpd.conf"  \
+  ["httpd.conf"]="${CANDLEHOME}/$ARCH/iu/ihs/HTTPServer/conf/httpd.conf"  \
   ["cq.ini"]="${CANDLEHOME}/config/cq.ini" \
   ["tep.jnlpt"]="${CANDLEHOME}/config/tep.jnlpt" \
   ["component.jnlpt"]="${CANDLEHOME}/config/component.jnlpt" \
@@ -808,8 +825,8 @@ etm=$((SECONDS/60))
 host=`hostname`
 echo "------------------------------------------------------------------------------------------"
 echo "INFO - main - Procedure successfully finished Elapsedtime: $etm min " 
-echo " - Original files saved in folder $CANDLEHOME/$BACKUPFOLDER "
-echo " - To restore the level before update run '$CANDLEHOME/$BACKUPFOLDER/$RESTORESCRIPT' "
+echo " - Original files saved in folder $BACKUPFOLDER "
+echo " - To restore the level before update run '$BACKUPFOLDER/$RESTORESCRIPT' "
 echo "----- POST script execution steps ---" 
 echo " - Reconfigure TEPS and verify connections for TEP, TEPS, HUB" 
 echo " - To check eWAS settings use: https://${host}:15206/ibm/console/login"
@@ -817,4 +834,3 @@ echo " - To check TEP WebStart  use: https://${host}:15201/tep.jnlp"
 echo "------------------------------------------------------------------------------------------"
 
 exit 0
-
