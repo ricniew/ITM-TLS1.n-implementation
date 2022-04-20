@@ -345,77 +345,52 @@ https://www.ibm.com/support/pages/unable-login-tivoli-enterprise-portal-tep-webs
 
 Sample run of the activate_teps-tlsv1.2.sh script in Linux:
 ```
-[root@falcate1 IBM]# ./activate_teps-tlsv1.2.sh -h /opt/IBM/ITM
+./activate_teps-tlsv1.2.sh -h /opt/IBM/ITM
 INFO - main - ITM home directory is: /opt/IBM/ITM
 INFO - main - ITM arch directory is: /opt/IBM/ITM/lx8266
-INFO - main - Backup directory is: /opt/IBM/ITM/backup_before_TLS1.2
-INFO - EnableICSLite - Set ISCLite to 'true' 
+INFO - main - TEPS = 06300711 eWAS = 08551600
+INFO - main - Backup directory is: /opt/IBM/ITM/backup/backup_before_TLS1.2
+INFO - checkIfFileExists - Directory /opt/IBM/ITM/lx8266/iw  OK.
+INFO - checkIfFileExists - Directory /opt/IBM/ITM/keyfiles  OK.
+INFO - checkIfFileExists - File /opt/IBM/ITM/config/tep.jnlpt OK.
+INFO - checkIfFileExists - File /opt/IBM/ITM/config/cq.ini OK.
+INFO - checkIfFileExists - File /opt/IBM/ITM/config/component.jnlpt OK.
+WARNING - checkIfFileExists - File /opt/IBM/ITM/lx8266/cj/kcjparms.txt does NOT exists. KCJ component probably not installed. Continue...
+INFO - checkIfFileExists - File /opt/IBM/ITM/lx8266/iw/profiles/ITMProfile/properties/ssl.client.props OK.
+INFO - checkIfFileExists - File /opt/IBM/ITM/lx8266/iw/profiles/ITMProfile/config/cells/ITMCell/nodes/ITMNode/trust.p12 OK.
+INFO - checkIfFileExists - File /opt/IBM/ITM/lx8266/iw/profiles/ITMProfile/config/cells/ITMCell/nodes/ITMNode/key.p12 OK.
+INFO - checkIfFileExists - File /opt/IBM/ITM/lx8266/iw/java/jre/lib/security/java.security OK.
+INFO - checkIfFileExists - File /opt/IBM/ITM/lx8266/cw/applet.html.updateparams OK.
+INFO - checkIfFileExists - File /opt/IBM/ITM/lx8266/iu/ihs/HTTPServer/conf/httpd.conf OK.
+INFO - EnableICSLite - Set ISCLite to 'true'
 WASX7209I: Connected to process "ITMServer" on node ITMNode using SOAP connector;  The type of process is: UnManagedProcess
 WASX7303I: The following options are passed to the scripting environment and are available as arguments that are stored in the argv variable: "[true]"
 ISClite is not running
-ISClite started 
+ISClite started
 
-INFO - backup - Saving Directory /opt/IBM/ITM/lx8266/iw in /opt/IBM/ITM/backup_before_TLS1.2. This can take a while...
-INFO - backup - Saving Directory /opt/IBM/ITM/lx8266/iw in /opt/IBM/ITM/backup_before_TLS1.2. This can take a while...
-INFO - backupfile - Saving /opt/IBM/ITM/lx8266//iu/ihs/HTTPServer/conf/httpd.conf in backup_before_TLS1.2 
-INFO - backupfile - Saving /opt/IBM/ITM/config/cq.ini in backup_before_TLS1.2 
-INFO - backupfile - Saving /opt/IBM/ITM/config/tep.jnlpt in backup_before_TLS1.2 
-INFO - backupfile - Saving /opt/IBM/ITM/config/component.jnlpt in backup_before_TLS1.2 
-INFO - backupfile - Saving /opt/IBM/ITM/lx8266/cw/applet.html.updateparams in backup_before_TLS1.2 
-WARNING - backupfile - file /opt/IBM/ITM/lx8266/cj/kcjparms.txt does NOT exists and not saved. KCJ componenent probably not installed. Continue...
-INFO - backupfile - Saving /opt/IBM/ITM/lx8266/iw/java/jre/lib/security/java.security in backup_before_TLS1.2 
-INFO - backupfile - Saving /opt/IBM/ITM/lx8266/iw/profiles/ITMProfile/config/cells/ITMCell/nodes/ITMNode/trust.p12 in backup_before_TLS1.2 
-INFO - backupfile - Saving /opt/IBM/ITM/lx8266/iw/profiles/ITMProfile/config/cells/ITMCell/nodes/ITMNode/key.p12 in backup_before_TLS1.2 
-INFO - backupfile - Saving /opt/IBM/ITM/lx8266/iw/profiles/ITMProfile/properties/ssl.client.props in backup_before_TLS1.2 
-WARNING - createRestoreScript - TEP Desktop Client apparently not installed. File 'kcjparms.txt' not added to restore script
-INFO - createRestoreScript - Restore bat file created /opt/IBM/ITM/backup_before_TLS1.2/SCRIPTrestore.sh
- /opt/IBM/ITM/lx8266/iw/bin/wsadmin.sh -lang jython -c "AdminTask.renewCertificate('-keyStoreName NodeDefaultKeyStore -certificateAlias  default')" -c "AdminConfig.save()"
+INFO - backup - Saving Directory /opt/IBM/ITM/lx8266/iw in /opt/IBM/ITM/backup/backup_before_TLS1.2. This can take a while...
+INFO - backup - /opt/IBM/ITM/keyfiles/ in /opt/IBM/ITM/backup/backup_before_TLS1.2...
+INFO - backupfile - Saving /opt/IBM/ITM/lx8266/iu/ihs/HTTPServer/conf/httpd.conf in /opt/IBM/ITM/backup/backup_before_TLS1.2
+INFO - backupfile - Saving /opt/IBM/ITM/config/cq.ini in /opt/IBM/ITM/backup/backup_before_TLS1.2
+INFO - backupfile - Saving /opt/IBM/ITM/config/tep.jnlpt in /opt/IBM/ITM/backup/backup_before_TLS1.2
+INFO - backupfile - Saving /opt/IBM/ITM/config/component.jnlpt in /opt/IBM/ITM/backup/backup_before_TLS1.2
+INFO - backupfile - Saving /opt/IBM/ITM/lx8266/cw/applet.html.updateparams in /opt/IBM/ITM/backup/backup_before_TLS1.2
+INFO - backupfile - Saving /opt/IBM/ITM/lx8266/iw/java/jre/lib/security/java.security in /opt/IBM/ITM/backup/backup_before_TLS1.2
+INFO - backupfile - Saving /opt/IBM/ITM/lx8266/iw/profiles/ITMProfile/config/cells/ITMCell/nodes/ITMNode/trust.p12 in /opt/IBM/ITM/backup/backup_before_TLS1.2
+INFO - backupfile - Saving /opt/IBM/ITM/lx8266/iw/profiles/ITMProfile/config/cells/ITMCell/nodes/ITMNode/key.p12 in /opt/IBM/ITM/backup/backup_before_TLS1.2
+INFO - backupfile - Saving /opt/IBM/ITM/lx8266/iw/profiles/ITMProfile/properties/ssl.client.props in /opt/IBM/ITM/backup/backup_before_TLS1.2
+INFO - createRestoreScript - Restore script created: /opt/IBM/ITM/backup/backup_before_TLS1.2/SCRIPTrestore.sh
+INFO - renewCert -  Default certificate will be renewed again (21)
 WASX7209I: Connected to process "ITMServer" on node ITMNode using SOAP connector;  The type of process is: UnManagedProcess
 TEPSEWASBundle loaded.
 '\nCWPKI0704I: The personal certificate with the default alias in the NodeDefaultKeyStore keystore has been RENEWED.'
 ''
-WASX7209I: Connected to process "ITMServer" on node ITMNode using SOAP connector;  The type of process is: UnManagedProcess
-TEPSEWASBundle loaded.
-'[[alias default] [version 3] [size 2048] [serialNumber 1162375622885617] [issuedTo [CN=falcate1, OU=ITMCell, OU=ITMNode, O=IBM, C=US]] [issuedBy [CN=falcate1, OU=Root Certificate, OU=ITMCell, OU=ITMNode, O=IBM, C=US]] [fingerPrint 24:18:2E:7C:CC:FD:20:73:27:87:62:58:F8:13:8C:90:B1:50:33:CC] [signatureAlgorithm SHA256withRSA(1.2.840.113549.1.1.11)] [validity [Valid from Mar 31, 2022 to Mar 31, 2023.]] [index 0] ]\n[[alias default] [version 3] [size 2048] [serialNumber 1059435484107525] [issuedTo [CN=falcate1, OU=Root Certificate, OU=ITMCell, OU=ITMNode, O=IBM, C=US]] [issuedBy [CN=falcate1, OU=Root Certificate, OU=ITMCell, OU=ITMNode, O=IBM, C=US]] [fingerPrint 29:2D:FB:FC:0F:AF:D7:6D:7D:89:0E:3A:EC:61:80:50:39:FE:AB:7C] [signatureAlgorithm SHA256withRSA(1.2.840.113549.1.1.11)] [validity [Valid from Mar 30, 2022 to Mar 26, 2037.]] [index 1] ]'
 INFO - renewCert - Successfully renewed Certificate
 INFO - renewCert - Running GSKitcmd.sh commands
-INFO - renewCert - GSKitcmd.sh commands finished. See label and issuer info below...
 
-CANDLEHOME=/opt/IBM/ITM /opt/IBM/ITM/bin/GSKitcmd.sh gsk8capicmd_64 -cert -list -db /opt/IBM/ITM/keyfiles/keyfile.kdb -stashed -label default 
--default
-!root
 
-CANDLEHOME=/opt/IBM/ITM /opt/IBM/ITM/bin/GSKitcmd.sh gsk8capicmd_64 -cert -details -db /opt/IBM/ITM/keyfiles/keyfile.kdb -stashed -label default | egrep 'Serial|Issuer|Subject|Not Before|Not After'
-Serial : 04212caa1900f1
-Issuer : "CN=falcate1,OU=Root Certificate,OU=ITMCell,OU=ITMNode,O=IBM,C=US"
-Subject : CN=falcate1,OU=ITMCell,OU=ITMNode,O=IBM,C=US
-Not Before : March 31, 2022 5:20:16 AM PDT
-Not After : March 31, 2023 5:20:16 AM PDT
-    SubjectKeyIdentifier
 
-CANDLEHOME=/opt/IBM/ITM /opt/IBM/ITM/bin/GSKitcmd.sh gsk8capicmd_64 -cert -details -db /opt/IBM/ITM/lx8266/iw/profiles/ITMProfile/config/cells/ITMCell/nodes/ITMNode/key.p12 -pw WebAS -label default | egrep 'Serial|Issuer|Subject|Not Before|Not After'
-Serial : 04212caa1900f1
-Issuer : "CN=falcate1,OU=Root Certificate,OU=ITMCell,OU=ITMNode,O=IBM,C=US"
-Subject : CN=falcate1,OU=ITMCell,OU=ITMNode,O=IBM,C=US
-Not Before : March 31, 2022 5:20:16 AM PDT
-Not After : March 31, 2023 5:20:16 AM PDT
-    SubjectKeyIdentifier
-
-CANDLEHOME=/opt/IBM/ITM /opt/IBM/ITM/bin/GSKitcmd.sh gsk8capicmd_64 -cert -details -db /opt/IBM/ITM/keyfiles/keyfile.kdb -stashed -label root | egrep 'Serial|Issuer|Subject|Not Before|Not After'
-Serial : 03c38d0bb15305
-Issuer : "CN=falcate1,OU=Root Certificate,OU=ITMCell,OU=ITMNode,O=IBM,C=US"
-Subject : "CN=falcate1,OU=Root Certificate,OU=ITMCell,OU=ITMNode,O=IBM,C=US"
-Not Before : March 30, 2022 12:44:34 AM PDT
-Not After : March 26, 2037 12:44:34 AM PDT
-    SubjectKeyIdentifier
-
-CANDLEHOME=/opt/IBM/ITM /opt/IBM/ITM/bin/GSKitcmd.sh gsk8capicmd_64 -cert -details -db /opt/IBM/ITM/lx8266/iw/profiles/ITMProfile/config/cells/ITMCell/nodes/ITMNode/trust.p12 -pw WebAS -label root | egrep 'Serial|Issuer|Subject|Not Before|Not After'
-Serial : 03c38d0bb15305
-Issuer : "CN=falcate1,OU=Root Certificate,OU=ITMCell,OU=ITMNode,O=IBM,C=US"
-Subject : "CN=falcate1,OU=Root Certificate,OU=ITMCell,OU=ITMNode,O=IBM,C=US"
-Not Before : March 30, 2022 12:44:34 AM PDT
-Not After : March 26, 2037 12:44:34 AM PDT
-    SubjectKeyIdentifier
+INFO - renewCert - GSKitcmd.sh commands finished successfully.
 INFO - restartTEPS - Restarting TEPS ...
 Processing. Please wait...
 systemctl stop ITMAgents1.cq.service RC: 0
@@ -432,37 +407,25 @@ Tivoli Enterprise Portal Server started
 INFO - restartTEPS - Waiting for TEPS to initialize....
 ............
 INFO - restartTEPS - TEPS restarted successfully.
-INFO - EnableICSLite - Set ISCLite to 'true' 
+INFO - EnableICSLite - Set ISCLite to 'true'
 WASX7209I: Connected to process "ITMServer" on node ITMNode using SOAP connector;  The type of process is: UnManagedProcess
 WASX7303I: The following options are passed to the scripting environment and are available as arguments that are stored in the argv variable: "[true]"
 ISClite is not running
-ISClite started 
+ISClite started
 
-/opt/IBM/ITM/lx8266/iw/bin/wsadmin.sh -lang jython -c  "AdminTask.modifySSLConfig('[-alias NodeDefaultSSLSettings -scopeName (cell):ITMCell:(node):ITMNode -keyStoreName NodeDefaultKeyStore -keyStoreScopeName (cell):ITMCell:(node):ITMNode -trustStoreName NodeDefaultTrustStore -trustStoreScopeName (cell):ITMCell:(node):ITMNode -jsseProvider IBMJSSE2 -sslProtocol TLSv1.2 -clientAuthentication false -clientAuthenticationSupported false -securityLevel HIGH -enabledCiphers ]')" -c  "AdminConfig.save()"
-WASX7209I: Connected to process "ITMServer" on node ITMNode using SOAP connector;  The type of process is: UnManagedProcess
-TEPSEWASBundle loaded.
-''
-''
-INFO - modQop - Successfully set TLSv1.2 for Quality of Protection (QoP)
+WARNING - modQop - Quality of Protection (QoP) is already set to 'sslProtocol SSL_TLSv2' and will not be modified again.
+INFO - disableAlgorithms - Modifying /opt/IBM/ITM/lx8266/iw/profiles/ITMProfile/config/cells/ITMCell/security.xml
 /opt/IBM/ITM/lx8266/iw/bin/wsadmin.sh -lang jython -f /opt/IBM/ITM/tmp/org.jy
 WASX7209I: Connected to process "ITMServer" on node ITMNode using SOAP connector;  The type of process is: UnManagedProcess
 INFO - disableAlgorithms - Successfully set com.ibm.websphere.tls.disabledAlgorithms to none
-INFO - modsslclientprops - Start /opt/IBM/ITM/lx8266/iw/profiles/ITMProfile/properties/ssl.client.props modification 
+INFO - modsslclientprops - Modifying /opt/IBM/ITM/lx8266/iw/profiles/ITMProfile/properties/ssl.client.props
 INFO - saveorgcreatenew - /opt/IBM/ITM/lx8266/iw/profiles/ITMProfile/properties/ssl.client.props.beforetls12 created to save original content
-INFO - saveorgcreatenew - /opt/IBM/ITM/lx8266/iw/profiles/ITMProfile/properties/ssl.client.props.tls12 will be the modified file
 INFO - modsslclientprops - /opt/IBM/ITM/lx8266/iw/profiles/ITMProfile/properties/ssl.client.props.tls12 created and copied on /opt/IBM/ITM/lx8266/iw/profiles/ITMProfile/properties/ssl.client.props
-INFO - modhttpconf - Start /opt/IBM/ITM/lx8266//iu/ihs/HTTPServer/conf/httpd.conf creation 
-INFO - saveorgcreatenew - /opt/IBM/ITM/lx8266//iu/ihs/HTTPServer/conf/httpd.conf.beforetls12 created to save original content
-INFO - saveorgcreatenew - /opt/IBM/ITM/lx8266//iu/ihs/HTTPServer/conf/httpd.conf.tls12 will be the modified file
-INFO - modhttpconf - /opt/IBM/ITM/lx8266//iu/ihs/HTTPServer/conf/httpd.conf.tls12 created and copied on /opt/IBM/ITM/lx8266//iu/ihs/HTTPServer/conf/httpd.conf
-INFO - modcqini - Start /opt/IBM/ITM/config/cq.ini creation 
+INFO - modkfwenv - Modifying /opt/IBM/ITM/config/cq.ini
 INFO - saveorgcreatenew - /opt/IBM/ITM/config/cq.ini.beforetls12 created to save original content
-INFO - saveorgcreatenew - /opt/IBM/ITM/config/cq.ini.tls12 will be the modified file
 INFO - modcqini - /opt/IBM/ITM/config/cq.ini.tls12 created and copied on /opt/IBM/ITM/config/cq.ini
-INFO - modjavasecurity - Start /opt/IBM/ITM/lx8266/iw/java/jre/lib/security/java.security creation 
-INFO - saveorgcreatenew - /opt/IBM/ITM/lx8266/iw/java/jre/lib/security/java.security.beforetls12 created to save original content
-INFO - saveorgcreatenew - /opt/IBM/ITM/lx8266/iw/java/jre/lib/security/java.security.tls12 will be the modified file
-INFO - modjavasecurity - /opt/IBM/ITM/lx8266/iw/java/jre/lib/security/java.security.tls12 created and copied on /opt/IBM/ITM/lx8266/iw/java/jre/lib/security/java.security
+INFO - saveorgcreatenew - /opt/IBM/ITM/lx8266/iu/ihs/HTTPServer/conf/httpd.conf.beforetls12 created to save original content
+INFO - modhttpconf - /opt/IBM/ITM/lx8266/iu/ihs/HTTPServer/conf/httpd.conf.tls12 created and copied on /opt/IBM/ITM/lx8266/iu/ihs/HTTPServer/conf/httpd.conf
 INFO - restartTEPS - Restarting TEPS ...
 Processing. Please wait...
 systemctl stop ITMAgents1.cq.service RC: 0
@@ -479,31 +442,32 @@ Tivoli Enterprise Portal Server started
 INFO - restartTEPS - Waiting for TEPS to initialize....
 ............
 INFO - restartTEPS - TEPS restarted successfully.
-INFO - modtepjnlpt - Start  creation 
+./activate_teps-tlsv1.2.sh: line 867: EnableICSLIte: command not found
+INFO - modjavasecurity - Modifying /opt/IBM/ITM/lx8266/iw/java/jre/lib/security/java.security
+INFO - saveorgcreatenew - /opt/IBM/ITM/lx8266/iw/java/jre/lib/security/java.security.beforetls12 created to save original content
+INFO - modjavasecurity - /opt/IBM/ITM/lx8266/iw/java/jre/lib/security/java.security.tls12 created and copied on /opt/IBM/ITM/lx8266/iw/java/jre/lib/security/java.security
+INFO - modtepjnlpt - Modifying /opt/IBM/ITM/config/tep.jnlpt
 INFO - saveorgcreatenew - /opt/IBM/ITM/config/tep.jnlpt.beforetls12 created to save original content
-INFO - saveorgcreatenew - /opt/IBM/ITM/config/tep.jnlpt.tls12 will be the modified file
 INFO - modtepjnlpt - /opt/IBM/ITM/config/tep.jnlpt.tls12 created and copied on /opt/IBM/ITM/config/tep.jnlpt
-INFO - modcompjnlpt - Start modcompjnlpt creation 
+INFO - modcompjnlpt - Modifying /opt/IBM/ITM/config/component.jnlpt
 INFO - saveorgcreatenew - /opt/IBM/ITM/config/component.jnlpt.beforetls12 created to save original content
-INFO - saveorgcreatenew - /opt/IBM/ITM/config/component.jnlpt.tls12 will be the modified file
 INFO - modcompjnlpt - /opt/IBM/ITM/config/component.jnlpt.tls12 created and copied on /opt/IBM/ITM/config/component.jnlpt
-INFO - modapplethtmlupdateparams - Start /opt/IBM/ITM/lx8266/cw/applet.html.updateparams creation 
+INFO - modapplethtmlupdateparams - Modifying /opt/IBM/ITM/lx8266/cw/applet.html.updateparams
 INFO - saveorgcreatenew - /opt/IBM/ITM/lx8266/cw/applet.html.updateparams.beforetls12 created to save original content
-INFO - saveorgcreatenew - /opt/IBM/ITM/lx8266/cw/applet.html.updateparams.tls12 will be the modified file
 INFO - modapplethtmlupdateparams - /opt/IBM/ITM/lx8266/cw/applet.html.updateparams.tls12 created and copied on /opt/IBM/ITM/lx8266/cw/applet.html.updateparams
-INFO - main - Reconfiguring TEP WebSstart/Broswer client 'cw'
+INFO - main - Reconfiguring CW
 Agent configuration started...
 Agent configuration completed...
-WARNING - main - TEP Desktop client not installed and was not modified ('kcjparms.txt' not existing) 
-INFO - EnableICSLite - Set ISCLite to 'false' 
+WARNING - main - TEP Desktop client not installed and was not modified ('kcjparms.txt' not existing)
+INFO - EnableICSLite - Set ISCLite to 'false'
 WASX7209I: Connected to process "ITMServer" on node ITMNode using SOAP connector;  The type of process is: UnManagedProcess
 WASX7303I: The following options are passed to the scripting environment and are available as arguments that are stored in the argv variable: "[false]"
 ISClite is not running
 
 ------------------------------------------------------------------------------------------
-INFO - main - Procedure successfully finished Elapsedtime: 4 min 
- - Original files saved in folder /opt/IBM/ITM/backup_before_TLS1.2 
- - To restore the level before update run '/opt/IBM/ITM/backup_before_TLS1.2/SCRIPTrestore.sh' 
+INFO - main - Procedure successfully finished Elapsedtime: 4 min
+ - Original files saved in folder /opt/IBM/ITM/backup/backup_before_TLS1.2
+ - To restore the level before update run '/opt/IBM/ITM/backup/backup_before_TLS1.2/SCRIPTrestore.sh'
 ----- POST script execution steps ---
  - Reconfigure TEPS and verify connections for TEP, TEPS, HUB
  - To check eWAS settings use: https://falcate1.fyre.ibm.com:15206/ibm/console/login
