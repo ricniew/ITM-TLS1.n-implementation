@@ -442,7 +442,11 @@ Tivoli Enterprise Portal Server started
 INFO - restartTEPS - Waiting for TEPS to initialize....
 ............
 INFO - restartTEPS - TEPS restarted successfully.
-./activate_teps-tlsv1.2.sh: line 867: EnableICSLIte: command not found
+INFO - EnableICSLite - Set ISCLite to 'true'
+WASX7209I: Connected to process "ITMServer" on node ITMNode using SOAP connector;  The type of process is: UnManagedProcess
+WASX7303I: The following options are passed to the scripting environment and are available as arguments that are stored in the argv variable: "[true]"
+ISClite is not running
+ISClite started
 INFO - modjavasecurity - Modifying /opt/IBM/ITM/lx8266/iw/java/jre/lib/security/java.security
 INFO - saveorgcreatenew - /opt/IBM/ITM/lx8266/iw/java/jre/lib/security/java.security.beforetls12 created to save original content
 INFO - modjavasecurity - /opt/IBM/ITM/lx8266/iw/java/jre/lib/security/java.security.tls12 created and copied on /opt/IBM/ITM/lx8266/iw/java/jre/lib/security/java.security
@@ -476,7 +480,3 @@ INFO - main - Procedure successfully finished Elapsedtime: 4 min
 [root@falcate1 IBM]# 
 ```
 <BR>
-
-
-
-
