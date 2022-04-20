@@ -4,16 +4,24 @@
 #
 # 16.03.2022: Initial version  by R. Niewolik EMEA AVP Team
 # 29.03.2022: Version 1.3      by R. Niewolik EMEA AVP Team
-#
+# 13.04.2022: Version 1.31     by R. Niewolik EMEA AVP Team
+#             - Add check if TEPS and eWas are at the required Level
+#             - Backupfolder now created in ITMHOME\backup\.. directory 
+# 20.04.2022: Version 1.32    by R. Niewolik EMEA AVP Team
+#             - New function to check for file existance
+#             - Added checks to functions if TLSv1.2 related variables were set already              
+##
 param($h)
 
+write-host "INFO - Script Version 1.32"
 $startTime = $(get-date)
 
-function getCandleHome ($candlehome) {
+function getCandleHome ($candlehome) 
+{
   if  ( $candlehome ) {
       $parcandlehome=$args[0]
       write-host "INFO - getCandleHome - CANDLE_HOME set by option is:  $candlehome"
-      if (Test-Path -Path $candlehome) {
+      if (Test-Path -Path "$candlehome") {
           write-host "INFO - getCandleHome - Path $candlehome exists. OK"
       } else {
           write-host "ERROR - getCandleHome - Path $candlehome doesn't exist. NOK"
@@ -28,7 +36,7 @@ function getCandleHome ($candlehome) {
       } else { 
           $candlehome = $cdh.Split(" ")[0].trim()
           write-host "INFO - getCandleHome - CANDLE_HOME by ENV is $candlehome"
-          if (Test-Path -Path $candlehome) {
+          if (Test-Path -Path "$candlehome" ) {
               write-host "INFO - getCandleHome - Path $candlehome exists. OK"
           } else {
               write-host "ERROR - getCandleHome - Path $candlehome doesn't exist. Please execute script including ITMHOME: scriptname.ps1 C:\IBM\ITM"
@@ -39,35 +47,64 @@ function getCandleHome ($candlehome) {
   return $candlehome
 }
 
-
-function backupfile ($file) {
-  #write-host "DEBUG - backupfile- $file"
-  if ( test-path $file ) {
-      write-host "INFO - backupfile - Saving $file in $BACKUPFOLDER "
-      Copy-Item -Path "$file" -Destination $BACKUPFOLDER
-      if ( -not $? ) {
-          write-host "ERROR - backupfile - Could not copy $file could not be saved to $BACKUPFOLDER !! Check permissions and available space."
-          exit 1
-      } else { return 0 }
+function checkIfFileExists () 
+{
+  # this function als check if the files to backup exists
+  if ( Test-Path -Path "$CANDLEHOME/CNPSJ" ) {
+      write-host "INFO - checkIfFileExists - Directory $CANDLEHOME/CNPSJ  OK."
   } else {
-      if ( $file -like '*kcjparms*') {
-          write-host "WARNING - backupfile - File $file does NOT exists and could not be saved (possibly TEP Destop Client not installed) "
-          return 4
+      write-host "ERROR - checkIfFileExists - Directory $CANDLEHOME/CNPSJ  does NOT exists. Please check."
+  }
+  if ( Test-Path -Path "$CANDLEHOME\keyfiles" ) {
+      write-host "INFO - checkIfFileExists - Directory $CANDLEHOME\keyfiles  OK."
+  } else {
+      write-host "ERROR - checkIfFileExists - Directory $CANDLEHOME\keyfiles  does NOT exists. Please check."
+  }
+  
+  foreach ( $h in $HFILES.Keys ) {
+      if ( test-path "$($HFILES.$h)" ) { 
+          write-host "INFO - checkIfFileExists - File $($HFILES.$h) OK."
+          continue
       } else {
-          write-host "ERROR - backupfile - Could not backup $file to $BACKUPFOLDER !! Check for existance, permissions and available space."
-      } 
+          if ( $h -like '*kcjparms*') {
+              write-host "WARNING - checkIfFileExists - File $($HFILES.$h) does NOT exists. KCJ component probably not installed. Continue..."
+              $KCJ=4 # will be used later in main and createRestoreScript
+              continue
+          } else {
+              write-host "ERROR - checkIfFileExists - file $($HFILES.$h) does NOT exists. Please check."
+              exit 1
+          }
+      }      
+  }
+  
+  return 0
+}  
+
+function backupfile ($file) 
+{
+  #write-host "DEBUG - backupfile- $file"
+  if ( test-path "$file" ) {
+      write-host "INFO - backupfile - Saving $file in $BACKUPFOLDER "
+      Copy-Item -Path "$file" -Destination "$BACKUPFOLDER"
+      if ( -not $? ) {
+          write-host "ERROR - backupfile - Error during copy of file $filen to $BACKUPFOLDER !! Check permissions and space available."
+          exit 1
+      } else { 
+          return 0 
+      }
   }
 }
 
-function backupewasAndkeys ($backupfolder) {
+function backupewasAndkeys ($backupfolder) 
+{
   write-host "INFO - backupewasAndkeys - Directory $CANDLEHOME\CNPSJ saving in $BACKUPFOLDER. This can take a while..."
-  Copy-Item -Path "$CANDLEHOME\CNPSJ" -Destination $BACKUPFOLDER -Recurse -erroraction stop
+  Copy-Item -Path "$CANDLEHOME\CNPSJ" -Destination "$BACKUPFOLDER" -Recurse -erroraction stop
   if ( -not $? ) {
       write-host "ERROR - backupewasAndkeys - Could not copy $CANDLEHOME/CNPSJ folder to $BACKUPFOLDER !! Check permissions and available space."
       exit 1
   }
   write-host "INFO - backupewasAndkeys - Directory $CANDLEHOME\keyfiles saving in $BACKUPFOLDER"
-  Copy-Item -Path "$CANDLEHOME\keyfiles" -Destination $BACKUPFOLDER -Recurse -erroraction stop
+  Copy-Item -Path "$CANDLEHOME\keyfiles" -Destination "$BACKUPFOLDER" -Recurse -erroraction stop
   write-host "INFO - backupewasAndkeys - Files successfully saved in folder $BACKUPFOLDER."
   if ( -not $? ) {
       write-host "ERROR - backupewasAndkeys - Could not copy $CANDLEHOME/keyfiles folder to $BACKUPFOLDER !! Check permissions and available space."
@@ -75,28 +112,29 @@ function backupewasAndkeys ($backupfolder) {
   }
 }
 
-function createRestoreScript ($restorebat) {
+function createRestoreScript ($restorebat) 
+{
   $restorebatfull = "$BACKUPFOLDER\$restorebat"
-  if ( test-path $restorebatfull ) { 
+  if ( test-path "$restorebatfull" ) { 
        write-host "WARNING - createRestoreScript - Script $restorebatfull exists already and will be deleted"
        remove-item $restorebatfull
   }
 
-  New-Item -Path $BACKUPFOLDER -Name $restorebat -ItemType "file"
-  Add-Content $restorebatfull "cd $BACKUPFOLDER"
-  Add-Content $restorebatfull "xcopy /y/s CNPSJ $CANDLEHOME"
-  Add-Content $restorebatfull "xcopy /y/s keyfiles $CANDLEHOME"
+  $rc = New-Item -Path "$BACKUPFOLDER" -Name "$restorebat" -ItemType "file"
+  Add-Content $restorebatfull "cd `"$BACKUPFOLDER`""
+  Add-Content $restorebatfull "xcopy /y/s CNPSJ `"$CANDLEHOME`""
+  Add-Content $restorebatfull "xcopy /y/s keyfiles `"$CANDLEHOME`""
   Add-Content $restorebatfull " "
 
   foreach ( $h in $HFILES.Keys ) {
-      $string="copy $h  $($HFILES.$h)"
+      $string="copy $h  `"$($HFILES.$h)`""
       if ( ( $file -like '*kcjparms*')  -and ( $KCJ = 4 ) ) {
-          write-host "WARNING - createRestoreScript - TEP Desktop Client apparently not installed. File 'kcjparms.txt' not added to restore script"
+          #write-host "WARNING - createRestoreScript - TEP Desktop Client apparently not installed. File 'kcjparms.txt' not added to restore script"
           continue 
       } 
       Add-Content $restorebatfull $string
-      Add-Content $restorebatfull "del $($HFILES.$h).beforetls12"
-      Add-Content $restorebatfull "del $($HFILES.$h).tls12"
+      Add-Content $restorebatfull "del `"$($HFILES.$h).beforetls12`""
+      Add-Content $restorebatfull "del `"$($HFILES.$h).tls12`""
       Add-Content $restorebatfull " "
   }
   Add-Content $restorebatfull " "
@@ -108,8 +146,58 @@ function createRestoreScript ($restorebat) {
   Start-Sleep -seconds 4
 }
 
+function EnableICSLIte ($action) 
+{
+  write-host "INFO - EnableICSLIte - ISCLite set enabled=$action."
+  $cmd="$CANDLEHOME\CNPSJ\bin\wsadmin -conntype SOAP -lang jacl -f $CANDLEHOME\CNPSJ\scripts\enableISCLite.jacl $action"
+  $cmd += '; $Success=$?'
+  #write-host "$cmd"
+  $out = Invoke-Expression $cmd
+  if ( $Success ) { write-host "INFO - EnableICSLIte - Successfully set ISCLite to '$action'." }
+  else {
+      write-host "$success"
+      write-host "ERROR - EnableICSLIte - Enable ISCLite command $cmd failed. Possibly you did not set a eWAS user password. "
+      Write-Host " Try to set a password as descirbed here https://www.ibm.com/docs/en/tivoli-monitoring/6.3.0?topic=administration-define-wasadmin-password" 
+      write-host " Powershell script ended!"
+      exit 1
+  }
+}
 
-function saveorgcreatenew ($orgfile) {
+function restartTEPS () 
+{
+  write-host "INFO - restartTEPS - Restarting TEPS ..." -ForegroundColor Yellow
+  net stop KFWSRV 
+  net start KFWSRV
+  if ( -not $? ) {
+      write-host "ERROR - restartTEPS - TEPS restart failed. Powershell script ended!"
+      exit 1
+  } else {
+      write-host "INFO - restartTEPS - Waiting for TEPS to initialize...."
+      Start-Sleep -seconds 7
+      $wait = 1
+      $c=0
+      while($wait -eq 1) {
+          If (Select-String -Path "$CANDLEHOME\logs\kfwservices.msg" -Pattern 'Waiting for requests. Startup complete' -SimpleMatch) {
+              Write-Host ""
+              Write-Host 'INFO - restartTEPS - TEPS started successfully' -ForegroundColor Green
+              $wait = 0 
+          } Else {
+              Write-Host -NoNewline ".."
+              $c = $c + 3
+              Start-Sleep -seconds 3  
+          }
+          if ( $c -gt 150 ) {
+              write-host "ERROR - restartTEPS - TEPS restart takes too long (over 2,5) min. Something went wrong. Powershell script ended!"
+              exit 1
+          }
+              
+      }
+      Start-Sleep -seconds 5
+  }
+}
+
+function saveorgcreatenew ($orgfile) 
+{
   [hashtable]$return = @{}
   $saveorgfile = "$orgfile.beforetls12"
 
@@ -129,7 +217,7 @@ function saveorgcreatenew ($orgfile) {
   } else {
       $dir = Split-Path $neworgfile -Parent
       $file = Split-Path $neworgfile -Leaf 
-      $null = New-Item -path $dir -name $file -ItemType "file"
+      $null = New-Item -path "$dir" -name "$file" -ItemType "file"
   }
 
   #write-host "DEBUG - saveorgcreatenew - new= $neworgfile save= $saveorgfile org= $orgfile"
@@ -139,13 +227,21 @@ function saveorgcreatenew ($orgfile) {
 }
 
 
-function modhttpconf ($httpdfile) {
-  write-host "INFO - modhttpconf - Start $httpdfile creation "
-  $rc = saveorgcreatenew $httpdfile
-  if ( $rc.rc -eq 1 ) {
-       write-host "WARNING - modhttpconf - IHS component apparently not installed. File $httpdfile not modified !"
-       return $rc.rc 
+function modhttpconf ($httpdfile) 
+{
+  $pattern = "^\s*SSLProtocolDisable\s*TLSv11"  
+  if (select-string -Path "$httpdfile" -Pattern $pattern) {
+    $pattern = "^\s*SSLProtocolEnable\s*TLSv12" 
+    if (select-string -Path "$httpdfile" -Pattern $pattern) {
+        write-host "WARNING - modhttpconf - $httpdfile contains 'SSLProtocolEnable TLSv12' + TLS11,10 disabled and will not be modified"
+        return 4
+    } else {
+        write-host "INFO - modhttpconf - Modifying $httpdfile"
+    }
   }
+  
+  $rc = saveorgcreatenew $httpdfile
+  
   $newhttpdfile = $rc.new
   $savehttpdfile = $rc.save
   $foundsslcfg = 1
@@ -203,17 +299,22 @@ function modhttpconf ($httpdfile) {
   }
   copy-item -Path "$newhttpdfile" -Destination "$httpdfile"
   write-host "INFO - modhttpconf - $newhttpdfile created and copied on $httpdfile"  
-
+  return 0
 }
 
 
-function modkfwenv ($kfwenv) {
-  write-host "INFO - modkfwenv - Start $kfwenv creation "
-  $rc = saveorgcreatenew $kfwenv
-  if ( $rc.rc -eq 1 ) {
-       write-host "WARNING - modkfwenv - TEPS component apparently not installed. File $kfwenv not modified !"
-       return $rc.rc 
+function modkfwenv ($kfwenv) 
+{
+  $pattern="KFW_ORB_ENABLED_PROTOCOLS=TLS_Version_1_2_Only" 
+  if (select-string -Path "$kfwenv" -Pattern $pattern) {
+     write-host "WARNING - modkfwenv - $kfwenv contains 'KFW_ORB_ENABLED_PROTOCOLS=TLS_Version_1_2_Only' and will not be modified"
+     return 4
+  } else {
+     write-host "INFO - modkfwenv - Modifying $kfwenv"
   }
+
+  $rc = saveorgcreatenew $kfwenv
+  
   $newkfwenv = $rc.new
   $savekfwenv = $rc.save
   $foundKFWORB = $foundTLS10 = $foundTLS11 = $foundTLS12 = 1
@@ -241,16 +342,21 @@ function modkfwenv ($kfwenv) {
   if ( $foundTLS12 -eq 1 )  { Add-Content $newkfwenv 'KDEBE_TLSV12_CIPHER_SPECS=TLS_RSA_WITH_AES_128_CBC_SHA256,TLS_RSA_WITH_AES_256_CBC_SHA256' }
   copy-item -Path "$newkfwenv" -Destination "$kfwenv"
   write-host "INFO - modkfwenv - $newkfwenv created and copied on $kfwenv"  
+  return 0
 }
 
 
-function modtepjnlpt ($tepjnlpt) {
-  write-host "INFO - modtepjnlpt - Start $tepjnlpt creation "
-  $rc = saveorgcreatenew $tepjnlpt
-  if ( $rc.rc -eq 1 ) {
-       write-host "WARNING - modtepjnlpt - CNB component apparently not installed. File $tepjnlpt not modified !"
-       return $rc.rc 
+function modtepjnlpt ($tepjnlpt) 
+{
+  $pattern="\s*<property name=`"jnlp.tep.sslcontext.protocol`.*TLSv1.2" 
+  If (select-string -Path "$tepjnlpt" -Pattern $pattern) {
+      write-host "WARNING - modtepjnlpt - $tepjnlpt contains 'jnlp.tep.sslcontext.protocol value=`"TLSv1.2`"' and will not be modified"
+      return 4
+  } else {
+     write-host "INFO - modtepjnlpt - Modifying $tepjnlpt"
   }
+
+  $rc = saveorgcreatenew $tepjnlpt
   $newtepjnlpt = $rc.new
   $savetepjnlpt = $rc.save
   $foundprotocol = $foundport = $foundTLS12 = 1
@@ -285,16 +391,22 @@ function modtepjnlpt ($tepjnlpt) {
   } else { }
   copy-item -Path "$newtepjnlpt" -Destination "$tepjnlpt"
   write-host "INFO - modtepjnlpt - $newtepjnlpt created and copied on $tepjnlpt"
+  return 0
 }
 
 
-function modcomponentjnlpt ($componentjnlpt) {
-  write-host "INFO - modcomponentjnlpt - Start $componentjnlpt creation "
-  $rc = saveorgcreatenew $componentjnlpt
-  if ( $rc.rc -eq 1 ) {
-       write-host "WARNING - modcomponentjnlpt - CNB component apparently not installed. File $componentjnlpt not modified !"
-       return $rc.rc 
+function modcomponentjnlpt ($componentjnlpt) 
+{
+  $pattern="codebase=`"https.*:15201" 
+  If (select-string -Path "$componentjnlpt" -Pattern $pattern) {
+      write-host "WARNING - modcomponentjnlpt - $componentjnlpt contains 'codebase=https..:15201' and will not be modified"
+      return 4
+  } else {
+     write-host "INFO - modcomponentjnlpt - Modifying $componentjnlpt"
   }
+
+  $rc = saveorgcreatenew $componentjnlpt
+
   $newcomponentjnlpt = $rc.new
   $savecomponentjnlpt = $rc.save
   foreach( $line in Get-Content $savecomponentjnlpt ) {
@@ -304,10 +416,19 @@ function modcomponentjnlpt ($componentjnlpt) {
   }
   copy-item -Path "$newcomponentjnlpt" -Destination "$componentjnlpt"
   write-host "INFO - modcomponentjnlpt - $newcomponentjnlpt created and copied on $componentjnlpt"
+  return 0
 }
 
-function modapplethtmlupdateparams ($applethtmlupdateparams) {
-  write-host "INFO - modapplethtmlupdateparams - Start $applethtmlupdateparams creation "
+function modapplethtmlupdateparams ($applethtmlupdateparams) 
+{  
+  $pattern="tep.sslcontext.protocol.*verride.*TLSv1.2" 
+  If (select-string -Path "$applethtmlupdateparams" -Pattern $pattern) {
+      write-host "WARNING - modapplethtmlupdateparams - $applethtmlupdateparams contains  `"tep.sslcontext.protocol|override|'TLSv1.2'`" and will not be modified"
+      return 4
+  } else {
+      write-host "INFO - modapplethtmlupdateparams - Modifying $applethtmlupdateparams"
+  }
+
   $rc = saveorgcreatenew $applethtmlupdateparams
 
   $newapplethtmlupdateparams = $rc.new
@@ -334,16 +455,21 @@ function modapplethtmlupdateparams ($applethtmlupdateparams) {
   } else { }
   copy-item -Path "$newapplethtmlupdateparams" -Destination "$applethtmlupdateparams"
   write-host "INFO - modapplethtmlupdateparams - $newapplethtmlupdateparams created and copied on $applethtmlupdateparams"
+  return 0
 
 }
 
-function modkcjparmstxt ($kcjparmstxt) {
-  write-host "INFO - modkcjparmstxt - Start $kcjparmstxt creation "
-  $rc = saveorgcreatenew $kcjparmstxt
-  if ( $rc.rc -eq 1 ) {
-       write-host "WARNING - modkcjparmstxt - CNP component apparently not installed. File $kcjparmstxt not modified !"
-       return $rc.rc 
+function modkcjparmstxt ($kcjparmstxt) 
+{
+  $pattern="tep.sslcontext.protocol .* TLSv1.2" 
+  If (select-string -Path "$kcjparmstxt" -Pattern $pattern) {
+      write-host "WARNING - modkcjparmstxt - $kcjparmstxt contains `"tep.sslcontext.protocol|override|'TLSv1.2'`" and will not be modified"
+      return 4
+  } else {
+     write-host "INFO - modkcjparmstxt - Modifying $kcjparmstxt"
   }
+  
+  $rc = saveorgcreatenew $kcjparmstxt
    
   $newkcjparmstxt = $rc.new
   $savenewkcjparmstxt = $rc.save
@@ -374,15 +500,21 @@ function modkcjparmstxt ($kcjparmstxt) {
 
   copy-item -Path "$newkcjparmstxt" -Destination "$kcjparmstxt"
   write-host "INFO - modkcjparmstxt - $newkcjparmstxt created and copied on $kcjparmstxt"
+  return 0
 }
 
-function modjavasecurity ($javasecurity) {
-  write-host "INFO - modjavasecurity - Start $javasecurity creation "
-  $rc = saveorgcreatenew $javasecurity
-  if ( $rc.rc -eq 1 ) {
-       write-host "WARNING - modjavasecurity - ITHOME/CNPSJ/JAVA component apparently not installed. File $javasecurity not modified !"
-       return $rc.rc 
+function modjavasecurity ($javasecurity) 
+{
+  $pattern="jdk.tls.disabledAlgorithms=MD5.*SSLv3.*DSA.*DESede.*DES.*RSA.*keySize\s*<\s*2048" 
+  If (select-string -Path "$javasecurity" -Pattern $pattern) {
+      write-host "WARNING - modjavasecurity - $javasecurity contains `"jdk.tls.disabledAlgorithms=MD5, SSLv3, DSA, DESede, DES, RSA keySize < 2048`" and will not be modified"
+      return 4
+  } else {
+      write-host "INFO - modjavasecurity - Modifying $javasecurity"
   }
+
+  $rc = saveorgcreatenew $javasecurity
+
   $newjavasecurity = $rc.new
   $savenewjavasecurity = $rc.save
   $nextline = 1
@@ -414,23 +546,29 @@ function modjavasecurity ($javasecurity) {
   }
   copy-item -Path "$newjavasecurity" -Destination "$javasecurity"
   write-host "INFO - modjavasecurity - $newjavasecurity created and copied on $javasecurity"
+  return 0
 }
 
 
-function modsslclientprops ($sslclientprops) {
-  write-host "INFO - modsslclientprops - Start $sslclientprops modification "
+function modsslclientprops ($sslclientprops) 
+{
+  $pattern="com.ibm.ssl.protocol.*TLSv1.2" 
+  If (select-string -Path "$sslclientprops" -Pattern $pattern) {
+      write-host "WARNING - modsslclientprops - $sslclientprops contains `"com.ibm.ssl.protocol=TLSv1.2`" and will not be modified"
+      return 4
+  } else {
+      write-host "INFO - modsslclientprops - Modifying $sslclientprops"
+  }  
+  
   $rc = saveorgcreatenew $sslclientprops
-  if ( $rc.rc -eq 1 ) {
-       write-host "WARNING - modsslclientprops - $sslclientprops not installed. File $sslclientprops not modified !"
-       return $rc.rc 
-  }
+  
   $newsslclientprops = $rc.new
   $savesslclientprops = $rc.save
   $foundproto = 1
   foreach ( $line in Get-Content $savesslclientprops ) {
       if ( ("$line" -match 'com.ibm.ssl.protocol') -and ( -not $line.StartsWith("#")) ) {
           if ( "$line" -match 'com.ibm.ssl.protocol=TLSv1.2' ) {
-              write-host "INFO - modsslclientprops - $sslclientprops contains already 'com.ibm.ssl.protocol=TLSv1.2'"
+              write-host "INFO - modsslclientprops - $sslclientprops contains  'com.ibm.ssl.protocol=TLSv1.2'"
               Add-Content $newsslclientprops "${line}"
           } else {
               write-host "INFO - modsslclientprops - Adding 'com.ibm.ssl.protocol=TLSv1.2'"
@@ -446,56 +584,129 @@ function modsslclientprops ($sslclientprops) {
   }
   copy-item -Path "$newsslclientprops" -Destination "$sslclientprops"
   write-host "INFO - modsslclientprops - $newsslclientprops created and copied on $sslclientprops"
+  return 0
 }
 
+function renewCert  
+{ 
+  $KEYKDB="$CANDLEHOME\\keyfiles\\keyfile.kdb"
+  $KEYP12="$CANDLEHOME\\CNPSJ\\profiles\\ITMProfile\\config\\cells\\ITMCell\\nodes\\ITMNode\\key.p12"
+  $TRUSTP12="$CANDLEHOME\\CNPSJ\\profiles\\ITMProfile\\config\\cells\\ITMCell\\nodes\\ITMNode\\trust.p12"
 
-function restartTEPS () {
-  write-host "INFO - restartTEPS - Restarting TEPS ..." -ForegroundColor Yellow
-  net stop KFWSRV 
-  net start KFWSRV
+  # check exp date
+  $keydate = GSKitcmd gsk8capicmd -cert -details -db $KEYKDB -stashed -label default | find "Not Before"
+  $pattern = "efore : (.*) "
+  $keydate = [regex]::Match($keydate,$pattern).Groups[1].Value
+  $now = get-date
+  $ts = New-TimeSpan -Start $keydate -End $now 
+  $days = $ts.Days
+
+  if ( $days -lt 10 ) {
+      write-host "WARNING - renewCert - Default certificate was renewed recently ($days days ago) and will not be renewed again"
+      return 4
+  } else {
+      write-host "INFO - renewCert -  Default certificate will be renewed again" 
+  } 
+
+  $cmd ="$CANDLEHOME\CNPSJ\bin\wsadmin -lang jython -c `"AdminTask.renewCertificate('-keyStoreName NodeDefaultKeyStore -certificateAlias  default')`" -c 'AdminConfig.save()'"
+  $cmd += '; $Success=$?'
+  #write-host $cmd
+  Invoke-Expression $cmd
+  if ( $Success ) {
+      #$cmd ="$CANDLEHOME\CNPSJ\bin\wsadmin -lang jython -c `"AdminTask.getCertificateChain('[-certificateAlias default -keyStoreName NodeDefaultKeyStore -keyStoreScope (cell):ITMCell:(node):ITMNode ]')`" "
+      #Invoke-Expression $cmd 
+      write-host "INFO - renewCert - Successfully renewed Certificate in eWAS"
+     
+  } else {
+      write-host "$success"
+      write-host "ERROR - renewCert - Error during renewing Certificate in eWAS. Powershell script ended!"
+      exit 1
+  }
+
+  GSKitcmd gsk8capicmd -cert -delete -db $KEYKDB -stashed -label default
+  GSKitcmd gsk8capicmd -cert -delete -db $KEYKDB -stashed -label root
+  GSKitcmd gsk8capicmd -cert -import -db $KEYP12 -pw WebAS -target $KEYKDB -target_stashed -label default -new_label default
+  GSKitcmd gsk8capicmd -cert -import -db $TRUSTP12 -pw WebAS -target $KEYKDB -target_stashed -label root -new_label root
   if ( -not $? ) {
-      write-host "ERROR - restartTEPS - TEPS restart failed. Powershell script ended!"
+      write-host "ERROR - renewCert - Error during gsk8capicmd  commands. Powershell script ended!"
       exit 1
   } else {
-      write-host "INFO - restartTEPS - Waiting for TEPS to initialize...."
-      Start-Sleep -seconds 7
-      $wait = 1
-      $c=0
-      while($wait -eq 1) {
-          If (Select-String -Path "$CANDLEHOME\logs\kfwservices.msg" -Pattern 'Waiting for requests. Startup complete' -SimpleMatch) {
-              Write-Host ""
-              Write-Host 'INFO - restartTEPS - TEPS started successfully' -ForegroundColor Green
-              $wait = 0 
-          } Else {
-              Write-Host -NoNewline ".."
-              $c = $c + 3
-              Start-Sleep -seconds 3  
-          }
-          #if ( $c -gt 150 ) {
-          #    write-host "ERROR - restartTEPS - TEPS restart takes too long (over 2,5) min. Something went wrong. Powershell script ended!"
-          #    exit 1
-          #}
-              
-      }
-      Start-Sleep -seconds 5
+      write-host "INFO - renewCert - Successfully executed gsk8capicmd  commands to copy renewed certificates to $KEYKDB. See label and issuer info below..." 
+      #GSKitcmd gsk8capicmd -cert -list -db $KEYKDB -stashed -label default
+      #GSKitcmd gsk8capicmd -cert -details -db $KEYKDB -stashed -label default | findstr "Serial Issuer Subject Not\ Before Not\ After"
+      #GSKitcmd gsk8capicmd -cert -details -type p12 -db $KEYP12 -pw WebAS -label default | findstr "Serial Issuer Subject Not\ Before Not\ After"
+      #GSKitcmd gsk8capicmd -cert -details -db $KEYKDB -stashed -label root | findstr "Serial Issuer Subject Not\ Before Not\ After"
+      #GSKitcmd gsk8capicmd -cert -details -type p12 -db $TRUSTP12 -pw WebAS -label root | findstr "Serial Issuer Subject Not\ Before Not\ After"   
   }
+  return 0
 }
 
-function EnableICSLIte ($action) {
-  write-host "INFO - EnableICSLIte - Enable ISCLite."
-  $cmd="$CANDLEHOME\CNPSJ\bin\wsadmin -conntype SOAP -lang jacl -f $CANDLEHOME\CNPSJ\scripts\enableISCLite.jacl $action"
+function modQop () 
+{
+  # check if set already
+  $CANDLEHOME = "c:\IBM\ITM"
+  $cmd = "$CANDLEHOME\CNPSJ\bin\wsadmin -lang jython -c `"AdminTask.getSSLConfig('[-alias NodeDefaultSSLSettings -scopeName (cell):ITMCell:(node):ITMNode ]')`" "
+  $out= Invoke-Expression $cmd
+  $pattern = "sslProtocol TLSv1.2"
+  $rc=[regex]::Match($out,$pattern)
+  if ( $rc.success ) {
+      write-host "WARNING - modQop - Quality of Protection (QoP) is already set to 'sslProtocol SSL_TLSv2' and will not be modified again." 
+      return 4
+  } else  {
+      write-host "INFO - modQop - Quality of Protection (QoP) not set yet. Modifying..."
+  } 
+  
+  $cmd = "$CANDLEHOME\CNPSJ\bin\wsadmin -lang jython -c `"AdminTask.modifySSLConfig('[-alias NodeDefaultSSLSettings -scopeName (cell):ITMCell:(node):ITMNode -keyStoreName NodeDefaultKeyStore -keyStoreScopeName (cell):ITMCell:(node):ITMNode -trustStoreName NodeDefaultTrustStore -trustStoreScopeName (cell):ITMCell:(node):ITMNode -jsseProvider IBMJSSE2 -sslProtocol TLSv1.2 -clientAuthentication false -clientAuthenticationSupported false -securityLevel HIGH -enabledCiphers ]') `" -c 'AdminConfig.save()'"
   $cmd += '; $Success=$?'
-  write-host "$cmd"
+  #write-host $cmd
   Invoke-Expression $cmd
-  if ( $Success ) { write-host "INFO - EnableICSLIte - Successfully enabled ISCLite." }
-  else {
-      write-host "$success"
-      write-host "ERROR - EnableICSLIte - Enable ISCLite command $cmd failed. Possibly you did not set a eWAS user password. "
-      Write-Host " Try to set a password as descirbed here https://www.ibm.com/docs/en/tivoli-monitoring/6.3.0?topic=administration-define-wasadmin-password" 
-      write-host " Powershell script ended!"
+  if ( $Success ) {
+      write-host "INFO - modQop - Successfully set TLSv1.2 for Quality of Protection (QoP)"
+      return 0
+  } else {
+      write-host "ERROR - modQop - Error setting TLSv1.2 for Quality of Protection (QoP). Powershell script ended!"
       exit 1
   }
+
 }
+
+function disableAlgorithms () 
+{
+  $secxml = "$CANDLEHOME\CNPSJ\profiles\ITMProfile\config\cells\ITMCell\security.xml"
+  $pattern = "com.ibm.websphere.tls.disabledAlgorithms.* value=.*none"  
+  if ( select-string -Path "$secxml" -Pattern $pattern ) {
+      write-host "WARNING - disableAlgorithms - Custom property 'com.ibm.websphere.tls.disabledAlgorithms... value=none' is already set and will not be set again"
+      return 4
+  } else {
+     write-host "INFO - disableAlgorithms - Modifying $secxml"
+  } 
+  
+   
+  $jython = "$CANDLEHOME\tmp\org.jy"
+  $null = New-Item  -path "$CANDLEHOME\tmp" -name "org.jy"  -ItemType "file"
+  Add-Content $jython "sec = AdminConfig.getid('/Security:/')"
+  Add-Content $jython "prop = AdminConfig.getid('/Security:/Property:com.ibm.websphere.tls.disabledAlgorithms/' )"
+  Add-Content $jython "if prop:" 
+  Add-Content $jython "  AdminConfig.modify(prop, [['value', 'none'],['required', `"false`"]])"
+  Add-Content $jython "else: "
+  Add-Content $jython " AdminConfig.create('Property',sec,'[[name `"com.ibm.websphere.tls.disabledAlgorithms`"] [description `"Added due ITM TSLv1.2 usage`"] [value `"none`"][required `"false`"]]') "
+  Add-Content $jython "AdminConfig.save()"
+  $cmd = "$CANDLEHOME\CNPSJ\bin\wsadmin -lang jython -f $jython"
+  $cmd += '; $Success=$?'
+  write-host $cmd 
+  Invoke-Expression $cmd
+  if ( $Success ) {
+      Remove-Item $jython
+      write-host "INFO - modQop - Successfully set com.ibm.websphere.tls.disabledAlgorithms to none" 
+      return 0
+  } else {
+      write-host "ERROR - modQop - Error setting Custom Property ( com.ibm.websphere.tls.disabledAlgorithms ). Powershell script ended!"
+      exit 1
+  }
+
+}
+
+
 # --------------------------------------------------------------
 # MAIN ---------------------------------------------------------
 # --------------------------------------------------------------
@@ -503,17 +714,63 @@ if ( $h )  { $tmphome = $h }
 else { $tmphome = "" } 
 
 $CANDLEHOME = getCandleHome $tmphome
-$BACKUPFOLDER = "$CANDLEHOME\backup_before_TLS1.2" # will be create in candlehome
-$RESTORESCRIPT = "BATrestore.bat"
+$BACKUPFOLDER = "$CANDLEHOME\Backup\backup_before_TLS1.2" # will be create in candlehome
+$RESTORESCRIPT = "SCRIPTrestore.bat"
+
+$permissions = kincinfo -r
+if ( $permissions.Contains(‘Cannot obtain all necessary privileges’) ) {
+    write-host "ERROR - main - You have not permissions to execute required commands (e.g. kincinfo). You must be logged in with an adminstrator account"
+    exit 1
+} else {
+    write-host "INFO - main - Permissions OK kincinfo can be executed."
+}
+
+$cmd = 'kincinfo -t cq|find "CQ  TEPS"'
+$tmp = Invoke-Expression $cmd
+$tmparray = $($tmp -replace '\s+',' ').Split(" ")
+$tepsver = [int]$($tmparray[8] -replace '\.', '')
+if ( $tepsver -lt 06300700  ) {
+    write-host "ERROR - main - TEPS server must be at least at version 06.30.07.00 (is $tepsver)." 
+    exit
+} else { 
+    write-host "INFO - main - TEPS version = $tepsver" 
+}
+
+$cmd = 'kincinfo -t iw|find "IW  TEPS"'
+$tmp = Invoke-Expression $cmd
+$tmparray = $($tmp -replace '\s+',' ').Split(" ")
+$ewasver = [int]$($tmparray[9] -replace '\.', '')
+if ( $ewasver -lt 08551600 ) {
+    write-host "ERROR - main - eWAS server must be at least at version 08.55.16.00 (is $ewasver). Please perform an eWAS and IHS uplift as described in the udpate readme files" 
+    exit
+} else { 
+    write-host "INFO - main - eWAS version = $ewasver" 
+}
 
 $tepsstatus = Get-Service -Name KFWSRV
 if ( $tepsstatus.Status -ne "Running" ) {
     write-host "ERROR - main - TEPS not running. Please start it and restart the procedure"
     exit 1
 } elseif ( -not ( Select-String -Path "$CANDLEHOME\logs\kfwservices.msg" -Pattern 'Waiting for requests. Startup complete' -SimpleMatch) ) {
-        Write-Host "ERROR - main - TEPS started but not connected to TEMS"
-        exit 1
+    Write-Host "ERROR - main - TEPS started but not connected to TEMS"
+    exit 1
 }
+
+if ( test-path "$BACKUPFOLDER" ) { 
+    write-host "ERROR - main - This script was started already and the folder $BACKUPFOLDER exists already! To avoid data loss, "
+    write-host "before executing this script again, you must restore the original content by using the '$RESTORESCRIPT' script and delete/rename the backup folder."
+    exit 1 
+} else {
+    $null = New-Item -Path "$CANDLEHOME\Backup"  -Name (Split-Path -Leaf "$BACKUPFOLDER") -ItemType "directory"
+    write-host "INFO - main - Folder $BACKUPFOLDER created."
+}
+
+if ( test-path "$CANDLEHOME\CNPSJ" ) { 
+    write-host "INFO - main - Tivoli Enterpise Portal Server is installed."
+} else {
+    write-host "ERROR - main - Tivoli Enterpise Portal Server not installed. Directory '$CANDLEHOME\CNPSJ' does not exists!"
+    exit 1
+} 
 
 
 $HFILES = @{ `
@@ -528,167 +785,110 @@ $HFILES = @{ `
   "key.p12"                   = "${CANDLEHOME}\CNPSJ\profiles\ITMProfile\config\cells\ITMCell\nodes\ITMNode\key.p12" ; `
   "ssl.client.props"          = "${CANDLEHOME}\CNPSJ\profiles\ITMProfile\properties\ssl.client.props" ;
 }
-
-<# #>
-
-if ( -not (test-path $CANDLEHOME) ) { 
-    write-host "ERROR - main - Folder $CANDLEHOME does not exists. Please check and restart"
-    exit 1
-}
-if ( test-path $BACKUPFOLDER ) { 
-    write-host "ERROR - main - This script was started already and the folder $BACKUPFOLDER exists already! To avoid data loss, "
-    write-host "before executing this script again, you must restore the original content by using the '$RESTORESCRIPT' script and delete/rename the backup folder."
-    exit 1 
-} else {
-    $null = New-Item -Path $CANDLEHOME  -Name (Split-Path -Leaf $BACKUPFOLDER) -ItemType "directory"
-    write-host "INFO - main - Folder $BACKUPFOLDER created."
-}
-if ( test-path $CANDLEHOME\CNPSJ ) { 
-    write-host "INFO - main - Tivoli Enterpise Portal Server is installed."
-} else {
-    write-host "ERROR - main - Tivoli Enterpise Portal Server not installed. Directory '$CANDLEHOME\CNPSJ' does not exists!"
-    exit 1
-} 
+$rc = checkIfFileExists
+<#
+#>
 
 # Enable ISCLite 
 EnableICSLIte "true"
 
-backupewasAndkeys $BACKUPFOLDER
-$HTTPD = backupfile $HFILES["httpd.conf"]
-$KFW = backupfile $HFILES["kfwenv"] 
-$TEPT = backupfile $HFILES["tep.jnlpt"]
-$COMPONENTT = backupfile $HFILES["component.jnlpt"]
-$APPLET = backupfile $HFILES["applet.html.updateparams"] 
-$KCJ = backupfile $HFILES["kcjparms.txt"] 
-$JAVASEC = backupfile $HFILES["java.security"] 
-$TRUST = backupfile $HFILES["trust.p12"]
-$JEYP = backupfile $HFILES["key.p12"]
-$SSLPROPS = backupfile $HFILES["ssl.client.props"]
+#backupewasAndkeys $BACKUPFOLDER
+$rc = backupfile $HFILES["httpd.conf"]
+$rc = backupfile $HFILES["kfwenv"] 
+$rc = backupfile $HFILES["tep.jnlpt"]
+$rc = backupfile $HFILES["component.jnlpt"]
+$rc = backupfile $HFILES["applet.html.updateparams"] 
+If ( $KCJ -ne 4 ) { 
+    $rc = backupfile $HFILES["kcjparms.txt"] 
+}
+$rc = backupfile $HFILES["java.security"] 
+$rc = backupfile $HFILES["trust.p12"]
+$rc = backupfile $HFILES["key.p12"]
+$rc = backupfile $HFILES["ssl.client.props"]
 
+# Create a script to restore the files before TLS1.2 was set using this script
 createRestoreScript $RESTORESCRIPT # create batch to restore original files in $BACKUPFOLDER (in case of failure)
 
 # Renew the default certificate
-$cmd ="$CANDLEHOME\CNPSJ\bin\wsadmin -lang jython -c `"AdminTask.renewCertificate('-keyStoreName NodeDefaultKeyStore -certificateAlias  default')`" -c 'AdminConfig.save()'"
-$cmd += '; $Success=$?'
-write-host $cmd
-Invoke-Expression $cmd
-if ( $Success ) {
-    $cmd ="$CANDLEHOME\CNPSJ\bin\wsadmin -lang jython -c `"AdminTask.getCertificateChain('[-certificateAlias default -keyStoreName NodeDefaultKeyStore -keyStoreScope (cell):ITMCell:(node):ITMNode ]')`" "
-    Invoke-Expression $cmd 
-    write-host "INFO - main - Successfully renewed Certificate in eWAS"
-   
-} else {
-    write-host "$success"
-    write-host "ERROR - maim - Error during renewing Certificate in eWAS. Powershell script ended!"
-    exit 1
-}
+$rc = renewCert
 
-$KEYKDB="$CANDLEHOME\\keyfiles\\keyfile.kdb"
-$KEYP12="$CANDLEHOME\\CNPSJ\\profiles\\ITMProfile\\config\\cells\\ITMCell\\nodes\\ITMNode\\key.p12"
-$TRUSTP12="$CANDLEHOME\\CNPSJ\\profiles\\ITMProfile\\config\\cells\\ITMCell\\nodes\\ITMNode\\trust.p12"
-GSKitcmd gsk8capicmd -cert -delete -db $KEYKDB -stashed -label default
-GSKitcmd gsk8capicmd -cert -delete -db $KEYKDB -stashed -label root
-GSKitcmd gsk8capicmd -cert -import -db $KEYP12 -pw WebAS -target $KEYKDB -target_stashed -label default -new_label default
-GSKitcmd gsk8capicmd -cert -import -db $TRUSTP12 -pw WebAS -target $KEYKDB -target_stashed -label root -new_label root
-if ( -not $? ) {
-    write-host "ERROR - maim - Error during gsk8capicmd  commands. Powershell script ended!"
-} else {
-    write-host ""
-    write-host "INFO - main - Successfully executed gsk8capicmd  commands to copy renewed certificates to $KEYKDB. See label and issuer info below..." 
-    write-host ""
-    GSKitcmd gsk8capicmd -cert -list -db $KEYKDB -stashed -label default
-    write-host ""
-    GSKitcmd gsk8capicmd -cert -details -db $KEYKDB -stashed -label default | findstr "Serial Issuer Subject Not\ Before Not\ After"
-    write-host ""
-    GSKitcmd gsk8capicmd -cert -details -type p12 -db $KEYP12 -pw WebAS -label default | findstr "Serial Issuer Subject Not\ Before Not\ After"
-    write-host ""
-    GSKitcmd gsk8capicmd -cert -details -db $KEYKDB -stashed -label root | findstr "Serial Issuer Subject Not\ Before Not\ After"
-    write-host ""
-    GSKitcmd gsk8capicmd -cert -details -type p12 -db $TRUSTP12 -pw WebAS -label root | findstr "Serial Issuer Subject Not\ Before Not\ After"
+# restart TEPS if  default certificate was renewed. otherwise not needed.
+If ( $rc -eq 4 ) {
+     write-host "INFO - main - No Tivoli Enterpise Portal Server restart required yet."
+} else { 
+    restartTEPS
+    EnableICSLIte "true"
 }
-
-# restart TEPS
-restartTEPS
-EnableICSLIte "true"
 
 # TLS v1.2 only configuration - TEPS/eWAS TEP, IHS, TEPS,  components
 # TEPS/eWAS modify Quality of Protection (QoP)
-
-$cmd = "$CANDLEHOME\CNPSJ\bin\wsadmin -lang jython -c `"AdminTask.modifySSLConfig('[-alias NodeDefaultSSLSettings -scopeName (cell):ITMCell:(node):ITMNode -keyStoreName NodeDefaultKeyStore -keyStoreScopeName (cell):ITMCell:(node):ITMNode -trustStoreName NodeDefaultTrustStore -trustStoreScopeName (cell):ITMCell:(node):ITMNode -jsseProvider IBMJSSE2 -sslProtocol TLSv1.2 -clientAuthentication false -clientAuthenticationSupported false -securityLevel HIGH -enabledCiphers ]') `" -c 'AdminConfig.save()'"
-$cmd += '; $Success=$?'
-write-host $cmd
-Invoke-Expression $cmd
-if ( $Success ) {
-    write-host "INFO - main - Successfully set TLSv1.2 for Quality of Protection (QoP)"
-} else {
-    write-host "ERROR - main - Error setting TLSv1.2 for Quality of Protection (QoP). Powershell script ended!"
-    exit 1
-}
+$rc = modQop
+$rcs = $rc
 
 # eWAS Set custom property com.ibm.websphere.tls.disabledAlgorithms 
-$jython = "$CANDLEHOME\tmp\org.jy"
-$null = New-Item  -path "$CANDLEHOME\tmp" -name "org.jy"  -ItemType "file"
-Add-Content $jython "sec = AdminConfig.getid('/Security:/')"
-Add-Content $jython "prop = AdminConfig.getid('/Security:/Property:com.ibm.websphere.tls.disabledAlgorithms/' )"
-Add-Content $jython "if prop:" 
-Add-Content $jython "  AdminConfig.modify(prop, [['value', 'none'],['required', `"false`"]])"
-Add-Content $jython "else: "
-Add-Content $jython " AdminConfig.create('Property',sec,'[[name `"com.ibm.websphere.tls.disabledAlgorithms`"] [description `"Added due ITM TSLv1.2 usage`"] [value `"none`"][required `"false`"]]') "
-Add-Content $jython "AdminConfig.save()"
-$cmd = "$CANDLEHOME\CNPSJ\bin\wsadmin -lang jython -f $jython"
-$cmd += '; $Success=$?'
-write-host $cmd 
-Invoke-Expression $cmd
-if ( $Success ) {
-    Remove-Item $jython
-    write-host "INFO - main - Successfully set com.ibm.websphere.tls.disabledAlgorithms to none" 
-} else {
-    write-host "ERROR - main - Error setting Custom Property ( com.ibm.websphere.tls.disabledAlgorithms ). Powershell script ended!"
-    exit 1
-}
+$rc = disableAlgorithms
+$rcs = $rcs + $rc
 
 # eWAS sslclientprops modification
-modsslclientprops $HFILES["ssl.client.props"]  
+$rc = modsslclientprops $HFILES["ssl.client.props"]  
+$rcs = $rcs + $rc
 # test openssl s_client -connect 172.16.11.4:15206 -tls1_2 doesn't work on windows by default. Needs to be installed first in PS (Install-Module -Name OpenSSL)
 
 # TEPS
 # kwfenv add/modify variables
-modkfwenv $HFILES["kfwenv"]
+$rc = modkfwenv $HFILES["kfwenv"]
+$rcs = $rcs + $rc
 
 # IHS httpd.conf modification
-modhttpconf $HFILES["httpd.conf"]
+$rc = modhttpconf $HFILES["httpd.conf"]
+$rcs = $rcs + $rc
 
 # restart TEPS
-restartTEPS
+If ( $rcs -eq 20 ) {
+     write-host "INFO - main - No changes, hence no Tivoli Enterpise Portal Server restart required yet."
+} else { 
+    restartTEPS
+    EnableICSLIte "true"
+}
 
 # TEPS JAVA java.security modification
-modjavasecurity $HFILES["java.security"] 
+$rc = modjavasecurity $HFILES["java.security"] 
 
 # Browser/WebStart client related
-modtepjnlpt $HFILES["tep.jnlpt"]  
-modcomponentjnlpt $HFILES["component.jnlpt"] 
-modapplethtmlupdateparams $HFILES["applet.html.updateparams"]
-
-write-host "INFO - main - Reconfiguring KCB"
-kinconfg -n -rKCB
-if ( -not $? ) {
-    write-host "ERROR - main - Executing kinconfg reconfigure of CNP $cmd failed. Powershell script ended!"
-    exit 1
-}
-Start-Sleep -seconds 15 
-
-# Desktop client related
-if ( $KCJ -eq 0  ) {
-    modkcjparmstxt $HFILES["kcjparms.txt"]
-    write-host "INFO - main - Reconfiguring KCJ"
-    kinconfg -n -rKCJ
+$rc = modtepjnlpt $HFILES["tep.jnlpt"] 
+$rcs = $rc 
+$rc = modcomponentjnlpt $HFILES["component.jnlpt"] 
+$rcs = $rcs + $rc
+$rc = modapplethtmlupdateparams $HFILES["applet.html.updateparams"]
+$rcs = $rcs + $rc
+If ( $rcs -eq 12 ) {
+    write-host "INFO - main - No changes hence no need to reconfigure KCB"
+} else {
+    write-host "INFO - main - Reconfiguring KCB"
+    kinconfg -n -rKCB
     if ( -not $? ) {
         write-host "ERROR - main - Executing kinconfg reconfigure of CNP $cmd failed. Powershell script ended!"
         exit 1
     }
-    Start-Sleep -seconds 10
+    Start-Sleep -seconds 15 
+}
+
+# Desktop client related
+if ( $KCJ -eq 4  ) {
+    write-host "WARNING - main - TEP Desktop client not installed ('kcjparms.txt' not existing)."
 } else {
-    write-host "WARNING - main - TEP Desktop client not installed ('kcjparms.txt' not existing). Continue.. "
+    $rc = modkcjparmstxt $HFILES["kcjparms.txt"]
+    if ( $rc -eq 4 ) {
+        write-host "INFO - main - No changes hence no need to reconfigure KCJ"
+    } else { 
+        write-host "INFO - main - Reconfiguring KCJ"
+        kinconfg -n -rKCJ
+        if ( -not $? ) {
+            write-host "ERROR - main - Executing kinconfg reconfigure of CNP $cmd failed. Powershell script ended!"
+            exit 1
+        }
+        Start-Sleep -seconds 10
+    }
 }
 
 EnableICSLIte "false"
@@ -706,4 +906,4 @@ write-host " - To check eWAS settings use: https://${myhost}:15206/ibm/console"
 write-host " - To check WenStart Client: https://${myhost}:15201/tep.jnlp"
 write-host "------------------------------------------------------------------------------------------"
 
-exit
+exit 0
