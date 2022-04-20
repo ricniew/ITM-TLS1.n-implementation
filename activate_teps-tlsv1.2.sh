@@ -4,12 +4,16 @@
 # R. Niewolik IBM AVP
 # This script  performs configuration steps to implement a TLSv1.2 only configuration
 # 16.03.2022: Initial version by R. Niewolik EMEA AVP Team
-# 30.03.2022: Version 1.4     by R. Niewolik EMEA AVP Team
-# 13.04.2022: Version 1.41    by R. Niewolik EMEA AVP Team
+# 30.03.2022: Version 1.3     by R. Niewolik EMEA AVP Team
+# 13.04.2022: Version 1.31    by R. Niewolik EMEA AVP Team
 #             - Add check if TEPS and eWas are at the required Level
-#             - Backupfolder now created in ITMHOME/backup/.. directory                
+#             - Backupfolder now created in ITMHOME/backup/.. directory 
+# 20.04.2022: Version 1.32    by R. Niewolik EMEA AVP Team
+#             - New function to check for file existance
+#             - Added checks to functions if TLSv1.2 related variables were set already              
 ## 
 SECONDS=0
+echo "INFO - Script Version 1.32"
 
 usage()
 { # usage description
@@ -22,6 +26,39 @@ echo "    $PROGNAME -h /opt/IBM/ITM "
 echo ""
 }
 
+checkIfFileExists () # not used yet
+{
+  # this function als check if the files to backup exists
+  if [ -d "$CANDLEHOME/$ARCH/iw" ]; then
+      echo "INFO - checkIfFileExists - Directory $CANDLEHOME/$ARCH/iw  OK."
+  else
+      echo "ERROR - checkIfFileExists - Directory $CANDLEHOME/$ARCH/iw  does NOT exists. Please check."
+  fi
+  if [ -d "$CANDLEHOME/keyfiles" ]; then
+      echo "INFO - checkIfFileExists - Directory $CANDLEHOME/keyfiles  OK."
+  else
+      echo "ERROR - checkIfFileExists - Directory $CANDLEHOME/keyfiles  does NOT exists. Please check."
+  fi
+  
+  for filename in "${!AFILES[@]}"; do
+      if [ -f ${AFILES[$filename]}  ] ; then 
+          echo "INFO - checkIfFileExists - File ${AFILES[$filename]} OK."
+          continue
+      else
+          if [[ $filename =~ "kcjparms" ]] ; then
+              echo "WARNING - checkIfFileExists - File ${AFILES[$filename]} does NOT exists. KCJ component probably not installed. Continue..."
+              KCJ=4 # will be used later in main and createRestoreScript
+              continue
+          else
+              echo "ERROR - checkIfFileExists - file ${AFILES[$filename]} does NOT exists. Please check."
+              exit 1
+          fi
+      fi      
+  done
+  
+  return 0
+}  
+
 backupfile () 
 {
   # this function als check if the files to backup exists, if not, scripts exists with error.
@@ -29,12 +66,8 @@ backupfile ()
   if [ -f $filen  ] ; then 
       echo "INFO - backupfile - Saving $filen in $BACKUPFOLDER "
       cp -p $filen $BACKUPFOLDER/.
-  else
-      if [[ $filen =~ "kcjparms" ]] ; then
-          echo "WARNING - backupfile - file $filen does NOT exists and not saved. KCJ componenent probably not installed. Continue..."
-          return 4
-      else
-          echo "ERROR - backupfile - file $filen does NOT exists. Please check."
+      if [ $? -ne 0 ] ; then
+          echo "ERROR - backupfile - Error during copy of file $filen to $BACKUPFOLDER. Check permissions and space available."
           exit 1
       fi
   fi
@@ -50,7 +83,7 @@ backupewasAndKeyfiles()
       echo "ERROR - backup - Could not backup  $CANDLEHOME/$ARCH/iw to folder $BACKUPFOLDER. Check permissions and space."
       exit 1
   fi 
-  echo "INFO - backup - Saving Directory $CANDLEHOME/$ARCH/iw in $BACKUPFOLDER. This can take a while..." 
+  echo "INFO - backup - $CANDLEHOME/keyfiles/ in $BACKUPFOLDER..." 
   cp -pR  $CANDLEHOME/keyfiles/ $BACKUPFOLDER/ 
   if [ $? -ne 0 ]; then
       echo "ERROR - backup - Could not backup  $CANDLEHOME/keyfiles/ to folder $BACKUPFOLDER. Check permissions and space."
@@ -76,7 +109,7 @@ createRestoreScript ()
   echo "" >>  $restorebatfull 
   for filename in "${!AFILES[@]}"; do
       if [[ $filename =~ "kcjparms" ]] && [[ $KCJ -eq 4 ]] ; then
-          echo "WARNING - createRestoreScript - TEP Desktop Client apparently not installed. File 'kcjparms.txt' not added to restore script"
+          #echo "WARNING - createRestoreScript - TEP Desktop Client apparently not installed. File 'kcjparms.txt' not added to restore script"
           continue
       fi
       echo "cp -p $filename ${AFILES[$filename]} " >> $restorebatfull   
@@ -92,7 +125,7 @@ createRestoreScript ()
       echo "${CANDLEHOME}/bin/itmcmd config -Ar cj" >> $restorebatfull 
   fi  
 
-  echo "INFO - createRestoreScript - Restore bat file created $restorebatfull"
+  echo "INFO - createRestoreScript - Restore script created: $restorebatfull"
   echo "" >>  $restorebatfull      
   sleep 4
   return 0
@@ -136,10 +169,10 @@ restartTEPS ()
               c=$(( $c + 1 ))
               sleep 3  
           fi
-	  #if [ $c -gt 150 ] ; then
-          #    echo "ERROR - restartTEPS - TEPS restart takes too long (over 2,5) min. Something went wrong. Powershell script ended!"
-          #    exit 1
-          #fi
+	        if [ $c -gt 150 ] ; then
+              echo "ERROR - restartTEPS - TEPS restart takes too long (over 2,5) min. Something went wrong. Powershell script ended!"
+              exit 1
+          fi
       done
       sleep 5
   fi
@@ -157,8 +190,6 @@ saveorgcreatenew ()
       echo "INFO - saveorgcreatenew - $SAVEORGFILE created to save original content" 
       cp -p  $orgfile $SAVEORGFILE
   fi
-  NEWORGFILE="$orgfile.tls12"
-  echo "INFO - saveorgcreatenew - $NEWORGFILE will be the modified file"
   if [ -f $NEWORGFILE ] ; then
       echo "INFO - saveorgcreatenew - $NEWORGFILE exists already and will be deleted"
       rm $NEWORGFILE 
@@ -170,12 +201,18 @@ saveorgcreatenew ()
 modhttpconf () 
 {
   httpdfile=$1
-  echo "INFO - modhttpconf - Start $httpdfile creation "
-  saveorgcreatenew $httpdfile
-  if [ $? -eq 1 ] ; then
-       echo "WARNING - modhttpconf - IHS component apparently not installed. File $httpdfile not modified !"
-       return 1 
+  grep "^\s*SSLProtocolDisable\s*TLSv11"  $httpdfile > /dev/null
+  if [ $? -eq 0 ] ; then
+      grep "^\s*SSLProtocolEnable\s*TLSv12"  $httpdfile > /dev/null
+      if [  $? -eq 0  ] ; then
+          echo "WARNING - modhttpconf - $httpdfile contains 'SSLProtocolEnable TLSv12' + TLS11,10 disabled and will not be modified"
+          return 4
+      else 
+          echo "INFO - modhttpconf - Modifying $httpdfile"
+      fi
   fi
+  
+  saveorgcreatenew $httpdfile
   newhttpdfile=$NEWORGFILE
   savehttpdfile=$SAVEORGFILE
   foundsslcfg=1
@@ -243,12 +280,15 @@ modhttpconf ()
 modcqini () 
 {
   cqini=$1
-  echo  "INFO - modcqini - Start $cqini creation "
-  saveorgcreatenew $cqini
-  if [ $? -eq 1 ] ; then
-       echo "WARNING - modcqini - TEPS component apparently not installed. File $cqini not modified !"
-       return 1
+  grep "KFW_ORB_ENABLED_PROTOCOLS=TLS_Version_1_2_Only" $cqini > /dev/null
+  if [  $? -eq 0  ] ; then
+     echo "WARNING - modkfwenv - $cqini contains 'KFW_ORB_ENABLED_PROTOCOLS=TLS_Version_1_2_Only' and will not be modified"
+     return 4
+  else 
+     echo "INFO - modkfwenv - Modifying $cqini"
   fi
+  
+  saveorgcreatenew $cqini
   newcqini=$NEWORGFILE
   savecqini=$SAVEORGFILE
   foundKFWORB=1
@@ -292,19 +332,21 @@ modcqini ()
 
 modtepjnlpt () 
 {
-  echo "INFO - modtepjnlpt - Start $tepjnlpt creation "
   tepjnlpt=$1
-  saveorgcreatenew $tepjnlpt
-  if [ $? -eq 1 ] ; then
-       echo "WARNING - modtepjnlpt - TEPS component apparently not installed. File $tepjnlpt not modified !"
-       return 1
+  grep "\s*<property name=\"jnlp.tep.sslcontext.protocol.*TLSv1.2" $tepjnlpt > /dev/null
+  if [ $? -eq 0 ] ; then
+      echo "WARNING - modtepjnlpt - $tepjnlpt contains 'jnlp.tep.sslcontext.protocol value=\"TLSv1.2\"' and will not be modified"
+      return 4
+  else 
+     echo  "INFO - modtepjnlpt - Modifying $tepjnlpt"
   fi
+  
+  saveorgcreatenew $tepjnlpt
   newtepjnlpt=$NEWORGFILE
   savetepjnlpt=$SAVEORGFILE
   foundprotocol=1
   foundport=1
   foundTLS12=1
-  
   while IFS= read -r line || [[ -n "$line" ]]
   do
       #echo "$line"
@@ -351,16 +393,18 @@ modtepjnlpt ()
 
 modcompjnlpt () 
 {
-  echo "INFO - modcompjnlpt - Start modcompjnlpt creation "
   compjnlpt=$1
-  saveorgcreatenew $compjnlpt
-  if [ $? -eq 1 ] ; then
-       echo "WARNING - modcompjnlpt - TEPS component apparently not installed. File $compjnlpt not modified !"
-       return 1
+  grep "codebase=\"https.*:15201" $compjnlpt > /dev/null
+  if [  $? -eq 0  ] ; then
+      echo "WARNING - modcompjnlpt - $compjnlpt contains 'codebase=https..:15201' and will not be modified"
+      return 4
+  else
+      echo "INFO - modcompjnlpt - Modifying $compjnlpt"
   fi
+  
+  saveorgcreatenew $compjnlpt
   newcompjnlpt=$NEWORGFILE
   savecompjnlpt=$SAVEORGFILE
-  
   cp $savecompjnlpt $newcompjnlpt
   sed -i -e 's/http:\/\/\$HOST\$:\$PORT\$/https:\/\/\$HOST\$:15201/g' $newcompjnlpt
   
@@ -372,15 +416,17 @@ modcompjnlpt ()
 modapplethtmlupdateparams () 
 {
   applethtmlupdateparams=$1
-  echo "INFO - modapplethtmlupdateparams - Start $applethtmlupdateparams creation "
+  grep "tep.sslcontext.protocol.*verride.*TLSv1.2" $applethtmlupdateparams > /dev/null
+  if [  $? -eq 0  ] ; then
+      echo "WARNING - modapplethtmlupdateparams - $applethtmlupdateparams contains \"tep.sslcontext.protocol|override|'TLSv1.2'\" and will not be modified"
+      return 4
+  else
+      echo "INFO - modapplethtmlupdateparams - Modifying $applethtmlupdateparams"
+  fi  
+  
   saveorgcreatenew $applethtmlupdateparams
-  if [ $? -eq 1 ] ; then
-       echo "WARNING - modapplethtmlupdateparams - TEPS component apparently not installed. File $applethtmlupdateparams not modified !"
-       return 1
-  fi
   newapplethtmlupdateparams=$NEWORGFILE
   saveapplethtmlupdateparams=$SAVEORGFILE
-  
   foundprotocol=1
   foundport=1
   foundTLS12=1
@@ -421,15 +467,17 @@ modapplethtmlupdateparams ()
 modkcjparmstxt () 
 {
   kcjparmstxt=$1
-  echo  "INFO - modkcjparmstxt - Start $kcjparmstxt creation "
-  saveorgcreatenew $kcjparmstxt
-  if [ $? -eq 1 ] ; then
-      echo "WARNING - modkcjparmstxt - CNP Destop Client apparently not installed. File $kcjparmstxt not modified !"
-      return 1
-  fi
-  newkcjparmstxt=$NEWORGFILE
-  savekcjparmstxt=$SAVEORGFILE
+  grep "tep.sslcontext.protocol .* TLSv1.2" $kcjparmstxt > /dev/null
+  if [  $? -eq 0  ] ; then
+      echo "WARNING - modkcjparmstxt - $kcjparmstxt contains\"tep.sslcontext.protocol|override|'TLSv1.2'\" and will not be modified"
+      return 4
+  else 
+     echo "INFO - modkcjparmstxt - Modifying $kcjparmstxt"
+  fi  
   
+  saveorgcreatenew $kcjparmstxt
+  newkcjparmstxt=$NEWORGFILE
+  savekcjparmstxt=$SAVEORGFILE 
   foundprotocol=1
   foundport=1
   foundTLS12=1
@@ -464,59 +512,20 @@ modkcjparmstxt ()
   return 0
 }
 
-modsslclientprops () 
-{
-  sslclientprops=$1
-  echo "INFO - modsslclientprops - Start $sslclientprops modification "
-  saveorgcreatenew $sslclientprops
-  if [ $? -eq 1 ] ; then
-       echo "WARNING - modsslclientprops -  $sslclientprops not installed. File $sslclientprops not modified !"
-       return 1
-  fi
-  newsslclientprops=$NEWORGFILE
-  savesslclientprops=$SAVEORGFILE
-  foundproto=1
-  
-  while IFS= read -r line || [[ -n "$line" ]]
-  do  
-      if [ "${line:0:1}" = "#" ] ; then
-          echo  "$line"  >> $newsslclientprops   
-          continue 
-      elif [[ $line =~ com.ibm.ssl.protocol ]] ; then
-          if [[ $line =~ com.ibm.ssl.protocol=TLSv1.2 ]] ; then
-              echo  "INFO - modsslclientprops - $sslclientprops contains already 'com.ibm.ssl.protocol=TLSv1.2'"
-              echo "${line}" >> $newsslclientprops 
-          else
-              echo "com.ibm.ssl.protocol=TLSv1.2" >> $newsslclientprops 
-              echo "#${line}" >> $newsslclientprops 
-          fi
-          foundproto=0 
-      else 
-          echo  "${line}" >> $newsslclientprops
-      fi
-  done < $savesslclientprops
-  
-  if [ $foundproto -eq 1 ] ; then
-      echo "INFO - modsslclientprops - 'com.ibm.ssl.protocol' set TLSv1.2 at the end of props file"
-      echo  "com.ibm.ssl.protocol=TLSv1.2" >> $newsslclientprops 
-  fi
-  cp $newsslclientprops $sslclientprops
-  echo  "INFO - modsslclientprops - $newsslclientprops created and copied on $sslclientprops"
-  return 0
-}
-
 modjavasecurity () 
 {
   javasecurity=$1
-  echo "INFO - modjavasecurity - Start $javasecurity creation "
-  saveorgcreatenew $javasecurity
-  if [ $? -eq 1 ] ; then
-       echo "WARNING - modjavasecurity - ITHOME/CNPSJ/JAVA component apparently not installed. File $javasecurity not modified !"
-       return 1
+  grep "jdk.tls.disabledAlgorithms=MD5.*SSLv3.*DSA.*DESede.*DES.*RSA.*keySize\s*<\s*2048" $javasecurity > /dev/null
+  if [  $? -eq 0  ] ; then
+      echo "WARNING - modjavasecurity - $javasecurity contains \"jdk.tls.disabledAlgorithms=MD5, SSLv3, DSA, DESede, DES, RSA keySize < 2048\" and will not be modified"
+      return 4
+  else
+     echo "INFO - modjavasecurity - Modifying $javasecurity"
   fi
+  
+  saveorgcreatenew $javasecurity
   newjavasecurity=$NEWORGFILE
   savejavasecurity=$SAVEORGFILE
-  
   nextline=1
   foundAlgo=1
   while IFS= read -r line || [[ -n "$line" ]]
@@ -555,26 +564,82 @@ modjavasecurity ()
   echo "INFO - modjavasecurity - $newjavasecurity created and copied on $javasecurity"
 }
 
-renewCert () 
+modsslclientprops () 
 {
-  cmd1="AdminTask.renewCertificate('-keyStoreName NodeDefaultKeyStore -certificateAlias  default')"
-  cmd2="AdminConfig.save()"
-  echo " $WSADMIN -lang jython -c \"${cmd1}\" -c \"${cmd2}\""
-  $WSADMIN -lang jython -c "${cmd1}" -c "${cmd2}"
-  if  [ $? -ne 0 ] ; then
-      echo "ERROR - renewCert - Error during renewing Certificate. Script ended!"
-  else
-      cmd="AdminTask.getCertificateChain('[-certificateAlias default -keyStoreName NodeDefaultKeyStore -keyStoreScope (cell):ITMCell:(node):ITMNode ]')"
-      $WSADMIN -lang jython -c "${cmd}"
-      echo "INFO - renewCert - Successfully renewed Certificate" 
+  sslclientprops=$1
+  grep "^\s*com.ibm.ssl.protocol.*TLSv1.2" $sslclientprops > /dev/null
+  if [  $? -eq 0  ] ; then
+      echo "WARNING - modsslclientprops - $sslclientprops contains \"com.ibm.ssl.protocol=TLSv1.2\" and will not be modified"
+      return 4
+  else 
+     echo "INFO - modsslclientprops - Modifying $sslclientprops"
   fi
 
-  echo "INFO - renewCert - Running GSKitcmd.sh commands" 
+  saveorgcreatenew $sslclientprops
+  newsslclientprops=$NEWORGFILE
+  savesslclientprops=$SAVEORGFILE
+  foundproto=1
+  while IFS= read -r line || [[ -n "$line" ]]
+  do  
+      if [ "${line:0:1}" = "#" ] ; then
+          echo  "$line"  >> $newsslclientprops   
+          continue 
+      elif [[ $line =~ com.ibm.ssl.protocol ]] ; then
+          if [[ $line =~ com.ibm.ssl.protocol=TLSv1.2 ]] ; then
+              echo  "INFO - modsslclientprops - $sslclientprops contains 'com.ibm.ssl.protocol=TLSv1.2'"
+              echo "${line}" >> $newsslclientprops 
+          else
+              echo "com.ibm.ssl.protocol=TLSv1.2" >> $newsslclientprops 
+              echo "#${line}" >> $newsslclientprops 
+          fi
+          foundproto=0 
+      else 
+          echo  "${line}" >> $newsslclientprops
+      fi
+  done < $savesslclientprops
+  
+  if [ $foundproto -eq 1 ] ; then
+      echo "INFO - modsslclientprops - 'com.ibm.ssl.protocol' set TLSv1.2 at the end of props file"
+      echo  "com.ibm.ssl.protocol=TLSv1.2" >> $newsslclientprops 
+  fi
+  cp $newsslclientprops $sslclientprops
+  echo  "INFO - modsslclientprops - $newsslclientprops created and copied on $sslclientprops"
+  return 0
+}
+
+renewCert () 
+{
   CH=$CANDLEHOME
   IWDIR=$(ls -d $CH/[al]*/iw 2> /dev/null)
   KEYKDB=$CANDLEHOME/keyfiles/keyfile.kdb
   KEYP12=$IWDIR/profiles/ITMProfile/config/cells/ITMCell/nodes/ITMNode/key.p12
   TRUSTP12=$IWDIR/profiles/ITMProfile/config/cells/ITMCell/nodes/ITMNode/trust.p12
+  
+  keydate=`CANDLEHOME=$CH $CH/bin/GSKitcmd.sh gsk8capicmd_64 -cert -details -db $KEYKDB -stashed -label default | grep 'Not Before'|awk -F' : ' '{print $2}'`
+  now=$(date)
+  date_one=$(date -d "$keydate" +%s)
+  date_two=$(date -d "$now" +%s)
+  ts=$(( (date_two - date_one) / 86400 ))
+  if [ $ts -lt 10 ] ; then
+      echo "WARNING - renewCert - Default certificate was renewed recently ($ts days ago) and will not be renewed again"
+      return 4
+  else 
+      echo "INFO - renewCert -  Default certificate will be renewed again ($ts)"
+  fi
+  
+  cmd1="AdminTask.renewCertificate('-keyStoreName NodeDefaultKeyStore -certificateAlias  default')"
+  cmd2="AdminConfig.save()"
+  #echo " $WSADMIN -lang jython -c \"${cmd1}\" -c \"${cmd2}\""
+  $WSADMIN -lang jython -c "${cmd1}" -c "${cmd2}"
+  if  [ $? -ne 0 ] ; then
+      echo "ERROR - renewCert - Error during renewing Certificate. Script ended!"
+  else
+      #cmd="AdminTask.getCertificateChain('[-certificateAlias default -keyStoreName NodeDefaultKeyStore -keyStoreScope (cell):ITMCell:(node):ITMNode ]')"
+      #$WSADMIN -lang jython -c "${cmd}"
+      echo "INFO - renewCert - Successfully renewed Certificate" 
+  fi
+
+  echo "INFO - renewCert - Running GSKitcmd.sh commands" 
   CANDLEHOME=$CH $CH/bin/GSKitcmd.sh gsk8capicmd_64 -cert -delete -db $KEYKDB -stashed -label default
   CANDLEHOME=$CH $CH/bin/GSKitcmd.sh gsk8capicmd_64 -cert -delete -db $KEYKDB -stashed -label root
   CANDLEHOME=$CH $CH/bin/GSKitcmd.sh gsk8capicmd_64 -cert -import -db $KEYP12 -pw WebAS -target $KEYKDB -target_stashed -label default -new_label default
@@ -583,63 +648,71 @@ renewCert ()
       echo "ERROR - renewCert - Error during GSKitcmd.sh execution. Script ended!"
       exit 1
   else
-      echo "INFO - renewCert - GSKitcmd.sh commands finished. See label and issuer info below..." 
-      echo ""
-      echo "CANDLEHOME=$CH $CH/bin/GSKitcmd.sh gsk8capicmd_64 -cert -list -db $KEYKDB -stashed -label default "
-      CANDLEHOME=$CH $CH/bin/GSKitcmd.sh gsk8capicmd_64 -cert -list -db $KEYKDB -stashed -label default
-      echo ""
-      echo "CANDLEHOME=$CH $CH/bin/GSKitcmd.sh gsk8capicmd_64 -cert -details -db $KEYKDB -stashed -label default | egrep 'Serial|Issuer|Subject|Not Before|Not After'"
-      CANDLEHOME=$CH $CH/bin/GSKitcmd.sh gsk8capicmd_64 -cert -details -db $KEYKDB -stashed -label default | egrep 'Serial|Issuer|Subject|Not Before|Not After'
-      echo ""
-      echo "CANDLEHOME=$CH $CH/bin/GSKitcmd.sh gsk8capicmd_64 -cert -details -db $KEYP12 -pw WebAS -label default | egrep 'Serial|Issuer|Subject|Not Before|Not After'"
-      CANDLEHOME=$CH $CH/bin/GSKitcmd.sh gsk8capicmd_64 -cert -details -db $KEYP12 -pw WebAS -label default | egrep 'Serial|Issuer|Subject|Not Before|Not After'
-      echo ""
-      echo "CANDLEHOME=$CH $CH/bin/GSKitcmd.sh gsk8capicmd_64 -cert -details -db $KEYKDB -stashed -label root | egrep 'Serial|Issuer|Subject|Not Before|Not After'"
-      CANDLEHOME=$CH $CH/bin/GSKitcmd.sh gsk8capicmd_64 -cert -details -db $KEYKDB -stashed -label root | egrep 'Serial|Issuer|Subject|Not Before|Not After'
-      echo ""
-      echo "CANDLEHOME=$CH $CH/bin/GSKitcmd.sh gsk8capicmd_64 -cert -details -db $TRUSTP12 -pw WebAS -label root | egrep 'Serial|Issuer|Subject|Not Before|Not After'"
-      CANDLEHOME=$CH $CH/bin/GSKitcmd.sh gsk8capicmd_64 -cert -details -db $TRUSTP12 -pw WebAS -label root | egrep 'Serial|Issuer|Subject|Not Before|Not After'
+      echo "INFO - renewCert - GSKitcmd.sh commands finished successfully." 
+      #echo "" ; CANDLEHOME=$CH $CH/bin/GSKitcmd.sh gsk8capicmd_64 -cert -list -db $KEYKDB -stashed -label default
+      #echo "" ; CANDLEHOME=$CH $CH/bin/GSKitcmd.sh gsk8capicmd_64 -cert -details -db $KEYKDB -stashed -label default | egrep 'Serial|Issuer|Subject|Not Before|Not After'
+      #echo "" ; CANDLEHOME=$CH $CH/bin/GSKitcmd.sh gsk8capicmd_64 -cert -details -db $KEYP12 -pw WebAS -label default | egrep 'Serial|Issuer|Subject|Not Before|Not After'
+      #echo "" ; CANDLEHOME=$CH $CH/bin/GSKitcmd.sh gsk8capicmd_64 -cert -details -db $KEYKDB -stashed -label root | egrep 'Serial|Issuer|Subject|Not Before|Not After'
+      #echo "" ; CANDLEHOME=$CH $CH/bin/GSKitcmd.sh gsk8capicmd_64 -cert -details -db $TRUSTP12 -pw WebAS -label root | egrep 'Serial|Issuer|Subject|Not Before|Not After'
       return 0
   fi
-
+  
 }
 
 modQop () 
 {    
-cmd1="AdminTask.modifySSLConfig('[-alias NodeDefaultSSLSettings -scopeName (cell):ITMCell:(node):ITMNode -keyStoreName NodeDefaultKeyStore -keyStoreScopeName (cell):ITMCell:(node):ITMNode -trustStoreName NodeDefaultTrustStore -trustStoreScopeName (cell):ITMCell:(node):ITMNode -jsseProvider IBMJSSE2 -sslProtocol TLSv1.2 -clientAuthentication false -clientAuthenticationSupported false -securityLevel HIGH -enabledCiphers ]')"
-cmd2="AdminConfig.save()"
-echo "$WSADMIN -lang jython -c  \"${cmd1}\" -c  \"${cmd2}\""
-$WSADMIN -lang jython -c "${cmd1}" -c "${cmd2}"
-if [ $? -ne 0 ]; then
-    echo "ERROR - modQop - Error setting TLSv1.2 for Quality of Protection (QoP). Script ended!"
-    exit 1
-else
-    echo "INFO - modQop - Successfully set TLSv1.2 for Quality of Protection (QoP)" 
-    return 0
-fi
+  # check if "[ sslProtocol SSL_TLSv2 ]" already set
+  $WSADMIN  -lang jython -c "AdminTask.getSSLConfig('[-alias NodeDefaultSSLSettings -scopeName (cell):ITMCell:(node):ITMNode ]')" | grep "sslProtocol SSL_TLSv2" > /dev/null 
+  if [ $? -eq 0 ] ; then
+      echo "WARNING - modQop - Quality of Protection (QoP) is already set to 'sslProtocol SSL_TLSv2' and will not be modified again." 
+      return 4
+  else
+      echo "INFO - modQop - Quality of Protection (QoP) not set yet. Modifying..."
+  fi
+  
+  cmd1="AdminTask.modifySSLConfig('[-alias NodeDefaultSSLSettings -scopeName (cell):ITMCell:(node):ITMNode -keyStoreName NodeDefaultKeyStore -keyStoreScopeName (cell):ITMCell:(node):ITMNode -trustStoreName NodeDefaultTrustStore -trustStoreScopeName (cell):ITMCell:(node):ITMNode -jsseProvider IBMJSSE2 -sslProtocol TLSv1.2 -clientAuthentication false -clientAuthenticationSupported false -securityLevel HIGH -enabledCiphers ]')"
+  cmd2="AdminConfig.save()"
+  echo "$WSADMIN -lang jython -c  \"${cmd1}\" -c  \"${cmd2}\""
+  $WSADMIN -lang jython -c "${cmd1}" -c "${cmd2}"
+  if [ $? -ne 0 ]; then
+      echo "ERROR - modQop - Error setting TLSv1.2 for Quality of Protection (QoP). Script ended!"
+      exit 1
+  else
+      echo "INFO - modQop - Successfully set TLSv1.2 for Quality of Protection (QoP)" 
+      return 0
+  fi
 }
 
 disableAlgorithms () 
 {
-jython="$CANDLEHOME/tmp/org.jy"
-touch $jython 
-echo "sec = AdminConfig.getid('/Security:/')" > $jython 
-echo "prop = AdminConfig.getid('/Security:/Property:com.ibm.websphere.tls.disabledAlgorithms/' )"  >> $jython 
-echo "if prop:"  >> $jython 
-echo "  AdminConfig.modify(prop, [['value', 'none'],['required', \"false\"]])"  >> $jython 
-echo "else: "  >> $jython 
-echo " AdminConfig.create('Property',sec,'[[name \"com.ibm.websphere.tls.disabledAlgorithms\"] [description \"Added due ITM TSLv1.2 usage\"] [value \"none\"][required \"false\"]]') "  >> $jython 
-echo "AdminConfig.save()" >> $jython
-echo "$WSADMIN -lang jython -f $jython"
-$WSADMIN -lang jython -f $jython
-if [ $? -ne 0 ]; then
-    echo "ERROR - disableAlgorithms - Error setting Custom Property ( com.ibm.websphere.tls.disabledAlgorithms ). Script ended!"
-    exit 1
-else
-    #rm -f $jython
-    echo "INFO - disableAlgorithms - Successfully set com.ibm.websphere.tls.disabledAlgorithms to none" 
-    return 0
-fi
+  secxml="$CANDLEHOME/$ARCH/iw/profiles/ITMProfile/config/cells/ITMCell/security.xml"
+  grep "com.ibm.websphere.tls.disabledAlgorithms.* value=.*none"  $secxml > /dev/null
+   if [ $? -eq 0 ] ; then
+      echo "WARNING - disableAlgorithms - Custom property 'com.ibm.websphere.tls.disabledAlgorithms... value=none' is already set and will not be set again"
+      return 4
+  else 
+     echo "INFO - disableAlgorithms - Modifying $secxml"
+  fi
+  
+  jython="$CANDLEHOME/tmp/org.jy"
+  touch $jython 
+  echo "sec = AdminConfig.getid('/Security:/')" > $jython 
+  echo "prop = AdminConfig.getid('/Security:/Property:com.ibm.websphere.tls.disabledAlgorithms/' )"  >> $jython 
+  echo "if prop:"  >> $jython 
+  echo "  AdminConfig.modify(prop, [['value', 'none'],['required', \"false\"]])"  >> $jython 
+  echo "else: "  >> $jython 
+  echo " AdminConfig.create('Property',sec,'[[name \"com.ibm.websphere.tls.disabledAlgorithms\"] [description \"Added due ITM TSLv1.2 usage\"] [value \"none\"][required \"false\"]]') "  >> $jython 
+  echo "AdminConfig.save()" >> $jython
+  echo "$WSADMIN -lang jython -f $jython"
+  $WSADMIN -lang jython -f $jython
+  if [ $? -ne 0 ]; then
+      echo "ERROR - disableAlgorithms - Error setting Custom Property ( com.ibm.websphere.tls.disabledAlgorithms ). Script ended!"
+      exit 1
+  else
+      #rm -f $jython
+      echo "INFO - disableAlgorithms - Successfully set com.ibm.websphere.tls.disabledAlgorithms to none" 
+      return 0
+  fi
 }
 
 # --------------------------------------------------------------
@@ -698,7 +771,6 @@ elif [ $ewasver -lt 08551600 ] ; then
 fi
 echo "INFO - main - TEPS = $tepsver eWAS = $ewasver"
 
-
 PROGNAME=$(basename $0)
 USRCMD="$0 $*"
 BACKUPFOLDER="${CANDLEHOME}/backup/backup_before_TLS1.2"
@@ -730,91 +802,116 @@ declare -A AFILES=(
   ["key.p12"]="${CANDLEHOME}/$ARCH/iw/profiles/ITMProfile/config/cells/ITMCell/nodes/ITMNode/key.p12" \
   ["ssl.client.props"]="${CANDLEHOME}/$ARCH/iw/profiles/ITMProfile/properties/ssl.client.props" \
 )
-
+checkIfFileExists
 
 # enable ICSLite in eWAS
 EnableICSLite "true"
 
 backupewasAndKeyfiles
 backupfile "${AFILES["httpd.conf"]}" 
-HTTPD=$?
 backupfile "${AFILES["cq.ini"]}"
-CQINI=$?
 backupfile "${AFILES["tep.jnlpt"]}"
-TEPT=$?
 backupfile "${AFILES["component.jnlpt"]}"
-COMPONENTT=$?
 backupfile "${AFILES["applet.html.updateparams"]}"
-APPLET=$?
-backupfile "${AFILES["kcjparms.txt"]}"
-KCJ=$?
+if [ $KCJ -ne 4 ] ; then
+    backupfile "${AFILES["kcjparms.txt"]}"
+fi
 backupfile "${AFILES["java.security"]}"
-JAVASEC=$?
 backupfile "${AFILES["trust.p12"]}"
-TRUSTP12=$?
 backupfile "${AFILES["key.p12"]}"
-KEYP12=$?
 backupfile "${AFILES["ssl.client.props"]}"
-SSLPROPS=$?
 
 # Create a script to restore the files before TLS1.2 was set using this script
 createRestoreScript
 
 # Renew the default certificate
 renewCert
-
+rc=$?
 # restart TEPS
-restartTEPS
-EnableICSLite "true"
+if [ $rc -eq 4 ] ; then
+    echo "INFO - main - Tivoli Enterpise Portal Server restart not required yet."
+else
+    restartTEPS
+    EnableICSLite "true"
+fi
 
 # TLS v1.2 only configuration - TEPS/eWAS TEP, IHS, TEPS,  components
 # TEPS/eWAS modify Quality of Protection (QoP)    
 modQop
+rc=$?
+rcs=$rc
 
 # eWAS Set custom property com.ibm.websphere.tls.disabledAlgorithms
 disableAlgorithms
+rc=$?
+rcs=$(( $rc + $rcs ))
 
 # eWAS sslclientprops modification
 modsslclientprops "${AFILES["ssl.client.props"]}" 
+rc=$?
+rcs=$(( $rc + $rcs ))
 # test openssl s_client -connect 172.16.11.4:15206 -tls1_2 doesn't work on windows by default. Needs to be installed first in PS (Install-Module -Name OpenSSL)
+
+# TEPS
+# cq.ini add/modify variables
+modcqini "${AFILES["cq.ini"]}"
+rc=$?
+rcs=$(( $rc + $rcs ))
 
 # IHS httpd.conf modification
 modhttpconf "${AFILES["httpd.conf"]}" 
+rc=$?
+rcs=$(( $rc + $rcs ))
 
-# TEPS
-# kwfenv add/modify variables
-modcqini "${AFILES["cq.ini"]}"
+# restart TEPS
+if  [ $rcs -eq 20 ] ; then
+    echo "INFO - main - No changes, hence Tivoli Enterpise Portal Server restart not required yet."
+else 
+    restartTEPS
+    EnableICSLite "true"
+fi
 
 # TEPS JAVA java.security modification
 modjavasecurity "${AFILES["java.security"]}"
-
-# restart TEPS
-restartTEPS
+rc=$?
 
 # Browser/WebStart client related
 modtepjnlpt "${AFILES["tep.jnlpt"]}"
+rc=$?
+rcs=rc
 modcompjnlpt "${AFILES["component.jnlpt"]}"
+rc=$?
+rcs=$(( $rc + $rcs ))
 modapplethtmlupdateparams "${AFILES["applet.html.updateparams"]}"
-echo "INFO - main - Reconfiguring TEP WebSstart/Broswer client 'cw'"
-${CANDLEHOME}/bin/itmcmd config -A cw
-if [ $? -ne 0 ] ; then
-    echo "ERROR - main - Reconfigure of TEP WebSstart/Broswer client '${CANDLEHOME}/bin/itmcmd config -A kcw' failed. Script ended!"
-    exit 1
-fi
-#sleep 10
-
-# Desktop client related
-if [ $KCJ -eq 0 ] ; then
-    modkcjparmstxt "${AFILES["kcjparms.txt"]}"
-    echo  "INFO - main - Reconfiguring TEP Desktop Client 'cj'"
-    ${CANDLEHOME}/bin/itmcmd config -Ar cj
-    if [ $? -ne ] ; then
-        error "ERROR - main - Reconfigure of TEP Desktop Client '${CANDLEHOME}/bin/itmcmd config -Ar kcj' failed. Powershell script ended!"
+rc=$?
+rcs=$(( $rc + $rcs ))
+if [ $rcs -eq 12 ] ; then
+    echo "INFO - main - No changes hence no need to reconfigure CW"
+else 
+    echo "INFO - main - Reconfiguring CW"
+    ${CANDLEHOME}/bin/itmcmd config -A cw
+    if [ $? -ne 0 ] ; then
+        echo "ERROR - main - Reconfigure of TEP WebSstart/Broswer client '${CANDLEHOME}/bin/itmcmd config -A kcw' failed. Script ended!"
         exit 1
     fi
-    #sleep 10
-else 
+fi
+
+# Desktop client related
+if [ $KCJ -eq 4 ] ; then
     echo "WARNING - main - TEP Desktop client not installed and was not modified ('kcjparms.txt' not existing) "
+else
+    modkcjparmstxt "${AFILES["kcjparms.txt"]}"
+    rc=$?
+    if [ $rc -eq 4 ] ; then
+        echo "INFO - main - No changes hence no need to reconfigure KCJ"
+    else
+        echo  "INFO - main - Reconfiguring TEP Desktop Client 'cj'"
+        ${CANDLEHOME}/bin/itmcmd config -Ar cj
+        if [ $? -ne 0 ] ; then
+            echo "ERROR - main - Reconfigure of TEP Desktop Client '${CANDLEHOME}/bin/itmcmd config -Ar kcj' failed. Powershell script ended!"
+            exit 1
+        fi
+    fi
 fi
 
 # Disable ICSLIte
