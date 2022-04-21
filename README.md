@@ -345,7 +345,8 @@ https://www.ibm.com/support/pages/unable-login-tivoli-enterprise-portal-tep-webs
 
 Sample run of the activate_teps-tlsv1.2.sh script in Linux:
 ```
-./activate_teps-tlsv1.2.sh -h /opt/IBM/ITM
+[root@falcate1 IBM]# ./activate_teps-tlsv1.2.sh -h /opt/IBM/ITM
+INFO - Script Version 1.33
 INFO - main - ITM home directory is: /opt/IBM/ITM
 INFO - main - ITM arch directory is: /opt/IBM/ITM/lx8266
 INFO - main - TEPS = 06300711 eWAS = 08551600
@@ -380,14 +381,13 @@ INFO - backupfile - Saving /opt/IBM/ITM/lx8266/iw/profiles/ITMProfile/config/cel
 INFO - backupfile - Saving /opt/IBM/ITM/lx8266/iw/profiles/ITMProfile/config/cells/ITMCell/nodes/ITMNode/key.p12 in /opt/IBM/ITM/backup/backup_before_TLS1.2
 INFO - backupfile - Saving /opt/IBM/ITM/lx8266/iw/profiles/ITMProfile/properties/ssl.client.props in /opt/IBM/ITM/backup/backup_before_TLS1.2
 INFO - createRestoreScript - Restore script created: /opt/IBM/ITM/backup/backup_before_TLS1.2/SCRIPTrestore.sh
-INFO - renewCert -  Default certificate will be renewed again (21)
+INFO - renewCert -  Default certificate will be renewed again (22)
 WASX7209I: Connected to process "ITMServer" on node ITMNode using SOAP connector;  The type of process is: UnManagedProcess
 TEPSEWASBundle loaded.
 '\nCWPKI0704I: The personal certificate with the default alias in the NodeDefaultKeyStore keystore has been RENEWED.'
 ''
 INFO - renewCert - Successfully renewed Certificate
 INFO - renewCert - Running GSKitcmd.sh commands
-
 
 
 INFO - renewCert - GSKitcmd.sh commands finished successfully.
@@ -415,15 +415,15 @@ ISClite started
 
 WARNING - modQop - Quality of Protection (QoP) is already set to 'sslProtocol SSL_TLSv2' and will not be modified again.
 INFO - disableAlgorithms - Modifying /opt/IBM/ITM/lx8266/iw/profiles/ITMProfile/config/cells/ITMCell/security.xml
-/opt/IBM/ITM/lx8266/iw/bin/wsadmin.sh -lang jython -f /opt/IBM/ITM/tmp/org.jy
 WASX7209I: Connected to process "ITMServer" on node ITMNode using SOAP connector;  The type of process is: UnManagedProcess
 INFO - disableAlgorithms - Successfully set com.ibm.websphere.tls.disabledAlgorithms to none
 INFO - modsslclientprops - Modifying /opt/IBM/ITM/lx8266/iw/profiles/ITMProfile/properties/ssl.client.props
 INFO - saveorgcreatenew - /opt/IBM/ITM/lx8266/iw/profiles/ITMProfile/properties/ssl.client.props.beforetls12 created to save original content
 INFO - modsslclientprops - /opt/IBM/ITM/lx8266/iw/profiles/ITMProfile/properties/ssl.client.props.tls12 created and copied on /opt/IBM/ITM/lx8266/iw/profiles/ITMProfile/properties/ssl.client.props
-INFO - modkfwenv - Modifying /opt/IBM/ITM/config/cq.ini
+INFO - modcqini - Modifying /opt/IBM/ITM/config/cq.ini
 INFO - saveorgcreatenew - /opt/IBM/ITM/config/cq.ini.beforetls12 created to save original content
 INFO - modcqini - /opt/IBM/ITM/config/cq.ini.tls12 created and copied on /opt/IBM/ITM/config/cq.ini
+INFO - modhttpconf - Modifying /opt/IBM/ITM/lx8266/iu/ihs/HTTPServer/conf/httpd.conf
 INFO - saveorgcreatenew - /opt/IBM/ITM/lx8266/iu/ihs/HTTPServer/conf/httpd.conf.beforetls12 created to save original content
 INFO - modhttpconf - /opt/IBM/ITM/lx8266/iu/ihs/HTTPServer/conf/httpd.conf.tls12 created and copied on /opt/IBM/ITM/lx8266/iu/ihs/HTTPServer/conf/httpd.conf
 INFO - restartTEPS - Restarting TEPS ...
@@ -447,6 +447,7 @@ WASX7209I: Connected to process "ITMServer" on node ITMNode using SOAP connector
 WASX7303I: The following options are passed to the scripting environment and are available as arguments that are stored in the argv variable: "[true]"
 ISClite is not running
 ISClite started
+
 INFO - modjavasecurity - Modifying /opt/IBM/ITM/lx8266/iw/java/jre/lib/security/java.security
 INFO - saveorgcreatenew - /opt/IBM/ITM/lx8266/iw/java/jre/lib/security/java.security.beforetls12 created to save original content
 INFO - modjavasecurity - /opt/IBM/ITM/lx8266/iw/java/jre/lib/security/java.security.tls12 created and copied on /opt/IBM/ITM/lx8266/iw/java/jre/lib/security/java.security
@@ -462,11 +463,7 @@ INFO - modapplethtmlupdateparams - /opt/IBM/ITM/lx8266/cw/applet.html.updatepara
 INFO - main - Reconfiguring CW
 Agent configuration started...
 Agent configuration completed...
-WARNING - main - TEP Desktop client not installed and was not modified ('kcjparms.txt' not existing)
-INFO - EnableICSLite - Set ISCLite to 'false'
-WASX7209I: Connected to process "ITMServer" on node ITMNode using SOAP connector;  The type of process is: UnManagedProcess
-WASX7303I: The following options are passed to the scripting environment and are available as arguments that are stored in the argv variable: "[false]"
-ISClite is not running
+WARNING - main - TEP Desktop client not installed and was not modified 'kcjparms.txt' not existing.
 
 ------------------------------------------------------------------------------------------
 INFO - main - Procedure successfully finished Elapsedtime: 4 min
