@@ -2,18 +2,20 @@
 # Usage: Copy script to a directory, for examle C:\myfolder and run script in a Powershell window: 
 #   PS C:\myfolder> .\activate_teps-tlsv1.2.ps1 [ -h ITMHOME ]
 #
-# 16.03.2022: Initial version  by R. Niewolik EMEA AVP Team
-# 29.03.2022: Version 1.3      by R. Niewolik EMEA AVP Team
-# 13.04.2022: Version 1.31     by R. Niewolik EMEA AVP Team
+# 16.03.2022: Initial version  R. Niewolik EMEA AVP Team
+# 13.04.2022: Version 1.31     R. Niewolik EMEA AVP Team
 #             - Add check if TEPS and eWas are at the required Level
 #             - Backupfolder now created in ITMHOME\backup\.. directory 
-# 20.04.2022: Version 1.32    by R. Niewolik EMEA AVP Team
+# 20.04.2022: Version 1.32     R. Niewolik EMEA AVP Team
 #             - New function to check for file existance
-#             - Added checks to functions if TLSv1.2 related variables were set already              
+#             - Added checks if TLSv1.2 configured already  
+# 21.04.2022: Version 1.33     R. Niewolik EMEA AVP Team
+#             - Improved checks if TLSv1.2 configured already
+#                       
 ##
 param($h)
 
-write-host "INFO - Script Version 1.32"
+write-host "INFO - Script Version 1.33"
 $startTime = $(get-date)
 
 function getCandleHome ($candlehome) 
@@ -122,8 +124,8 @@ function createRestoreScript ($restorebat)
 
   $rc = New-Item -Path "$BACKUPFOLDER" -Name "$restorebat" -ItemType "file"
   Add-Content $restorebatfull "cd `"$BACKUPFOLDER`""
-  Add-Content $restorebatfull "xcopy /y/s CNPSJ `"$CANDLEHOME`""
-  Add-Content $restorebatfull "xcopy /y/s keyfiles `"$CANDLEHOME`""
+  Add-Content $restorebatfull "xcopy /y/s CNPSJ `"$CANDLEHOME\CNPSJ`""
+  Add-Content $restorebatfull "xcopy /y/s keyfiles `"$CANDLEHOME\keyfiles`""
   Add-Content $restorebatfull " "
 
   foreach ( $h in $HFILES.Keys ) {
@@ -257,7 +259,7 @@ function modhttpconf ($httpdfile)
       if ( "$line" -match "Listen\s*0.0.0.0:15200" ) {
           $temp = 'ServerName ' + $matches[1] + ':15201'
           Add-Content $newhttpdfile "Listen 127.0.0.1:15200"
-          Add-Content $newhttpdfile "${line}"
+          Add-Content $newhttpdfile "#${line}"
           continue
       }
       if ( $foundsslcfg -eq 1 ) {  
@@ -307,10 +309,13 @@ function modkfwenv ($kfwenv)
 {
   $pattern="KFW_ORB_ENABLED_PROTOCOLS=TLS_Version_1_2_Only" 
   if (select-string -Path "$kfwenv" -Pattern $pattern) {
-     write-host "WARNING - modkfwenv - $kfwenv contains 'KFW_ORB_ENABLED_PROTOCOLS=TLS_Version_1_2_Only' and will not be modified"
-     return 4
-  } else {
-     write-host "INFO - modkfwenv - Modifying $kfwenv"
+     $pattern="KDEBE_TLS11_ON=NO"
+     if (select-string -Path "$kfwenv" -Pattern $pattern) {
+         write-host "WARNING - modkfwenv - $kfwenv contains 'KFW_ORB_ENABLED_PROTOCOLS=TLS_Version_1_2_Only' and will not be modified"
+         return 4
+     } else {
+         write-host "INFO - modkfwenv - Modifying $kfwenv"
+     }
   }
 
   $rc = saveorgcreatenew $kfwenv
@@ -350,10 +355,13 @@ function modtepjnlpt ($tepjnlpt)
 {
   $pattern="\s*<property name=`"jnlp.tep.sslcontext.protocol`.*TLSv1.2" 
   If (select-string -Path "$tepjnlpt" -Pattern $pattern) {
-      write-host "WARNING - modtepjnlpt - $tepjnlpt contains 'jnlp.tep.sslcontext.protocol value=`"TLSv1.2`"' and will not be modified"
-      return 4
-  } else {
-     write-host "INFO - modtepjnlpt - Modifying $tepjnlpt"
+      $pattern="codebase=`"https.*:15201"
+      If (select-string -Path "$tepjnlpt" -Pattern $pattern) { 
+          write-host "WARNING - modtepjnlpt - $tepjnlpt contains 'jnlp.tep.sslcontext.protocol value=`"TLSv1.2`"' and will not be modified"
+          return 4
+      } else {
+         write-host "INFO - modtepjnlpt - Modifying $tepjnlpt"
+      }
   }
 
   $rc = saveorgcreatenew $tepjnlpt
@@ -423,10 +431,13 @@ function modapplethtmlupdateparams ($applethtmlupdateparams)
 {  
   $pattern="tep.sslcontext.protocol.*verride.*TLSv1.2" 
   If (select-string -Path "$applethtmlupdateparams" -Pattern $pattern) {
-      write-host "WARNING - modapplethtmlupdateparams - $applethtmlupdateparams contains  `"tep.sslcontext.protocol|override|'TLSv1.2'`" and will not be modified"
-      return 4
-  } else {
-      write-host "INFO - modapplethtmlupdateparams - Modifying $applethtmlupdateparams"
+      $pattern="tep.connection.protocol.*verride.*https"
+      If (select-string -Path "$applethtmlupdateparams" -Pattern $pattern) {
+          write-host "WARNING - modapplethtmlupdateparams - $applethtmlupdateparams contains  `"tep.sslcontext.protocol|override|'TLSv1.2'`" and will not be modified"
+          return 4
+      } else {
+          write-host "INFO - modapplethtmlupdateparams - Modifying $applethtmlupdateparams"
+      }
   }
 
   $rc = saveorgcreatenew $applethtmlupdateparams
@@ -461,16 +472,19 @@ function modapplethtmlupdateparams ($applethtmlupdateparams)
 
 function modkcjparmstxt ($kcjparmstxt) 
 {
-  $pattern="tep.sslcontext.protocol .* TLSv1.2" 
+  $pattern="tep.sslcontext.protocol.*TLSv1.2" 
   If (select-string -Path "$kcjparmstxt" -Pattern $pattern) {
-      write-host "WARNING - modkcjparmstxt - $kcjparmstxt contains `"tep.sslcontext.protocol|override|'TLSv1.2'`" and will not be modified"
-      return 4
-  } else {
-     write-host "INFO - modkcjparmstxt - Modifying $kcjparmstxt"
+      $pattern="tep.connection.protocol.*https"
+      If (select-string -Path "$kcjparmstxt" -Pattern $pattern) {
+          write-host "WARNING - modkcjparmstxt - $kcjparmstxt contains `"tep.sslcontext.protocol|override|'TLSv1.2'`" and will not be modified"
+          return 4
+      } else {
+          write-host "INFO - modkcjparmstxt - Modifying $kcjparmstxt"
+      }
   }
-  
+
   $rc = saveorgcreatenew $kcjparmstxt
-   
+
   $newkcjparmstxt = $rc.new
   $savenewkcjparmstxt = $rc.save
   $foundprotocol = 1
@@ -605,7 +619,7 @@ function renewCert
       write-host "WARNING - renewCert - Default certificate was renewed recently ($days days ago) and will not be renewed again"
       return 4
   } else {
-      write-host "INFO - renewCert -  Default certificate will be renewed again" 
+      write-host "INFO - renewCert -  Default certificate will be renewed again ($days)" 
   } 
 
   $cmd ="$CANDLEHOME\CNPSJ\bin\wsadmin -lang jython -c `"AdminTask.renewCertificate('-keyStoreName NodeDefaultKeyStore -certificateAlias  default')`" -c 'AdminConfig.save()'"
@@ -706,7 +720,6 @@ function disableAlgorithms ()
 
 }
 
-
 # --------------------------------------------------------------
 # MAIN ---------------------------------------------------------
 # --------------------------------------------------------------
@@ -714,12 +727,12 @@ if ( $h )  { $tmphome = $h }
 else { $tmphome = "" } 
 
 $CANDLEHOME = getCandleHome $tmphome
-$BACKUPFOLDER = "$CANDLEHOME\Backup\backup_before_TLS1.2" # will be create in candlehome
+$BACKUPFOLDER = "$CANDLEHOME\Backup\backup_before_TLS1.2" 
 $RESTORESCRIPT = "SCRIPTrestore.bat"
 
 $permissions = kincinfo -r
 if ( $permissions.Contains(‘Cannot obtain all necessary privileges’) ) {
-    write-host "ERROR - main - You have not permissions to execute required commands (e.g. kincinfo). You must be logged in with an adminstrator account"
+    write-host "ERROR - main - You have not permissions to execute required commands (e.g. kincinfo). You must be logged in with an administrator account"
     exit 1
 } else {
     write-host "INFO - main - Permissions OK kincinfo can be executed."
@@ -792,7 +805,7 @@ $rc = checkIfFileExists
 # Enable ISCLite 
 EnableICSLIte "true"
 
-#backupewasAndkeys $BACKUPFOLDER
+backupewasAndkeys $BACKUPFOLDER
 $rc = backupfile $HFILES["httpd.conf"]
 $rc = backupfile $HFILES["kfwenv"] 
 $rc = backupfile $HFILES["tep.jnlpt"]
@@ -891,7 +904,7 @@ if ( $KCJ -eq 4  ) {
     }
 }
 
-EnableICSLIte "false"
+#EnableICSLIte "false"
 
 write-host ""
 $elapsedTime = new-timespan $startTime $(get-date) 
