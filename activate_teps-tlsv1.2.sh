@@ -10,10 +10,15 @@
 #             - Backupfolder now created in ITMHOME/backup/.. directory 
 # 20.04.2022: Version 1.32    by R. Niewolik EMEA AVP Team
 #             - New function to check for file existance
-#             - Added checks to functions if TLSv1.2 related variables were set already              
+#             - Added checks to functions if TLSv1.2 related variables were set already 
+# 21.04.2022: Version 1.33     R. Niewolik EMEA AVP Team
+#             - Improved checks if TLSv1.2 configured already
+#               
 ## 
 SECONDS=0
-echo "INFO - Script Version 1.32"
+PROGNAME=$(basename $0)
+USRCMD="$0 $*"
+echo "INFO - Script Version 1.33"
 
 usage()
 { # usage description
@@ -21,7 +26,6 @@ echo ""
 echo " Usage:"
 echo "  $PROGNAME { -h ITM home } [ -a arch ]"
 echo " Sample executions:"
-echo "  Create a silent response file only without execution unconfiguration step for all servers"
 echo "    $PROGNAME -h /opt/IBM/ITM "
 echo ""
 }
@@ -207,10 +211,9 @@ modhttpconf ()
       if [  $? -eq 0  ] ; then
           echo "WARNING - modhttpconf - $httpdfile contains 'SSLProtocolEnable TLSv12' + TLS11,10 disabled and will not be modified"
           return 4
-      else 
-          echo "INFO - modhttpconf - Modifying $httpdfile"
       fi
   fi
+  echo "INFO - modhttpconf - Modifying $httpdfile"
   
   saveorgcreatenew $httpdfile
   newhttpdfile=$NEWORGFILE
@@ -282,11 +285,13 @@ modcqini ()
   cqini=$1
   grep "KFW_ORB_ENABLED_PROTOCOLS=TLS_Version_1_2_Only" $cqini > /dev/null
   if [  $? -eq 0  ] ; then
-     echo "WARNING - modkfwenv - $cqini contains 'KFW_ORB_ENABLED_PROTOCOLS=TLS_Version_1_2_Only' and will not be modified"
-     return 4
-  else 
-     echo "INFO - modkfwenv - Modifying $cqini"
+      grep "KDEBE_TLS11_ON=NO" $cqini > /dev/null
+      if [  $? -eq 0  ] ; then
+          echo "WARNING - modcqini - $cqini contains 'KFW_ORB_ENABLED_PROTOCOLS=TLS_Version_1_2_Only' and will not be modified"
+          return 4
+      fi
   fi
+  echo "INFO - modcqini - Modifying $cqini"
   
   saveorgcreatenew $cqini
   newcqini=$NEWORGFILE
@@ -335,12 +340,13 @@ modtepjnlpt ()
   tepjnlpt=$1
   grep "\s*<property name=\"jnlp.tep.sslcontext.protocol.*TLSv1.2" $tepjnlpt > /dev/null
   if [ $? -eq 0 ] ; then
-      echo "WARNING - modtepjnlpt - $tepjnlpt contains 'jnlp.tep.sslcontext.protocol value=\"TLSv1.2\"' and will not be modified"
-      return 4
-  else 
-     echo  "INFO - modtepjnlpt - Modifying $tepjnlpt"
+      grep "codebase=\"https.*:15201" $tepjnlpt > /dev/null
+      if [ $? -eq 0 ] ; then
+          echo "WARNING - modtepjnlpt - $tepjnlpt contains 'jnlp.tep.sslcontext.protocol value=\"TLSv1.2\"' and will not be modified"
+          return 4
+      fi
   fi
-  
+  echo  "INFO - modtepjnlpt - Modifying $tepjnlpt"
   saveorgcreatenew $tepjnlpt
   newtepjnlpt=$NEWORGFILE
   savetepjnlpt=$SAVEORGFILE
@@ -416,13 +422,15 @@ modcompjnlpt ()
 modapplethtmlupdateparams () 
 {
   applethtmlupdateparams=$1
-  grep "tep.sslcontext.protocol.*verride.*TLSv1.2" $applethtmlupdateparams > /dev/null
+  grep -i "tep.sslcontext.protocol.*verride.*TLSv1.2" $applethtmlupdateparams > /dev/null
   if [  $? -eq 0  ] ; then
-      echo "WARNING - modapplethtmlupdateparams - $applethtmlupdateparams contains \"tep.sslcontext.protocol|override|'TLSv1.2'\" and will not be modified"
-      return 4
-  else
-      echo "INFO - modapplethtmlupdateparams - Modifying $applethtmlupdateparams"
-  fi  
+      grep -i "tep.connection.protocol.*verride.*https" $applethtmlupdateparams > /dev/null
+      if [  $? -eq 0  ] ; then
+          echo "WARNING - modapplethtmlupdateparams - $applethtmlupdateparams contains \"tep.sslcontext.protocol|override|'TLSv1.2'\" and will not be modified"
+          return 4
+      fi  
+  fi
+  echo "INFO - modapplethtmlupdateparams - Modifying $applethtmlupdateparams"
   
   saveorgcreatenew $applethtmlupdateparams
   newapplethtmlupdateparams=$NEWORGFILE
@@ -467,13 +475,15 @@ modapplethtmlupdateparams ()
 modkcjparmstxt () 
 {
   kcjparmstxt=$1
-  grep "tep.sslcontext.protocol .* TLSv1.2" $kcjparmstxt > /dev/null
+  grep -i "tep.sslcontext.protocol.*TLSv1.2" $kcjparmstxt > /dev/null
   if [  $? -eq 0  ] ; then
-      echo "WARNING - modkcjparmstxt - $kcjparmstxt contains\"tep.sslcontext.protocol|override|'TLSv1.2'\" and will not be modified"
-      return 4
-  else 
-     echo "INFO - modkcjparmstxt - Modifying $kcjparmstxt"
-  fi  
+      grep -i "tep.connection.protocol.*https" $kcjparmstxt > /dev/null
+      if [  $? -eq 0  ] ; then
+          echo "WARNING - modkcjparmstxt - $kcjparmstxt contains\"tep.sslcontext.protocol|override|'TLSv1.2'\" and will not be modified"
+          return 4 
+      fi
+  fi      
+  echo "INFO - modkcjparmstxt - Modifying $kcjparmstxt"
   
   saveorgcreatenew $kcjparmstxt
   newkcjparmstxt=$NEWORGFILE
@@ -572,7 +582,7 @@ modsslclientprops ()
       echo "WARNING - modsslclientprops - $sslclientprops contains \"com.ibm.ssl.protocol=TLSv1.2\" and will not be modified"
       return 4
   else 
-     echo "INFO - modsslclientprops - Modifying $sslclientprops"
+      echo "INFO - modsslclientprops - Modifying $sslclientprops"
   fi
 
   saveorgcreatenew $sslclientprops
@@ -672,7 +682,7 @@ modQop ()
   
   cmd1="AdminTask.modifySSLConfig('[-alias NodeDefaultSSLSettings -scopeName (cell):ITMCell:(node):ITMNode -keyStoreName NodeDefaultKeyStore -keyStoreScopeName (cell):ITMCell:(node):ITMNode -trustStoreName NodeDefaultTrustStore -trustStoreScopeName (cell):ITMCell:(node):ITMNode -jsseProvider IBMJSSE2 -sslProtocol TLSv1.2 -clientAuthentication false -clientAuthenticationSupported false -securityLevel HIGH -enabledCiphers ]')"
   cmd2="AdminConfig.save()"
-  echo "$WSADMIN -lang jython -c  \"${cmd1}\" -c  \"${cmd2}\""
+  #echo "$WSADMIN -lang jython -c  \"${cmd1}\" -c  \"${cmd2}\""
   $WSADMIN -lang jython -c "${cmd1}" -c "${cmd2}"
   if [ $? -ne 0 ]; then
       echo "ERROR - modQop - Error setting TLSv1.2 for Quality of Protection (QoP). Script ended!"
@@ -703,7 +713,7 @@ disableAlgorithms ()
   echo "else: "  >> $jython 
   echo " AdminConfig.create('Property',sec,'[[name \"com.ibm.websphere.tls.disabledAlgorithms\"] [description \"Added due ITM TSLv1.2 usage\"] [value \"none\"][required \"false\"]]') "  >> $jython 
   echo "AdminConfig.save()" >> $jython
-  echo "$WSADMIN -lang jython -f $jython"
+  #echo "$WSADMIN -lang jython -f $jython"
   $WSADMIN -lang jython -f $jython
   if [ $? -ne 0 ]; then
       echo "ERROR - disableAlgorithms - Error setting Custom Property ( com.ibm.websphere.tls.disabledAlgorithms ). Script ended!"
@@ -771,8 +781,6 @@ elif [ $ewasver -lt 08551600 ] ; then
 fi
 echo "INFO - main - TEPS = $tepsver eWAS = $ewasver"
 
-PROGNAME=$(basename $0)
-USRCMD="$0 $*"
 BACKUPFOLDER="${CANDLEHOME}/backup/backup_before_TLS1.2"
 RESTORESCRIPT="SCRIPTrestore.sh"
 WSADMIN="$CANDLEHOME/$ARCH/iw/bin/wsadmin.sh"
@@ -782,7 +790,7 @@ if [ ! -d "${CANDLEHOME}/backup/" ]; then
     exit 1
 fi
 if [ -d "${BACKUPFOLDER}" ]; then
-    echo "ERROR - main - This script was started already and the folder $BACKUPFOLDER exists already! To avoid data loss, "
+    echo "ERROR - main - This script was started already and the folder $BACKUPFOLDER exists! To avoid data loss, "
     echo "before executing this script again, you must restore the original content by using the '$BACKUPFOLDER/$RESTORESCRIPT' script and delete/rename the backup folder."
     exit 1
 else
@@ -898,7 +906,7 @@ fi
 
 # Desktop client related
 if [ $KCJ -eq 4 ] ; then
-    echo "WARNING - main - TEP Desktop client not installed and was not modified ('kcjparms.txt' not existing) "
+    echo "WARNING - main - TEP Desktop client not installed and was not modified 'kcjparms.txt' not existing."
 else
     modkcjparmstxt "${AFILES["kcjparms.txt"]}"
     rc=$?
@@ -915,7 +923,7 @@ else
 fi
 
 # Disable ICSLIte
-EnableICSLite "false"
+#EnableICSLite "false"
 
 echo ""
 etm=$((SECONDS/60))
