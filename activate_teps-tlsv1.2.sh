@@ -13,21 +13,25 @@
 #             - Added checks to functions if TLSv1.2 related variables were set already 
 # 21.04.2022: Version 1.33     R. Niewolik EMEA AVP Team
 #             - Improved checks if TLSv1.2 configured already
+# 22.04.2022: Version 1.34     R. Niewolik EMEA AVP Team
+#             - added "-n" option to allow a run without performing a backup
 #               
-## 
+###################################################################
 SECONDS=0
 PROGNAME=$(basename $0)
 USRCMD="$0 $*"
-echo "INFO - Script Version 1.33"
+echo "INFO - Script Version 1.34"
 
 usage()
 { # usage description
 echo ""
 echo " Usage:"
-echo "  $PROGNAME { -h ITM home } [ -a arch ]"
-echo " Sample executions:"
-echo "    $PROGNAME -h /opt/IBM/ITM "
+echo "  $PROGNAME { -h ITM home } [ -a arch ] [-n ]"
 echo ""
+echo " Sample executions:"
+echo ""
+echo "    $PROGNAME -h /opt/IBM/ITM       # ITM home set and a backup is performed. Should be the DEFAULT"
+echo "    $PROGNAME -h /opt/IBM/ITM -n    # ITM home set AND NO backup is performed. Please use that parameter carefully!!!!!!"
 }
 
 checkIfFileExists () # not used yet
@@ -582,7 +586,7 @@ modsslclientprops ()
       echo "WARNING - modsslclientprops - $sslclientprops contains \"com.ibm.ssl.protocol=TLSv1.2\" and will not be modified"
       return 4
   else 
-      echo "INFO - modsslclientprops - Modifying $sslclientprops"
+     echo "INFO - modsslclientprops - Modifying $sslclientprops"
   fi
 
   saveorgcreatenew $sslclientprops
@@ -729,12 +733,13 @@ disableAlgorithms ()
 # MAIN ---------------------------------------------------------
 # --------------------------------------------------------------
 
-while getopts "a:h:" OPTS
+while getopts "a:h:n" OPTS
 do
   case $OPTS in
     h) CANDLEHOME=${OPTARG} ;;
     a) ARCH=${OPTARG} ;;
-    *) echo "$OPTARG is not a valid switch"; usage ; exit ;;
+    n) BACKUP="no" ;;
+    *) echo "ERROR - main - You have used a not valid switch"; usage ; exit ;;
   esac
 done
 
@@ -789,13 +794,19 @@ if [ ! -d "${CANDLEHOME}/backup/" ]; then
     echo "ERROR - main - Default backup folder ${CANDLEHOME}/backup does not exists! Please check. "
     exit 1
 fi
-if [ -d "${BACKUPFOLDER}" ]; then
-    echo "ERROR - main - This script was started already and the folder $BACKUPFOLDER exists! To avoid data loss, "
-    echo "before executing this script again, you must restore the original content by using the '$BACKUPFOLDER/$RESTORESCRIPT' script and delete/rename the backup folder."
-    exit 1
+
+if [ "$BACKUP" != "no" ] ; then
+    if [ -d "${BACKUPFOLDER}" ]; then
+        echo "ERROR - main - This script was started already and the folder $BACKUPFOLDER exists! To avoid data loss, "
+        echo "before executing this script again, you must restore the original content by using the '$BACKUPFOLDER/$RESTORESCRIPT' script and delete/rename the backup folder."
+        exit 1
+    else
+        mkdir ${BACKUPFOLDER}
+        echo "INFO - main - Backup directory is: ${BACKUPFOLDER}"
+    fi
 else
-    mkdir ${BACKUPFOLDER}
-    echo "INFO - main - Backup directory is: ${BACKUPFOLDER}"
+     echo "WARNING - main - Backup will not be done because option \"-n\" was set !!!!. Press CTRL+C in the next 7 secs if it was a mistake."
+     sleep 7
 fi
 
 declare -A AFILES=( 
@@ -815,22 +826,26 @@ checkIfFileExists
 # enable ICSLite in eWAS
 EnableICSLite "true"
 
-backupewasAndKeyfiles
-backupfile "${AFILES["httpd.conf"]}" 
-backupfile "${AFILES["cq.ini"]}"
-backupfile "${AFILES["tep.jnlpt"]}"
-backupfile "${AFILES["component.jnlpt"]}"
-backupfile "${AFILES["applet.html.updateparams"]}"
-if [ $KCJ -ne 4 ] ; then
-    backupfile "${AFILES["kcjparms.txt"]}"
+if [ "$BACKUP" != "no" ] ; then
+    backupewasAndKeyfiles
+    backupfile "${AFILES["httpd.conf"]}" 
+    backupfile "${AFILES["cq.ini"]}"
+    backupfile "${AFILES["tep.jnlpt"]}"
+    backupfile "${AFILES["component.jnlpt"]}"
+    backupfile "${AFILES["applet.html.updateparams"]}"
+    if [ $KCJ -ne 4 ] ; then
+         backupfile "${AFILES["kcjparms.txt"]}"
+    fi
+    backupfile "${AFILES["java.security"]}"
+    backupfile "${AFILES["trust.p12"]}"
+    backupfile "${AFILES["key.p12"]}"
+    backupfile "${AFILES["ssl.client.props"]}"
+    # Create a script to restore the files before TLS1.2 was set using this script
+    createRestoreScript
+else
+    echo "WARNING - main - Backup will not be done because option \"-n\" was set !!!!. Press CTRL+C in the next 5 secs if it was a mistake."
+    sleep 7
 fi
-backupfile "${AFILES["java.security"]}"
-backupfile "${AFILES["trust.p12"]}"
-backupfile "${AFILES["key.p12"]}"
-backupfile "${AFILES["ssl.client.props"]}"
-
-# Create a script to restore the files before TLS1.2 was set using this script
-createRestoreScript
 
 # Renew the default certificate
 renewCert
