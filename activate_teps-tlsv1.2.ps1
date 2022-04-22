@@ -1,6 +1,6 @@
 #
 # Usage: Copy script to a directory, for examle C:\myfolder and run script in a Powershell window: 
-#   PS C:\myfolder> .\activate_teps-tlsv1.2.ps1 [ -h ITMHOME ]
+#   PS C:\myfolder> .\activate_teps-tlsv1.2.ps1 [ -h ITMHOME ] [ -n ]
 #
 # 16.03.2022: Initial version  R. Niewolik EMEA AVP Team
 # 13.04.2022: Version 1.31     R. Niewolik EMEA AVP Team
@@ -11,20 +11,46 @@
 #             - Added checks if TLSv1.2 configured already  
 # 21.04.2022: Version 1.33     R. Niewolik EMEA AVP Team
 #             - Improved checks if TLSv1.2 configured already
-#                       
+#             - Modified restore script (added "if exists")
+# 22.04.2022: Version 1.34     R. Niewolik EMEA AVP Team
+#             - added "-n" option to allow a run without performing a backup        
 ##
-param($h)
 
-write-host "INFO - Script Version 1.33"
+param(
+    [Parameter(HelpMessage="Disables backup")]
+    [switch]$n = $False,
+
+    [Parameter(HelpMessage="ITM home folder")]
+    [string]$h,
+
+    [Parameter(Mandatory=$false, ValueFromRemainingArguments=$true)]
+    $UndefinedArgs
+)
+
+write-host "INFO - Script Version 1.34"
 $startTime = $(get-date)
+
+$scriptname = $MyInvocation.MyCommand.Name
+if ( $UndefinedArgs ) { 
+    write-host "ERROR - $scriptname - Please use the correct syntax "
+    write-host ""
+    write-host " Usage:"
+    write-host "  $scriptname { -h ITM home } [-n ]"
+    write-host ""
+    write-host " Sample executions:"
+    write-host "    $scriptname -h /opt/IBM/ITM       # ITM home set and a backup is performed. Should be the DEFAULT"
+    write-host "    $scriptname -h /opt/IBM/ITM -n    # ITM home set AND NO backup is performed. Please use that parameter carefully!!!!!!"
+    write-host ""
+    exit 1
+}
 
 function getCandleHome ($candlehome) 
 {
   if  ( $candlehome ) {
-      $parcandlehome=$args[0]
       write-host "INFO - getCandleHome - CANDLE_HOME set by option is:  $candlehome"
-      if (Test-Path -Path "$candlehome") {
+      if (Test-Path -Path "$candlehome") { 
           write-host "INFO - getCandleHome - Path $candlehome exists. OK"
+          return $candlehome
       } else {
           write-host "ERROR - getCandleHome - Path $candlehome doesn't exist. NOK"
           exit 1
@@ -46,6 +72,7 @@ function getCandleHome ($candlehome)
           }
       }
   }
+  
   return $candlehome
 }
 
@@ -135,8 +162,8 @@ function createRestoreScript ($restorebat)
           continue 
       } 
       Add-Content $restorebatfull $string
-      Add-Content $restorebatfull "del `"$($HFILES.$h).beforetls12`""
-      Add-Content $restorebatfull "del `"$($HFILES.$h).tls12`""
+      Add-Content $restorebatfull "if exist `"$($HFILES.$h).beforetls12`" del `"$($HFILES.$h).beforetls12`""
+      Add-Content $restorebatfull "if exist `"$($HFILES.$h).tls12`" del `"$($HFILES.$h).tls12`""
       Add-Content $restorebatfull " "
   }
   Add-Content $restorebatfull " "
@@ -159,7 +186,7 @@ function EnableICSLIte ($action)
   else {
       write-host "$success"
       write-host "ERROR - EnableICSLIte - Enable ISCLite command $cmd failed. Possibly you did not set a eWAS user password. "
-      Write-Host " Try to set a password as descirbed here https://www.ibm.com/docs/en/tivoli-monitoring/6.3.0?topic=administration-define-wasadmin-password" 
+      write-host " Try to set a password as descirbed here https://www.ibm.com/docs/en/tivoli-monitoring/6.3.0?topic=administration-define-wasadmin-password" 
       write-host " Powershell script ended!"
       exit 1
   }
@@ -180,11 +207,11 @@ function restartTEPS ()
       $c=0
       while($wait -eq 1) {
           If (Select-String -Path "$CANDLEHOME\logs\kfwservices.msg" -Pattern 'Waiting for requests. Startup complete' -SimpleMatch) {
-              Write-Host ""
-              Write-Host 'INFO - restartTEPS - TEPS started successfully' -ForegroundColor Green
+              write-host ""
+              write-host 'INFO - restartTEPS - TEPS started successfully' -ForegroundColor Green
               $wait = 0 
           } Else {
-              Write-Host -NoNewline ".."
+              write-host -NoNewline ".."
               $c = $c + 3
               Start-Sleep -seconds 3  
           }
@@ -645,7 +672,7 @@ function renewCert
       write-host "ERROR - renewCert - Error during gsk8capicmd  commands. Powershell script ended!"
       exit 1
   } else {
-      write-host "INFO - renewCert - Successfully executed gsk8capicmd  commands to copy renewed certificates to $KEYKDB. See label and issuer info below..." 
+      write-host "INFO - renewCert - Successfully executed gsk8capicmd  commands to copy renewed certificates to $KEYKDB." 
       #GSKitcmd gsk8capicmd -cert -list -db $KEYKDB -stashed -label default
       #GSKitcmd gsk8capicmd -cert -details -db $KEYKDB -stashed -label default | findstr "Serial Issuer Subject Not\ Before Not\ After"
       #GSKitcmd gsk8capicmd -cert -details -type p12 -db $KEYP12 -pw WebAS -label default | findstr "Serial Issuer Subject Not\ Before Not\ After"
@@ -723,8 +750,8 @@ function disableAlgorithms ()
 # --------------------------------------------------------------
 # MAIN ---------------------------------------------------------
 # --------------------------------------------------------------
-if ( $h )  { $tmphome = $h }
-else { $tmphome = "" } 
+$nobackup = $n # getting value provided by param  "[switch]$n = $False", see at top of this script
+$tmphome = $h # getting value provided by param "[string]$h"
 
 $CANDLEHOME = getCandleHome $tmphome
 $BACKUPFOLDER = "$CANDLEHOME\Backup\backup_before_TLS1.2" 
@@ -765,17 +792,22 @@ if ( $tepsstatus.Status -ne "Running" ) {
     write-host "ERROR - main - TEPS not running. Please start it and restart the procedure"
     exit 1
 } elseif ( -not ( Select-String -Path "$CANDLEHOME\logs\kfwservices.msg" -Pattern 'Waiting for requests. Startup complete' -SimpleMatch) ) {
-    Write-Host "ERROR - main - TEPS started but not connected to TEMS"
+    write-host "ERROR - main - TEPS started but not connected to TEMS"
     exit 1
 }
 
-if ( test-path "$BACKUPFOLDER" ) { 
-    write-host "ERROR - main - This script was started already and the folder $BACKUPFOLDER exists already! To avoid data loss, "
-    write-host "before executing this script again, you must restore the original content by using the '$RESTORESCRIPT' script and delete/rename the backup folder."
-    exit 1 
+if ( -not $nobackup ) { 
+    if ( test-path "$BACKUPFOLDER" ) { 
+        write-host "ERROR - main - This script was started already and the folder $BACKUPFOLDER exists already! To avoid data loss, "
+        write-host "before executing this script again, you must restore the original content by using the '$RESTORESCRIPT' script and delete/rename the backup folder."
+        exit 1 
+    } else {
+        $null = New-Item -Path "$CANDLEHOME\Backup"  -Name (Split-Path -Leaf "$BACKUPFOLDER") -ItemType "directory"
+        write-host "INFO - main - Folder $BACKUPFOLDER created."
+    }
 } else {
-    $null = New-Item -Path "$CANDLEHOME\Backup"  -Name (Split-Path -Leaf "$BACKUPFOLDER") -ItemType "directory"
-    write-host "INFO - main - Folder $BACKUPFOLDER created."
+    write-host "WARNING - main - !!!! Backup will not be done because option `"-n`" was set !!!!. Press CTRL+C in the next 7 secs if it was a mistake."
+    Start-Sleep -seconds 7 
 }
 
 if ( test-path "$CANDLEHOME\CNPSJ" ) { 
@@ -784,7 +816,6 @@ if ( test-path "$CANDLEHOME\CNPSJ" ) {
     write-host "ERROR - main - Tivoli Enterpise Portal Server not installed. Directory '$CANDLEHOME\CNPSJ' does not exists!"
     exit 1
 } 
-
 
 $HFILES = @{ `
   "httpd.conf"                = "${CANDLEHOME}\IHS\conf\httpd.conf" ; `
@@ -805,22 +836,27 @@ $rc = checkIfFileExists
 # Enable ISCLite 
 EnableICSLIte "true"
 
-backupewasAndkeys $BACKUPFOLDER
-$rc = backupfile $HFILES["httpd.conf"]
-$rc = backupfile $HFILES["kfwenv"] 
-$rc = backupfile $HFILES["tep.jnlpt"]
-$rc = backupfile $HFILES["component.jnlpt"]
-$rc = backupfile $HFILES["applet.html.updateparams"] 
-If ( $KCJ -ne 4 ) { 
-    $rc = backupfile $HFILES["kcjparms.txt"] 
-}
-$rc = backupfile $HFILES["java.security"] 
-$rc = backupfile $HFILES["trust.p12"]
-$rc = backupfile $HFILES["key.p12"]
-$rc = backupfile $HFILES["ssl.client.props"]
+if ( -not $nobackup ) { 
+    backupewasAndkeys $BACKUPFOLDER
+    $rc = backupfile $HFILES["httpd.conf"]
+    $rc = backupfile $HFILES["kfwenv"] 
+    $rc = backupfile $HFILES["tep.jnlpt"]
+    $rc = backupfile $HFILES["component.jnlpt"]
+    $rc = backupfile $HFILES["applet.html.updateparams"] 
+    If ( $KCJ -ne 4 ) { 
+        $rc = backupfile $HFILES["kcjparms.txt"] 
+    }
+    $rc = backupfile $HFILES["java.security"] 
+    $rc = backupfile $HFILES["trust.p12"]
+    $rc = backupfile $HFILES["key.p12"]
+    $rc = backupfile $HFILES["ssl.client.props"]
 
-# Create a script to restore the files before TLS1.2 was set using this script
-createRestoreScript $RESTORESCRIPT # create batch to restore original files in $BACKUPFOLDER (in case of failure)
+    # create batch to restore from original files in $BACKUPFOLDER (e.g. in case of failure)
+    createRestoreScript $RESTORESCRIPT 
+} else {
+    echo "WARNING - main - !!!! Backup will not be done because option `"-n`" was set !!!!. Press CTRL+C in the next 5 secs if it was a mistake."
+    Start-Sleep -seconds 7
+}
 
 # Renew the default certificate
 $rc = renewCert
