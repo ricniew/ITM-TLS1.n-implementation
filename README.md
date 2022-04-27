@@ -18,9 +18,11 @@ Revision: 1.0
 
 [4 Tivoli Enterprise Management Agent](#4-agents)
 
-[5 Troubleshooting](#5-Troubleshooting)
+[5 Summarization and Pruning Agent](#5-summarization-and-pruning-agent)
 
-[6 Appendixes](#6-appendixes)
+[6 Troubleshooting](#5-Troubleshooting)
+
+[7 Appendixes](#6-appendixes)
 
 <BR>
 
@@ -305,7 +307,11 @@ On Linux/Unix you could add the required variables directly into the ITMHOME/con
 
 <BR>
 
-5 Troubleshooting
+5 Summarization and Pruning Agent
+=================
+
+
+6 Troubleshooting
 =================
 
 Content from PFD file: https://www.ibm.com/support/pages/tivoli-monitoring-v6307-tls-v12-only-configuration-tep-ihs-teps-teps-ewas-components-and-ewas-default-certificate-renewal
@@ -340,7 +346,7 @@ https://www.ibm.com/support/pages/unable-login-tivoli-enterprise-portal-tep-webs
 
 <BR>
 
-6 Appendixes
+7 Appendixes
 ============
 
 Sample run of the activate_teps-tlsv1.2.sh script in Linux:
