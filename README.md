@@ -312,7 +312,7 @@ On Linux/Unix you could add the required variables directly into the ITMHOME/con
 
 Check if the S&P Agent is connecting through HTTPS and port 15201, if not, configure it accordingly:
 
-<img src="https://media.github.ibm.com/user/85313/files/dc6d4d00-c640-11ec-9f31-40b1c555503f" width="35%" height="35%">
+<img src="https://media.github.ibm.com/user/85313/files/dc6d4d00-c640-11ec-9f31-40b1c555503f" width="40%" height="40%">
 
 <BR>
   
