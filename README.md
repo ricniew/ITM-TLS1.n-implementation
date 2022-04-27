@@ -308,9 +308,14 @@ On Linux/Unix you could add the required variables directly into the ITMHOME/con
 <BR>
 
 5 Summarization and Pruning Agent
-=================
+=================================
 
+Check if the S&P Agent is connceting through HTTPS and port 15201 if not configure it accordingly:
 
+<img src="https://media.github.ibm.com/user/85313/files/dc6d4d00-c640-11ec-9f31-40b1c555503f" width="25%" height="25%">
+
+<BR>
+  
 6 Troubleshooting
 =================
 
