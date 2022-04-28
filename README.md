@@ -189,9 +189,8 @@ To verify certs usage for ports 15206 (eWas Console) or 15201 (TEPS HTTPS). Samp
     ```
 
 <BR>
-
-
-5 Summarization and Pruning Agent
+  
+4 Summarization and Pruning Agent
 =================================
 
 Check if the S&P Agent is connecting through HTTPS and port 15201, if not, configure it accordingly:
@@ -199,9 +198,9 @@ Check if the S&P Agent is connecting through HTTPS and port 15201, if not, confi
 <img src="https://media.github.ibm.com/user/85313/files/dc6d4d00-c640-11ec-9f31-40b1c555503f" width="40%" height="40%">
 
 <BR>
-
-4 Agents
-==============
+  
+5 Agents
+========
 
 **ALTERNATIVE A** ---------------
 
