@@ -20,9 +20,9 @@ Revision: 1.0
 
 [5 Tivoli Enterprise Management Agent](#5-agents)
 
-[6 Troubleshooting](#5-Troubleshooting)
+[6 Troubleshooting](#6-Troubleshooting)
 
-[7 Appendixes](#6-appendixes)
+[7 Appendixes](#7-appendixes)
 
 <BR>
 
