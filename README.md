@@ -352,8 +352,7 @@ plugin-cfg.xml and httpd.conf file that was edited for this test in step 1&2 abo
 Please read the technote
 https://www.ibm.com/support/pages/unable-login-tivoli-enterprise-portal-tep-webstart-client
 
-<BR>
-[\[goto top\]](#content)
+<BR> [\[goto top\]](#content)
 
 7 Appendixes
 ============
@@ -491,5 +490,4 @@ INFO - main - Procedure successfully finished Elapsedtime: 4 min
 ------------------------------------------------------------------------------------------
 [root@falcate1 IBM]# 
 ```
-<BR>
-[\[goto top\]](#content)
+<BR> [\[goto top\]](#content)
