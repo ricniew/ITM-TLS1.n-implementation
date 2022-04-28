@@ -118,7 +118,7 @@ LINUX/AIX
 <BR>
 
 3 TEPS
-==============
+======
 
 The manual process described in  "_TLS v1.2 only configuration - TEP, IHS, TEPS, TEPS/eWAS components_" section of the PDF file provided (https://www.ibm.com/support/pages/tivoli-monitoring-v6307-tls-v12-only-configuration-tep-ihs-teps-teps-ewas-components-and-ewas-default-certificate-renewal), was automated and two scripts have been created, one PowerShell script for Windows and a Bash shell script for Linux:
 
@@ -131,8 +131,8 @@ The Bash shell script was tested on RedHat linux only, but should run on other L
 
 - Before starting the script, please verify that the TEPS is started and **connected to TEMS using IP.SPIPE**
 - Update the `wasadmin` password if **not** done so far
-    - UNIX: `<BR>$CANDLEHOME/{archdir}/iw/scripts/updateTEPSEPass.sh wasadmin {yourpass}` <BR> For example _/opt/IBM/ITM/lx8266/iw/scripts/ updateTEPSEPass.sh wasadmin itmuser_
-    - WINDOWS: `<BR>%CANDLE_HOME%\CNPSJ\scripts\updateTEPSEPass.bat wasadmin {yourpass}` <BR> For example _c:\IBM\ITM\CNPSJ\scripts\updateTEPSEPass.bat wasadmin itmuser_ 
+    - UNIX: <BR>`$CANDLEHOME/{archdir}/iw/scripts/updateTEPSEPass.sh wasadmin {yourpass}` <BR> For example _/opt/IBM/ITM/lx8266/iw/scripts/ updateTEPSEPass.sh wasadmin itmuser_
+    - WINDOWS: <BR>`%CANDLE_HOME%\CNPSJ\scripts\updateTEPSEPass.bat wasadmin {yourpass}` <BR> For example _C:\IBM\ITM\CNPSJ\scripts\updateTEPSEPass.bat wasadmin itmuser_ 
 - PowerShell on Windows and Bash Shell on Linux must exists
 - If a WAS 855 uplift was not performed in the TEPS host as described in the update readme files, you must execute _Appendix B_ action as described in ITMTEPSeWASTLSv12 pdf  document. To check if a WAS uplift was made use ITMHOME/[arch]/iw/bin/versionInfo.sh or ITMHOME\CNPSJ\bin\versionInfo.bat. The version must be at least 8.5.5.16
 - **If you use your own CA root and issuer certs** in `keyfiles/keyfile.kdb`, you need to check if they are still present in the newly created keyfile.kdb and add them back if needed.
@@ -189,6 +189,7 @@ To verify certs usage for ports 15206 (eWas Console) or 15201 (TEPS HTTPS). Samp
     ```
 <BR>
 
+
 5 Summarization and Pruning Agent
 =================================
 
@@ -197,7 +198,8 @@ Check if the S&P Agent is connecting through HTTPS and port 15201, if not, confi
 <img src="https://media.github.ibm.com/user/85313/files/dc6d4d00-c640-11ec-9f31-40b1c555503f" width="40%" height="40%">
 
 <BR>
-  
+
+
 4 Agents
 ==============
 
