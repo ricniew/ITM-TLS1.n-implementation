@@ -13,7 +13,11 @@
 #             - Improved checks if TLSv1.2 configured already
 #             - Modified restore script (added "if exists")
 # 22.04.2022: Version 1.34     R. Niewolik EMEA AVP Team
-#             - added "-n" option to allow a run without performing a backup        
+#             - added "-n" option to allow a run without performing a backup  
+# 28.04.2022: Version 1.35     R. Niewolik EMEA AVP Team
+#             - Deleted test statement in function renewCert which set $CANDLEHOME to c:\IBM\ITM
+#             - Modified invoke-expression commands to support CANDLEHOME path with spaces 
+#             - Successfuly tested with CANDLEHOME="C:\Program Files (x86)\ibm\ITM"        
 ##
 
 param(
@@ -27,7 +31,7 @@ param(
     $UndefinedArgs
 )
 
-write-host "INFO - Script Version 1.34"
+write-host "INFO - Script Version 1.35"
 $startTime = $(get-date)
 
 $scriptname = $MyInvocation.MyCommand.Name
@@ -178,7 +182,7 @@ function createRestoreScript ($restorebat)
 function EnableICSLIte ($action) 
 {
   write-host "INFO - EnableICSLIte - ISCLite set enabled=$action."
-  $cmd="$CANDLEHOME\CNPSJ\bin\wsadmin -conntype SOAP -lang jacl -f $CANDLEHOME\CNPSJ\scripts\enableISCLite.jacl $action"
+  $cmd="& '$CANDLEHOME\CNPSJ\bin\wsadmin' -conntype SOAP -lang jacl -f '$CANDLEHOME\CNPSJ\scripts\enableISCLite.jacl' $action"
   $cmd += '; $Success=$?'
   #write-host "$cmd"
   $out = Invoke-Expression $cmd
@@ -190,6 +194,7 @@ function EnableICSLIte ($action)
       write-host " Powershell script ended!"
       exit 1
   }
+  
 }
 
 function restartTEPS () 
@@ -649,12 +654,12 @@ function renewCert
       write-host "INFO - renewCert -  Default certificate will be renewed again ($days)" 
   } 
 
-  $cmd ="$CANDLEHOME\CNPSJ\bin\wsadmin -lang jython -c `"AdminTask.renewCertificate('-keyStoreName NodeDefaultKeyStore -certificateAlias  default')`" -c 'AdminConfig.save()'"
+  $cmd ="& '$CANDLEHOME\CNPSJ\bin\wsadmin' -lang jython -c `"AdminTask.renewCertificate('-keyStoreName NodeDefaultKeyStore -certificateAlias  default')`" -c 'AdminConfig.save()'"
   $cmd += '; $Success=$?'
   #write-host $cmd
   Invoke-Expression $cmd
   if ( $Success ) {
-      #$cmd ="$CANDLEHOME\CNPSJ\bin\wsadmin -lang jython -c `"AdminTask.getCertificateChain('[-certificateAlias default -keyStoreName NodeDefaultKeyStore -keyStoreScope (cell):ITMCell:(node):ITMNode ]')`" "
+      #$cmd ="& '$CANDLEHOME\CNPSJ\bin\wsadmin' -lang jython -c `"AdminTask.getCertificateChain('[-certificateAlias default -keyStoreName NodeDefaultKeyStore -keyStoreScope (cell):ITMCell:(node):ITMNode ]')`" "
       #Invoke-Expression $cmd 
       write-host "INFO - renewCert - Successfully renewed Certificate in eWAS"
      
@@ -685,8 +690,7 @@ function renewCert
 function modQop () 
 {
   # check if set already
-  $CANDLEHOME = "c:\IBM\ITM"
-  $cmd = "$CANDLEHOME\CNPSJ\bin\wsadmin -lang jython -c `"AdminTask.getSSLConfig('[-alias NodeDefaultSSLSettings -scopeName (cell):ITMCell:(node):ITMNode ]')`" "
+  $cmd = "& '$CANDLEHOME\CNPSJ\bin\wsadmin' -lang jython -c `"AdminTask.getSSLConfig('[-alias NodeDefaultSSLSettings -scopeName (cell):ITMCell:(node):ITMNode ]')`" "
   $out= Invoke-Expression $cmd
   $pattern = "sslProtocol TLSv1.2"
   $rc=[regex]::Match($out,$pattern)
@@ -697,7 +701,7 @@ function modQop ()
       write-host "INFO - modQop - Quality of Protection (QoP) not set yet. Modifying..."
   } 
   
-  $cmd = "$CANDLEHOME\CNPSJ\bin\wsadmin -lang jython -c `"AdminTask.modifySSLConfig('[-alias NodeDefaultSSLSettings -scopeName (cell):ITMCell:(node):ITMNode -keyStoreName NodeDefaultKeyStore -keyStoreScopeName (cell):ITMCell:(node):ITMNode -trustStoreName NodeDefaultTrustStore -trustStoreScopeName (cell):ITMCell:(node):ITMNode -jsseProvider IBMJSSE2 -sslProtocol TLSv1.2 -clientAuthentication false -clientAuthenticationSupported false -securityLevel HIGH -enabledCiphers ]') `" -c 'AdminConfig.save()'"
+  $cmd = "& '$CANDLEHOME\CNPSJ\bin\wsadmin' -lang jython -c `"AdminTask.modifySSLConfig('[-alias NodeDefaultSSLSettings -scopeName (cell):ITMCell:(node):ITMNode -keyStoreName NodeDefaultKeyStore -keyStoreScopeName (cell):ITMCell:(node):ITMNode -trustStoreName NodeDefaultTrustStore -trustStoreScopeName (cell):ITMCell:(node):ITMNode -jsseProvider IBMJSSE2 -sslProtocol TLSv1.2 -clientAuthentication false -clientAuthenticationSupported false -securityLevel HIGH -enabledCiphers ]') `" -c 'AdminConfig.save()'"
   $cmd += '; $Success=$?'
   #write-host $cmd
   Invoke-Expression $cmd
@@ -732,9 +736,9 @@ function disableAlgorithms ()
   Add-Content $jython "else: "
   Add-Content $jython " AdminConfig.create('Property',sec,'[[name `"com.ibm.websphere.tls.disabledAlgorithms`"] [description `"Added due ITM TSLv1.2 usage`"] [value `"none`"][required `"false`"]]') "
   Add-Content $jython "AdminConfig.save()"
-  $cmd = "$CANDLEHOME\CNPSJ\bin\wsadmin -lang jython -f $jython"
+  $cmd = "& '$CANDLEHOME\CNPSJ\bin\wsadmin' -lang jython -f '$jython'"
   $cmd += '; $Success=$?'
-  write-host $cmd 
+  #write-host $cmd 
   Invoke-Expression $cmd
   if ( $Success ) {
       Remove-Item $jython
