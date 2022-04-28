@@ -7,8 +7,8 @@ Contact: niewolik@de.ibm.com
 Revision: 1.0
 
 
-
-#
+Content
+-------
 
 [1 General](#1-general)
 
@@ -116,6 +116,8 @@ LINUX/AIX
   3.  Restart the TEMSs
 
 <BR>
+
+[\[goto top\]](#content)
 
 3 TEPS
 ======
