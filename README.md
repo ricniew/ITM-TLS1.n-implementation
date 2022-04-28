@@ -188,8 +188,7 @@ To verify certs usage for ports 15206 (eWas Console) or 15201 (TEPS HTTPS). Samp
         commonName                = falcate1
     ```
 
-<BR>
-[\[goto top\]](#content)
+<BR> [\[goto top\]](#content)
   
 4 Summarization and Pruning Agent
 =================================
@@ -198,8 +197,7 @@ Check if the S&P Agent is connecting through HTTPS and port 15201, if not, confi
 
 <img src="https://media.github.ibm.com/user/85313/files/dc6d4d00-c640-11ec-9f31-40b1c555503f" width="40%" height="40%">
 
-<BR>
-[\[goto top\]](#content)
+<BR> [\[goto top\]](#content)
   
 5 Agents
 ========
@@ -318,8 +316,7 @@ Please always check if the registry settings are taken over by the agents after 
 
 On Linux/Unix you could add the required variables directly into the ITMHOME/config/[pc].ini file. That way you do not need the [pc].environemnt file. But this is not working for instance agents, here the instance config file `[pc]_[inst].config` must be modified.
 
-<BR>
-[\[goto top\]](#content)
+<BR> [\[goto top\]](#content)
 
 
 6 Troubleshooting
