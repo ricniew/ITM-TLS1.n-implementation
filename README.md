@@ -16,9 +16,9 @@ Revision: 1.0
 
 [3 Tivoli Enterprise Portal Server](#3-teps)
 
-[4 Tivoli Enterprise Management Agent](#4-agents)
+[4 Summarization and Pruning Agent](#4-summarization-and-pruning-agent)
 
-[5 Summarization and Pruning Agent](#5-summarization-and-pruning-agent)
+[5 Tivoli Enterprise Management Agent](#5-agents)
 
 [6 Troubleshooting](#5-Troubleshooting)
 
@@ -149,11 +149,11 @@ Both scripts are looking for the ITMHOME folder variables (%CANDLE_HOME% on Wind
 
 Windows: 
 - Open PowerShell cmd prompt and go to the temp directory
-- Launch script via `.\activate_teps-tlsv1.2.ps1 [-h ITMHOME ] [ -n ]` <BR> **Note**: If your ITMHOME folder name contains spaces, you must start it as: `.\activate_tls1.2.ps1  -h 'C:\Program Files (x86)\ibm\ITM'`
+- Launch script via <BR> `.\activate_teps-tlsv1.2.ps1 [-h ITMHOME ] [ -n ]` <BR> **Note**: If your ITMHOME folder name contains spaces, you must start it as: <BR> `.\activate_tls1.2.ps1  -h 'C:\Program Files (x86)\ibm\ITM'`
 
 Unix/Linux
 - Open shell prompt and go to the temp directory
-- Launch script via `./activate_teps-tlsv1.2.sh [-h ITMHOME] -a [ arch ] [ -n ]`
+- Launch script via <BR> `./activate_teps-tlsv1.2.sh [-h ITMHOME] -a [ arch ] [ -n ]`
 
 <BR>
   
@@ -161,11 +161,11 @@ Unix/Linux
 
 Test TEP login:
 
-- Access `https://[yourhost]:15201/tep.jnlp` to test Webstart client (you may need to delete the Java cache)
+- Access <BR>`https://[yourhost]:15201/tep.jnlp` <BR> to test Webstart client (you may need to delete the Java cache)
 
 To verify certs usage for ports 15206 (eWas Console) or 15201 (TEPS HTTPS). Sample outputs for port 15206:
 
-- Command `openssl s_client -crlf -connect localhost:15206  -servername localhost -tls1_2 < /dev/null | egrep "Secure Renegotiation|Server public key | SSL handshake"`. Output:
+- Command <BR>`$> openssl s_client -crlf -connect localhost:15206  -servername localhost -tls1_2 < /dev/null | egrep "Secure Renegotiation|Server public key | SSL handshake"`. <BR>Output:
     ```
     depth=1 C = US, O = IBM, OU = ITMNode, OU = ITMCell, OU = Root Certificate, CN = falcate1
     verify error:num=19:self signed certificate in certificate chain
@@ -173,12 +173,12 @@ To verify certs usage for ports 15206 (eWas Console) or 15201 (TEPS HTTPS). Samp
     Server public key is 2048 bit
     Secure Renegotiation IS supported
     ```
-- Command `openssl s_client  -connect localhost:15206 2>/dev/null |  openssl x509 -noout -dates`. Output:
+- Command <BR>`$> openssl s_client  -connect localhost:15206 2>/dev/null |  openssl x509 -noout -dates`. <BR>Output:
     ```
     notBefore=Mar 31 15:22:36 2022 GMT
     notAfter=Mar 31 15:22:36 2023 GMT
     ```
-- Commnad `openssl s_client  -connect localhost:15206 2>/dev/null |  openssl x509 -noout -issuer -nameopt multiline`. Output:
+- Commnad <BR>`$> openssl s_client  -connect localhost:15206 2>/dev/null |  openssl x509 -noout -issuer -nameopt multiline`. <BR>Output:
     ```issuer=
         countryName               = US
         organizationName          = IBM
@@ -187,7 +187,17 @@ To verify certs usage for ports 15206 (eWas Console) or 15201 (TEPS HTTPS). Samp
         organizationalUnitName    = Root Certificate
         commonName                = falcate1
     ```
+<BR>
 
+5 Summarization and Pruning Agent
+=================================
+
+Check if the S&P Agent is connecting through HTTPS and port 15201, if not, configure it accordingly:
+
+<img src="https://media.github.ibm.com/user/85313/files/dc6d4d00-c640-11ec-9f31-40b1c555503f" width="40%" height="40%">
+
+<BR>
+  
 4 Agents
 ==============
 
@@ -204,7 +214,7 @@ If you don't use failover RTEMS (agent connects to one TEMS only) and IP.PIPE wa
 - `tacmd setagentconnection -n falcate1:LZ -a -e KDEBE_TLS10_ON=NO KDEBE_TLS11_ON=NO KDEBE_TLSV12_CIPHER_SPECS=TLS_RSA_WITH_AES_128_CBC_SHA256,TLS_RSA_WITH_AES_256_CBC_SHA256` <BR>([ITMHOME]/config/[pc].environment file is created with the KDEBE settings for each agent running on the system, agents are restarted)
  
 If IP.SPIPE was already used: <BR>
-- `tacmd setagentconnection -n falcate1:LZ -a -e KDEBE_TLS10_ON=NO KDEBE_TLS11_ON=NO KDEBE_TLSV12_CIPHER_SPECS=TLS_RSA_WITH_AES_128_CBC_SHA256,TLS_RSA_WITH_AES_256_CBC_SHA256` ([ITMHOME]/config/[pc].environment file is created with the KDEBE settings for each agent running on the system, agents are restarted)
+- `tacmd setagentconnection -n falcate1:LZ -a -e KDEBE_TLS10_ON=NO KDEBE_TLS11_ON=NO KDEBE_TLSV12_CIPHER_SPECS=TLS_RSA_WITH_AES_128_CBC_SHA256,TLS_RSA_WITH_AES_256_CBC_SHA256` <BR>([ITMHOME]/config/[pc].environment file is created with the KDEBE settings for each agent running on the system, agents are restarted)
 
 
 
@@ -307,15 +317,7 @@ On Linux/Unix you could add the required variables directly into the ITMHOME/con
 
 <BR>
 
-5 Summarization and Pruning Agent
-=================================
 
-Check if the S&P Agent is connecting through HTTPS and port 15201, if not, configure it accordingly:
-
-<img src="https://media.github.ibm.com/user/85313/files/dc6d4d00-c640-11ec-9f31-40b1c555503f" width="40%" height="40%">
-
-<BR>
-  
 6 Troubleshooting
 =================
 
