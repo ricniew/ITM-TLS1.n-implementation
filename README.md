@@ -67,8 +67,8 @@ If all your TEMS use **both IP.SPIPE and IP.PIPE** and **some Agents use IP.PIPE
   2. Configure your TEPS to use IP.SPIPE with TLSV1.2 and the specific ciphers for the TEMS connection (**how to**: See TEPS section for further config TEPS actions related to TLSv1.2 only usage)
   3. Configure all your Agents to use IP.SPIPE with TLSV1.2 and the specific ciphers only for the TEMS connenction (**how to**: see Agents section)
 
-<BR>
-  
+<BR> [\[goto top\]](#content)
+
 2 TEMS
 =======
 
@@ -115,11 +115,9 @@ LINUX/AIX
   2.  Reconfigure TEMS using `itmcmd config -S -t TEMS` disable IP.PIPE protocol
   3.  Restart the TEMSs
 
-<BR>
+<BR> [\[goto top\]](#content)
 
-[\[goto top\]](#content)
-
-3 TEPS
+3 TEPS 
 ======
 
 The manual process described in  "_TLS v1.2 only configuration - TEP, IHS, TEPS, TEPS/eWAS components_" section of the PDF file provided (https://www.ibm.com/support/pages/tivoli-monitoring-v6307-tls-v12-only-configuration-tep-ihs-teps-teps-ewas-components-and-ewas-default-certificate-renewal), was automated and two scripts have been created, one PowerShell script for Windows and a Bash shell script for Linux:
@@ -318,7 +316,7 @@ Please always check if the registry settings are taken over by the agents after 
 
 On Linux/Unix you could add the required variables directly into the ITMHOME/config/[pc].ini file. That way you do not need the [pc].environemnt file. But this is not working for instance agents, here the instance config file `[pc]_[inst].config` must be modified.
 
-<BR>
+<BR>[\[goto top\]](#content)
 
 
 6 Troubleshooting
