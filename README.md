@@ -70,7 +70,7 @@ If all your TEMS use **both IP.SPIPE and IP.PIPE** and **some Agents use IP.PIPE
 <BR>
   
 2 TEMS
-==============
+=======
 
 To use TLS, specifically TLSV1.2, all TEMS server (HUB and remote TEMS) **must** use IP.SPIPE (HTTPS) for communication.
 
@@ -187,6 +187,7 @@ To verify certs usage for ports 15206 (eWas Console) or 15201 (TEPS HTTPS). Samp
         organizationalUnitName    = Root Certificate
         commonName                = falcate1
     ```
+
 <BR>
 
 
@@ -198,7 +199,6 @@ Check if the S&P Agent is connecting through HTTPS and port 15201, if not, confi
 <img src="https://media.github.ibm.com/user/85313/files/dc6d4d00-c640-11ec-9f31-40b1c555503f" width="40%" height="40%">
 
 <BR>
-
 
 4 Agents
 ==============
