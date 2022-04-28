@@ -149,9 +149,7 @@ Both scripts are looking for the ITMHOME folder variables (%CANDLE_HOME% on Wind
 
 Windows: 
 - Open PowerShell cmd prompt and go to the temp directory
-- Launch script via `.\activate_teps-tlsv1.2.ps1 [-h ITMHOME ] [ -n ]`
-
-**Note**: If your ITMHOME folder name contains spaces, you must start it as: `.\activate_tls1.2.ps1  -h 'C:\Program Files (x86)\ibm\ITM'`
+- Launch script via `.\activate_teps-tlsv1.2.ps1 [-h ITMHOME ] [ -n ]` <BR> **Note**: If your ITMHOME folder name contains spaces, you must start it as: `.\activate_tls1.2.ps1  -h 'C:\Program Files (x86)\ibm\ITM'`
 
 Unix/Linux
 - Open shell prompt and go to the temp directory
