@@ -17,7 +17,9 @@
 # 28.04.2022: Version 1.35     R. Niewolik EMEA AVP Team
 #             - Deleted test statement in function renewCert which set $CANDLEHOME to c:\IBM\ITM
 #             - Modified invoke-expression commands to support CANDLEHOME path with spaces 
-#             - Successfuly tested with CANDLEHOME="C:\Program Files (x86)\ibm\ITM"        
+#             - Successfuly tested with CANDLEHOME="C:\Program Files (x86)\ibm\ITM" 
+# 09.05.2022: Version 1.36     R. Niewolik EMEA AVP Team
+#             - Modifed seting of $KCJ var to $global:KCJ       
 ##
 
 param(
@@ -31,7 +33,7 @@ param(
     $UndefinedArgs
 )
 
-write-host "INFO - Script Version 1.35"
+write-host "INFO - Script Version 1.36"
 $startTime = $(get-date)
 
 $scriptname = $MyInvocation.MyCommand.Name
@@ -101,7 +103,7 @@ function checkIfFileExists ()
       } else {
           if ( $h -like '*kcjparms*') {
               write-host "WARNING - checkIfFileExists - File $($HFILES.$h) does NOT exists. KCJ component probably not installed. Continue..."
-              $KCJ=4 # will be used later in main and createRestoreScript
+              $global:KCJ=4 # will be used later in main and createRestoreScript
               continue
           } else {
               write-host "ERROR - checkIfFileExists - file $($HFILES.$h) does NOT exists. Please check."
@@ -109,7 +111,7 @@ function checkIfFileExists ()
           }
       }      
   }
-  
+
   return 0
 }  
 
@@ -833,7 +835,10 @@ $HFILES = @{ `
   "key.p12"                   = "${CANDLEHOME}\CNPSJ\profiles\ITMProfile\config\cells\ITMCell\nodes\ITMNode\key.p12" ; `
   "ssl.client.props"          = "${CANDLEHOME}\CNPSJ\profiles\ITMProfile\properties\ssl.client.props" ;
 }
+
+$global:KCJ=0  # global variable if set to 4 in checkIfFileExists then TEP Desktop Client most likely not installed
 $rc = checkIfFileExists
+
 <#
 #>
 
@@ -841,6 +846,7 @@ $rc = checkIfFileExists
 EnableICSLIte "true"
 
 if ( -not $nobackup ) { 
+
     backupewasAndkeys $BACKUPFOLDER
     $rc = backupfile $HFILES["httpd.conf"]
     $rc = backupfile $HFILES["kfwenv"] 
