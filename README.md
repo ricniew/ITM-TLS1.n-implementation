@@ -4,7 +4,7 @@ Author: Richard Niewolik
 
 Contact: niewolik@de.ibm.com
 
-Revision: 1.0
+Revision: 1.4
 
 
 Content
@@ -135,7 +135,7 @@ The Bash shell script was tested on RedHat linux only, but should run on other L
     - WINDOWS: <BR>`%CANDLE_HOME%\CNPSJ\scripts\updateTEPSEPass.bat wasadmin {newpass}` <BR> For example<BR>  _C:\IBM\ITM\CNPSJ\scripts\updateTEPSEPass.bat wasadmin mypass_ 
 - PowerShell on Windows and Bash Shell on Linux must exists
 - If a WAS 855 uplift was not performed in the TEPS host as described in the update readme files, you must execute _Appendix B_ action as described in ITMTEPSeWASTLSv12 pdf  document. To check if a WAS uplift was made use ITMHOME/[arch]/iw/bin/versionInfo.sh or ITMHOME\CNPSJ\bin\versionInfo.bat. The version must be at least 8.5.5.16
-- **If you use your own CA root and issuer certs** in `keyfiles/keyfile.kdb`, you need to check if they are still present in the newly created keyfile.kdb and add them back if needed.
+- **If you use your own CA root and issuer certs** in `keyfiles/keyfile.kdb` and eWAS, you should execute the script witht he option `-r no` to surpress the ITM default certification renewal. For example `./activate_teps-tlsv1.2.sh -h /opt/IBM/ITM -r no`. If you not set this option, you need to check if our own certificates are still present in the newly created keyfile.kdb and add them back if required.
 
 **Download the scripts:**
 
@@ -147,13 +147,49 @@ Use "Download ZIP" to save scripts to a temp folder. Then unzip it.
 
 Both scripts are looking for the ITMHOME folder variables (%CANDLE_HOME% on Windows and $CANDLEHOME on Linux). If not existing you need to use the `-h [ITMHOME]` option. The Shell script tries also to find the required "arch" folder (e.g. lx8266) but you can use the `-a [ arch ]` to provide the directory name. Additianally there is the option `-h`. It is a switsch which can be used to surpress the backup of the modified files and folders. Please use this option **carefully and never** if you have not created a backup before (as described in the technote). 
 
-Windows: 
-- Open PowerShell cmd prompt and go to the temp directory
-- Launch script via <BR> `.\activate_teps-tlsv1.2.ps1 [-h ITMHOME ] [ -n ]` <BR> **Note**: If your ITMHOME folder name contains spaces, you must start it as: <BR> `.\activate_tls1.2.ps1  -h 'C:\Program Files (x86)\ibm\ITM'`
+WINDOWS Syntax:
 
-Unix/Linux
-- Open shell prompt and go to the temp directory
-- Launch script via <BR> `./activate_teps-tlsv1.2.sh [-h ITMHOME] -a [ arch ] [ -n ]`
+    activate_teps-tlsv1.2.ps1 { -h ITM home } [-b {no, yes[default]} ] [-r {no, yes[default]} ]
+
+ `-h` = ITM home folder
+<BR> 
+`-b` = If backup should be performed or not, default is 'yes'. Please use that parameter carefully!!!!!!
+<BR>
+`-r` = If set to `no` the ITM default cert will NOT be renewed. Default is `yes`
+    
+Sample executions:
+
+- Open PowerShell cmd prompt and go to the temp directory where you have donloaded the script
+
+      .\activate_teps-tlsv1.2.ps1 -h /opt/IBM/ITM              # ITM home set, a backup is performed
+      .\activate_teps-tlsv1.2.ps1 -h /opt/IBM/ITM -r no        # ITM home set, a backup is performed and default keystore is not renewed
+      .\activate_teps-tlsv1.2.ps1 -h /opt/IBM/ITM -b no        # ITM home set, a NO backup is performed
+      .\activate_teps-tlsv1.2.ps1 -h /opt/IBM/ITM -b no -r no  # ITM home set, NO backup is performed and default keystore is not renewed
+
+
+**Note**: If your ITMHOME folder name contains spaces, you must start it as: <BR> `.\activate_tls1.2.ps1  -h 'C:\Program Files (x86)\ibm\ITM'`
+
+UNIX/LINUX Syntax
+
+    ./activate_teps-tlsv1.2.sh { -h ITM home } [ -a arch ] [-b {no, yes[default]} ] [-r {no, yes[default]} ]
+
+`-h` = ITM home folder
+<BR>
+`-a` = Arch folder name (e.g. lx8266)
+<BR>
+`-b` = If backup should be performed or not, default is 'yes'. Please use that parameter carefully!!!!!!
+<BR>
+`-r` = If set to `no` the ITM default cert will NOT be renewed. Default is `yes`
+ 
+Sample executions:
+
+- Open shell prompt and go to the temp directory where you have donloaded the script
+
+      ./activate_teps-tlsv1.2.sh -h /opt/IBM/ITM              # ITM home set, a backup is performed
+      ./activate_teps-tlsv1.2.sh -h /opt/IBM/ITM -r no        # ITM home set, a backup is performed and default keystore is not renewed
+      ./activate_teps-tlsv1.2.sh -h /opt/IBM/ITM -b no        # ITM home set, a NO backup is performed
+      ./activate_teps-tlsv1.2.sh -h /opt/IBM/ITM -b no -r no  # ITM home set, NO backup is performed and default keystore is not renewed
+
 
 <BR>
   
@@ -222,7 +258,7 @@ If IP.SPIPE was already used: <BR>
 **Important Notes:** 
 - **(1)**: You can **only** use the `tacmd` when the OS Agent is running. 
 - **(2)**: On windows the `tacmd setagentconnection` commands are **only** working when the agent is running with **administration** rigths.
-- **(3)**: On Windows instead of using option `-a` in  `tacmdsetagentconnection` you need to use the `-t ` to modify the agents (e.c. "-t nt "). For example: `tacmd setagentconnection -n Primary:myhost:NT -t nt -p SERVER=myprimary1 PROTOCOL=IP.SPIPE IP_PIPE_PORT=3660`
+- **(3)**: On Windows instead of using option `-a` in  `tacmdsetagentconnection` is not supproted on hosts where ITM TEMSs running (Technote: https://www.ibm.com/support/pages/node/6587038). You need to use the `-t ` to modify the agents (e.c. "-t nt "). For example: `tacmd setagentconnection -n Primary:myhost:NT -t nt -p SERVER=myprimary1 PROTOCOL=IP.SPIPE IP_PIPE_PORT=3660`
 - **(4)**: On Windows the option `-e` of `tacmdsetagentconnection` command with multiple variable settings is not supported in versions <= ITM 6.3 FP7 SP6. You would need to execute one comamnd for each KDEBE variable. For example <BR> `tacmd setagentconnection -n Primary:myhost:NT -t nt -e KDEBE_TLS10_ON=NO` <BR> `tacmd setagentconnection -n Primary:myhost:NT -t nt -e KDEBE_TLS11_ON=NO` <BR> `tacmd setagentconnection -n Primary:myhost:NT -t sy -e KDEBE_TLSV12_CIPHER_SPECS=TLS_RSA_WITH_AES_128_CBC_SHA256,TLS_RSA_WITH_AES_256_CBC_SHA256`
 
 - **(5)**: On Windows, the `-e` option creates a `[Overwrite local settings]` section in the `ITMHOME\TMAITM6_64\k[pc]cma.ini` file with the new variable settings. Then the agent is reconfigured and a registry entry is added to `HKEY_LOCAL_MACHINE\SOFTWARE\Candle\K[pc]\Ver610\Primary\Environment` for the specified variable (for example KDEBE_TLSV12_CIPHER_SPECS). This means that in the future, any manual change to the registry key of this variable will be overwritten by the override section, regardless of what you have specified.
@@ -312,7 +348,7 @@ On Windows you may try to edit or add configuration settings directly in the reg
 
 <img src="https://media.github.ibm.com/user/85313/files/b72bde00-b9b4-11ec-98cb-f210ff3d4edb" width="55%" height="55%">
 
-Please always check if the registry settings are taken over by the agents after reboot. Also, always check that the `ITMHOME\TMAITM6_64\k[pc]cma.ini` file does not contain an `[Override Local Settings]` section with the same variable names as the ones you manually set in the registry. The `[Override Local Settings]` section overrides your manual registry changes the next time an agent is reconfigured by the MTEMS tools.  
+Please always check if the registry settings are taken over by the agents after restart. Also, always check that the `ITMHOME\TMAITM6_64\k[pc]cma.ini` file does not contain an `[Override Local Settings]` section with the same variable names as that one you manually set in the registry. The `[Override Local Settings]` section overrides your manual registry changes the next time an agent is reconfigured by the MTEMS tools.  
 
 On Linux/Unix you could add the required variables directly into the ITMHOME/config/[pc].ini file. That way you do not need the [pc].environemnt file. But this is not working for instance agents, here the instance config file `[pc]_[inst].config` must be modified.
 
@@ -359,10 +395,11 @@ https://www.ibm.com/support/pages/unable-login-tivoli-enterprise-portal-tep-webs
 
 Sample run of the activate_teps-tlsv1.2.sh script in Linux:
 ```
-[root@falcate1 IBM]# ./activate_teps-tlsv1.2.sh -h /opt/IBM/ITM
-INFO - Script Version 1.33
-INFO - main - ITM home directory is: /opt/IBM/ITM
-INFO - main - ITM arch directory is: /opt/IBM/ITM/lx8266
+[root@falcate1 IBM]# ./activate_teps-tlsv1.2.sh -h /opt/IBM/ITM 
+INFO - Script Version 1.4
+INFO - check_param - ITM home directory is: /opt/IBM/ITM
+INFO - check_param - Option '-a' for ITM arch folder name was not set. Procedure tries to find it.
+INFO - check_param - ITM arch directory is: /opt/IBM/ITM/lx8266
 INFO - main - TEPS = 06300711 eWAS = 08551600
 INFO - main - Backup directory is: /opt/IBM/ITM/backup/backup_before_TLS1.2
 INFO - checkIfFileExists - Directory /opt/IBM/ITM/lx8266/iw  OK.
@@ -377,31 +414,33 @@ INFO - checkIfFileExists - File /opt/IBM/ITM/lx8266/iw/profiles/ITMProfile/confi
 INFO - checkIfFileExists - File /opt/IBM/ITM/lx8266/iw/java/jre/lib/security/java.security OK.
 INFO - checkIfFileExists - File /opt/IBM/ITM/lx8266/cw/applet.html.updateparams OK.
 INFO - checkIfFileExists - File /opt/IBM/ITM/lx8266/iu/ihs/HTTPServer/conf/httpd.conf OK.
-INFO - EnableICSLite - Set ISCLite to 'true'
+INFO - EnableICSLite - Set ISCLite to 'true' 
 WASX7209I: Connected to process "ITMServer" on node ITMNode using SOAP connector;  The type of process is: UnManagedProcess
 WASX7303I: The following options are passed to the scripting environment and are available as arguments that are stored in the argv variable: "[true]"
 ISClite is not running
-ISClite started
+ISClite started 
 
 INFO - backup - Saving Directory /opt/IBM/ITM/lx8266/iw in /opt/IBM/ITM/backup/backup_before_TLS1.2. This can take a while...
 INFO - backup - /opt/IBM/ITM/keyfiles/ in /opt/IBM/ITM/backup/backup_before_TLS1.2...
-INFO - backupfile - Saving /opt/IBM/ITM/lx8266/iu/ihs/HTTPServer/conf/httpd.conf in /opt/IBM/ITM/backup/backup_before_TLS1.2
-INFO - backupfile - Saving /opt/IBM/ITM/config/cq.ini in /opt/IBM/ITM/backup/backup_before_TLS1.2
-INFO - backupfile - Saving /opt/IBM/ITM/config/tep.jnlpt in /opt/IBM/ITM/backup/backup_before_TLS1.2
-INFO - backupfile - Saving /opt/IBM/ITM/config/component.jnlpt in /opt/IBM/ITM/backup/backup_before_TLS1.2
-INFO - backupfile - Saving /opt/IBM/ITM/lx8266/cw/applet.html.updateparams in /opt/IBM/ITM/backup/backup_before_TLS1.2
-INFO - backupfile - Saving /opt/IBM/ITM/lx8266/iw/java/jre/lib/security/java.security in /opt/IBM/ITM/backup/backup_before_TLS1.2
-INFO - backupfile - Saving /opt/IBM/ITM/lx8266/iw/profiles/ITMProfile/config/cells/ITMCell/nodes/ITMNode/trust.p12 in /opt/IBM/ITM/backup/backup_before_TLS1.2
-INFO - backupfile - Saving /opt/IBM/ITM/lx8266/iw/profiles/ITMProfile/config/cells/ITMCell/nodes/ITMNode/key.p12 in /opt/IBM/ITM/backup/backup_before_TLS1.2
-INFO - backupfile - Saving /opt/IBM/ITM/lx8266/iw/profiles/ITMProfile/properties/ssl.client.props in /opt/IBM/ITM/backup/backup_before_TLS1.2
+INFO - backupfile - Saving /opt/IBM/ITM/lx8266/iu/ihs/HTTPServer/conf/httpd.conf in /opt/IBM/ITM/backup/backup_before_TLS1.2 
+INFO - backupfile - Saving /opt/IBM/ITM/config/cq.ini in /opt/IBM/ITM/backup/backup_before_TLS1.2 
+INFO - backupfile - Saving /opt/IBM/ITM/config/tep.jnlpt in /opt/IBM/ITM/backup/backup_before_TLS1.2 
+INFO - backupfile - Saving /opt/IBM/ITM/config/component.jnlpt in /opt/IBM/ITM/backup/backup_before_TLS1.2 
+INFO - backupfile - Saving /opt/IBM/ITM/lx8266/cw/applet.html.updateparams in /opt/IBM/ITM/backup/backup_before_TLS1.2 
+INFO - backupfile - Saving /opt/IBM/ITM/lx8266/iw/java/jre/lib/security/java.security in /opt/IBM/ITM/backup/backup_before_TLS1.2 
+INFO - backupfile - Saving /opt/IBM/ITM/lx8266/iw/profiles/ITMProfile/config/cells/ITMCell/nodes/ITMNode/trust.p12 in /opt/IBM/ITM/backup/backup_before_TLS1.2 
+INFO - backupfile - Saving /opt/IBM/ITM/lx8266/iw/profiles/ITMProfile/config/cells/ITMCell/nodes/ITMNode/key.p12 in /opt/IBM/ITM/backup/backup_before_TLS1.2 
+INFO - backupfile - Saving /opt/IBM/ITM/lx8266/iw/profiles/ITMProfile/properties/ssl.client.props in /opt/IBM/ITM/backup/backup_before_TLS1.2 
 INFO - createRestoreScript - Restore script created: /opt/IBM/ITM/backup/backup_before_TLS1.2/SCRIPTrestore.sh
-INFO - renewCert -  Default certificate will be renewed again (22)
+INFO - renewCert -  Default certificate will be renewed again (58)
 WASX7209I: Connected to process "ITMServer" on node ITMNode using SOAP connector;  The type of process is: UnManagedProcess
 TEPSEWASBundle loaded.
 '\nCWPKI0704I: The personal certificate with the default alias in the NodeDefaultKeyStore keystore has been RENEWED.'
 ''
 INFO - renewCert - Successfully renewed Certificate
 INFO - renewCert - Running GSKitcmd.sh commands
+
+
 
 
 INFO - renewCert - GSKitcmd.sh commands finished successfully.
@@ -421,11 +460,11 @@ Tivoli Enterprise Portal Server started
 INFO - restartTEPS - Waiting for TEPS to initialize....
 ............
 INFO - restartTEPS - TEPS restarted successfully.
-INFO - EnableICSLite - Set ISCLite to 'true'
+INFO - EnableICSLite - Set ISCLite to 'true' 
 WASX7209I: Connected to process "ITMServer" on node ITMNode using SOAP connector;  The type of process is: UnManagedProcess
 WASX7303I: The following options are passed to the scripting environment and are available as arguments that are stored in the argv variable: "[true]"
 ISClite is not running
-ISClite started
+ISClite started 
 
 WARNING - modQop - Quality of Protection (QoP) is already set to 'sslProtocol SSL_TLSv2' and will not be modified again.
 INFO - disableAlgorithms - Modifying /opt/IBM/ITM/lx8266/iw/profiles/ITMProfile/config/cells/ITMCell/security.xml
@@ -456,11 +495,11 @@ Tivoli Enterprise Portal Server started
 INFO - restartTEPS - Waiting for TEPS to initialize....
 ............
 INFO - restartTEPS - TEPS restarted successfully.
-INFO - EnableICSLite - Set ISCLite to 'true'
+INFO - EnableICSLite - Set ISCLite to 'true' 
 WASX7209I: Connected to process "ITMServer" on node ITMNode using SOAP connector;  The type of process is: UnManagedProcess
 WASX7303I: The following options are passed to the scripting environment and are available as arguments that are stored in the argv variable: "[true]"
 ISClite is not running
-ISClite started
+ISClite started 
 
 INFO - modjavasecurity - Modifying /opt/IBM/ITM/lx8266/iw/java/jre/lib/security/java.security
 INFO - saveorgcreatenew - /opt/IBM/ITM/lx8266/iw/java/jre/lib/security/java.security.beforetls12 created to save original content
@@ -480,14 +519,14 @@ Agent configuration completed...
 WARNING - main - TEP Desktop client not installed and was not modified 'kcjparms.txt' not existing.
 
 ------------------------------------------------------------------------------------------
-INFO - main - Procedure successfully finished Elapsedtime: 4 min
- - Original files saved in folder /opt/IBM/ITM/backup/backup_before_TLS1.2
- - To restore the level before update run '/opt/IBM/ITM/backup/backup_before_TLS1.2/SCRIPTrestore.sh'
+INFO - main - Procedure successfully finished Elapsedtime: 4 min 
+ - Original files saved in folder /opt/IBM/ITM/backup/backup_before_TLS1.2 
+ - To restore the level before update run '/opt/IBM/ITM/backup/backup_before_TLS1.2/SCRIPTrestore.sh' 
 ----- POST script execution steps ---
  - Reconfigure TEPS and verify connections for TEP, TEPS, HUB
  - To check eWAS settings use: https://falcate1.fyre.ibm.com:15206/ibm/console/login
  - To check TEP WebStart  use: https://falcate1.fyre.ibm.com:15201/tep.jnlp
 ------------------------------------------------------------------------------------------
-[root@falcate1 IBM]# 
+[root@falcate1 IBM]#
 ```
 <BR> [\[goto top\]](#content)
