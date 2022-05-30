@@ -15,45 +15,104 @@
 # 22.04.2022: Version 1.34     R. Niewolik EMEA AVP Team
 #             - added "-n" option to allow a run without performing a backup  
 # 28.04.2022: Version 1.35     R. Niewolik EMEA AVP Team
-#             - Deleted test statement in function renewCert which set $CANDLEHOME to c:\IBM\ITM
-#             - Modified invoke-expression commands to support CANDLEHOME path with spaces 
-#             - Successfuly tested with CANDLEHOME="C:\Program Files (x86)\ibm\ITM" 
+#             - Deleted test statement in function renewCert which set $ITMHOME to c:\IBM\ITM
+#             - Modified invoke-expression commands to support ITMHOME path with spaces 
+#             - Successfuly tested with ITMHOME="C:\Program Files (x86)\ibm\ITM" 
 # 09.05.2022: Version 1.36     R. Niewolik EMEA AVP Team
-#             - Modifed seting of $KCJ var to $global:KCJ       
+#             - Modifed seting of $KCJ var to $global:KCJ  
+# 27.05.2022: Version 1.4      R. Niewolik EMEA AVP Team
+#             - Delete -n switch parameter and added -b instead
+#             - Added new -r parameter to allow a run without cert renew
+#             - Added functions for syntax display (syntax) and parameter check (check_param)      
 ##
 
-param(
-    [Parameter(HelpMessage="Disables backup")]
-    [switch]$n = $False,
-
+param (
     [Parameter(HelpMessage="ITM home folder")]
-    [string]$h,
+    [AllowEmptyString()]
+    [string]$h = "",
+
+    [Parameter(HelpMessage="Perform backup or not")]
+    [string]$b= 'yes',
+
+    [Parameter(HelpMessage="Certificate renew or not")]
+    [string]$r = 'yes',
 
     [Parameter(Mandatory=$false, ValueFromRemainingArguments=$true)]
     $UndefinedArgs
 )
 
-write-host "INFO - Script Version 1.36"
+write-host "INFO - Script Version 1.4"
 $startTime = $(get-date)
+$SCRIPTNAME = $MyInvocation.MyCommand.Name
 
-$scriptname = $MyInvocation.MyCommand.Name
-if ( $UndefinedArgs ) { 
-    write-host "ERROR - $scriptname - Please use the correct syntax "
+function syntax () 
+{
+    write-output "ERROR - $SCRIPTNAME - Please use the correct syntax "
     write-host ""
     write-host " Usage:"
-    write-host "  $scriptname { -h ITM home } [-n ]"
+    write-host "  $SCRIPTNAME { -h ITM home } [-b {no, yes[default]} ] [-r {no, yes[default]} ]"
+    write-host "    -h = ITM home folder"
+    write-host "    -b = If backup should be performed or not, default is 'yes'. Please use that parameter carefully!!!!!!"
+    write-host "    -r = If default cert should be renewed, default is 'yes'"
     write-host ""
     write-host " Sample executions:"
-    write-host "    $scriptname -h /opt/IBM/ITM       # ITM home set and a backup is performed. Should be the DEFAULT"
-    write-host "    $scriptname -h /opt/IBM/ITM -n    # ITM home set AND NO backup is performed. Please use that parameter carefully!!!!!!"
+    write-host "    $SCRIPTNAME -h /opt/IBM/ITM              # ITM home set, a backup is performed"
+    write-host "    $SCRIPTNAME -h /opt/IBM/ITM -r no        # ITM home set, a backup is performed and default keystore is not renewed"
+    write-host "    $SCRIPTNAME -h /opt/IBM/ITM -b no        # ITM home set, a NO backup is performed"
+    write-host "    $SCRIPTNAME -h /opt/IBM/ITM -b no -r no  # ITM home set, NO backup is performed and default keystore is not renewed"
     write-host ""
+    exit 1 
+
+}
+
+function check_param ()
+{
+  if ( $UndefinedArgs ) { 
+    syntax
     exit 1
+  } 
+  if ( $r ) { 
+      if ( $r -ne 'no' -And $r -ne 'yes'  ) { 
+          write-host "ERROR - check_param - Bad execution syntax. Parameter '-r' value not correct (yes/no)"
+          syntax
+          exit 1
+      } else {
+          if ( $r -eq 'yes' ) {
+              write-host "INFO - check_param - Parameter '-r' = '$r' (default)"
+          } else {  
+              write-host "INFO - check_param - Parameter '-r' = '$r'  OK."
+          }
+      }
+  }
+  if ( $b ) { 
+      if ( $b -ne 'no' -And $b -ne 'yes'  ) {
+          write-host "ERROR - check_param - Bad execution syntax. Parameter '-b' value not correct (yes/no)"
+          syntax
+          exit 1
+       } else {
+          if ( $b -eq 'yes' ) {
+              write-host "INFO - check_param - Parameter '-b' = '$b' (default)"
+          } else {  
+              write-host "INFO - check_param - Parameter '-b' = '$b'  OK."
+          }
+      }
+  }
+
+  if ( $h ) { 
+      if ( $h -eq ''  ) {
+          write-host "ERROR - check_param - Bad execution syntax. Parameter '-h' value not correct (-h {itmhome})"
+          syntax
+          exit 1
+      } else {
+          write-host "INFO - check_param - ITMHOME Parameter '-h' = '$h'  OK."
+      }  
+  }
 }
 
 function getCandleHome ($candlehome) 
 {
   if  ( $candlehome ) {
-      write-host "INFO - getCandleHome - CANDLE_HOME set by option is:  $candlehome"
+      write-host "INFO - getCandleHome - CANDLE_HOME set by option '-h' is:  $candlehome"
       if (Test-Path -Path "$candlehome") { 
           write-host "INFO - getCandleHome - Path $candlehome exists. OK"
           return $candlehome
@@ -61,7 +120,8 @@ function getCandleHome ($candlehome)
           write-host "ERROR - getCandleHome - Path $candlehome doesn't exist. NOK"
           exit 1
       }
-  } else { 
+  } else {
+      write-host "INFO - getCandleHome - ITMHOME was not set by option '-h'"
       write-host "INFO - getCandleHome - Looking for environment variable CANDLE_HOME"
       $cdh = Get-WmiObject -query "select * from Win32_environment where username='<system>' and name='CANDLE_HOME'" | ft -hide | out-string;
       if ( !$cdh  ) {
@@ -85,15 +145,15 @@ function getCandleHome ($candlehome)
 function checkIfFileExists () 
 {
   # this function als check if the files to backup exists
-  if ( Test-Path -Path "$CANDLEHOME/CNPSJ" ) {
-      write-host "INFO - checkIfFileExists - Directory $CANDLEHOME/CNPSJ  OK."
+  if ( Test-Path -Path "$ITMHOME/CNPSJ" ) {
+      write-host "INFO - checkIfFileExists - Directory $ITMHOME/CNPSJ  OK."
   } else {
-      write-host "ERROR - checkIfFileExists - Directory $CANDLEHOME/CNPSJ  does NOT exists. Please check."
+      write-host "ERROR - checkIfFileExists - Directory $ITMHOME/CNPSJ  does NOT exists. Please check."
   }
-  if ( Test-Path -Path "$CANDLEHOME\keyfiles" ) {
-      write-host "INFO - checkIfFileExists - Directory $CANDLEHOME\keyfiles  OK."
+  if ( Test-Path -Path "$ITMHOME\keyfiles" ) {
+      write-host "INFO - checkIfFileExists - Directory $ITMHOME\keyfiles  OK."
   } else {
-      write-host "ERROR - checkIfFileExists - Directory $CANDLEHOME\keyfiles  does NOT exists. Please check."
+      write-host "ERROR - checkIfFileExists - Directory $ITMHOME\keyfiles  does NOT exists. Please check."
   }
   
   foreach ( $h in $HFILES.Keys ) {
@@ -132,17 +192,17 @@ function backupfile ($file)
 
 function backupewasAndkeys ($backupfolder) 
 {
-  write-host "INFO - backupewasAndkeys - Directory $CANDLEHOME\CNPSJ saving in $BACKUPFOLDER. This can take a while..."
-  Copy-Item -Path "$CANDLEHOME\CNPSJ" -Destination "$BACKUPFOLDER" -Recurse -erroraction stop
+  write-host "INFO - backupewasAndkeys - Directory $ITMHOME\CNPSJ saving in $BACKUPFOLDER. This can take a while..."
+  Copy-Item -Path "$ITMHOME\CNPSJ" -Destination "$BACKUPFOLDER" -Recurse -erroraction stop
   if ( -not $? ) {
-      write-host "ERROR - backupewasAndkeys - Could not copy $CANDLEHOME/CNPSJ folder to $BACKUPFOLDER !! Check permissions and available space."
+      write-host "ERROR - backupewasAndkeys - Could not copy $ITMHOME/CNPSJ folder to $BACKUPFOLDER !! Check permissions and available space."
       exit 1
   }
-  write-host "INFO - backupewasAndkeys - Directory $CANDLEHOME\keyfiles saving in $BACKUPFOLDER"
-  Copy-Item -Path "$CANDLEHOME\keyfiles" -Destination "$BACKUPFOLDER" -Recurse -erroraction stop
+  write-host "INFO - backupewasAndkeys - Directory $ITMHOME\keyfiles saving in $BACKUPFOLDER"
+  Copy-Item -Path "$ITMHOME\keyfiles" -Destination "$BACKUPFOLDER" -Recurse -erroraction stop
   write-host "INFO - backupewasAndkeys - Files successfully saved in folder $BACKUPFOLDER."
   if ( -not $? ) {
-      write-host "ERROR - backupewasAndkeys - Could not copy $CANDLEHOME/keyfiles folder to $BACKUPFOLDER !! Check permissions and available space."
+      write-host "ERROR - backupewasAndkeys - Could not copy $ITMHOME/keyfiles folder to $BACKUPFOLDER !! Check permissions and available space."
       exit 1
   }
 }
@@ -157,8 +217,8 @@ function createRestoreScript ($restorebat)
 
   $rc = New-Item -Path "$BACKUPFOLDER" -Name "$restorebat" -ItemType "file"
   Add-Content $restorebatfull "cd `"$BACKUPFOLDER`""
-  Add-Content $restorebatfull "xcopy /y/s CNPSJ `"$CANDLEHOME\CNPSJ`""
-  Add-Content $restorebatfull "xcopy /y/s keyfiles `"$CANDLEHOME\keyfiles`""
+  Add-Content $restorebatfull "xcopy /y/s CNPSJ `"$ITMHOME\CNPSJ`""
+  Add-Content $restorebatfull "xcopy /y/s keyfiles `"$ITMHOME\keyfiles`""
   Add-Content $restorebatfull " "
 
   foreach ( $h in $HFILES.Keys ) {
@@ -184,7 +244,7 @@ function createRestoreScript ($restorebat)
 function EnableICSLIte ($action) 
 {
   write-host "INFO - EnableICSLIte - ISCLite set enabled=$action."
-  $cmd="& '$CANDLEHOME\CNPSJ\bin\wsadmin' -conntype SOAP -lang jacl -f '$CANDLEHOME\CNPSJ\scripts\enableISCLite.jacl' $action"
+  $cmd="& '$ITMHOME\CNPSJ\bin\wsadmin' -conntype SOAP -lang jacl -f '$ITMHOME\CNPSJ\scripts\enableISCLite.jacl' $action"
   $cmd += '; $Success=$?'
   #write-host "$cmd"
   $out = Invoke-Expression $cmd
@@ -213,7 +273,7 @@ function restartTEPS ()
       $wait = 1
       $c=0
       while($wait -eq 1) {
-          If (Select-String -Path "$CANDLEHOME\logs\kfwservices.msg" -Pattern 'Waiting for requests. Startup complete' -SimpleMatch) {
+          If (Select-String -Path "$ITMHOME\logs\kfwservices.msg" -Pattern 'Waiting for requests. Startup complete' -SimpleMatch) {
               write-host ""
               write-host 'INFO - restartTEPS - TEPS started successfully' -ForegroundColor Green
               $wait = 0 
@@ -282,7 +342,7 @@ function modhttpconf ($httpdfile)
   $savehttpdfile = $rc.save
   $foundsslcfg = 1
   foreach( $line in Get-Content $savehttpdfile ) {
-      #echo -- $foundsslcfg
+      #write-host -- $foundsslcfg
       if ( $line.StartsWith("#") ) { Add-Content $newhttpdfile "${line}" ; continue }
       if ( "$line" -match "ServerName\s*(.*):15200" ) {
           $temp = 'ServerName ' + $matches[1] + ':15201'
@@ -298,8 +358,8 @@ function modhttpconf ($httpdfile)
       }
       if ( $foundsslcfg -eq 1 ) {  
           if ( $line -eq '<VirtualHost *:15201>') {
-              #echo Debug -modhttpconf-----line= $line -- foundsslcfg= $foundsslcfg 
-              $ch = $CANDLEHOME -replace "\\", '/'
+              #write-host Debug -modhttpconf-----line= $line -- foundsslcfg= $foundsslcfg 
+              $ch = $ITMHOME -replace "\\", '/'
               $foundsslcfg = 0
               Add-Content $newhttpdfile $line
               $temp = '  DocumentRoot "' + ${ch} + '/CNB"'
@@ -637,9 +697,9 @@ function modsslclientprops ($sslclientprops)
 
 function renewCert  
 { 
-  $KEYKDB="$CANDLEHOME\\keyfiles\\keyfile.kdb"
-  $KEYP12="$CANDLEHOME\\CNPSJ\\profiles\\ITMProfile\\config\\cells\\ITMCell\\nodes\\ITMNode\\key.p12"
-  $TRUSTP12="$CANDLEHOME\\CNPSJ\\profiles\\ITMProfile\\config\\cells\\ITMCell\\nodes\\ITMNode\\trust.p12"
+  $KEYKDB="$ITMHOME\\keyfiles\\keyfile.kdb"
+  $KEYP12="$ITMHOME\\CNPSJ\\profiles\\ITMProfile\\config\\cells\\ITMCell\\nodes\\ITMNode\\key.p12"
+  $TRUSTP12="$ITMHOME\\CNPSJ\\profiles\\ITMProfile\\config\\cells\\ITMCell\\nodes\\ITMNode\\trust.p12"
 
   # check exp date
   $keydate = GSKitcmd gsk8capicmd -cert -details -db $KEYKDB -stashed -label default | find "Not Before"
@@ -656,12 +716,12 @@ function renewCert
       write-host "INFO - renewCert -  Default certificate will be renewed again ($days)" 
   } 
 
-  $cmd ="& '$CANDLEHOME\CNPSJ\bin\wsadmin' -lang jython -c `"AdminTask.renewCertificate('-keyStoreName NodeDefaultKeyStore -certificateAlias  default')`" -c 'AdminConfig.save()'"
+  $cmd ="& '$ITMHOME\CNPSJ\bin\wsadmin' -lang jython -c `"AdminTask.renewCertificate('-keyStoreName NodeDefaultKeyStore -certificateAlias  default')`" -c 'AdminConfig.save()'"
   $cmd += '; $Success=$?'
   #write-host $cmd
   Invoke-Expression $cmd
   if ( $Success ) {
-      #$cmd ="& '$CANDLEHOME\CNPSJ\bin\wsadmin' -lang jython -c `"AdminTask.getCertificateChain('[-certificateAlias default -keyStoreName NodeDefaultKeyStore -keyStoreScope (cell):ITMCell:(node):ITMNode ]')`" "
+      #$cmd ="& '$ITMHOME\CNPSJ\bin\wsadmin' -lang jython -c `"AdminTask.getCertificateChain('[-certificateAlias default -keyStoreName NodeDefaultKeyStore -keyStoreScope (cell):ITMCell:(node):ITMNode ]')`" "
       #Invoke-Expression $cmd 
       write-host "INFO - renewCert - Successfully renewed Certificate in eWAS"
      
@@ -692,7 +752,7 @@ function renewCert
 function modQop () 
 {
   # check if set already
-  $cmd = "& '$CANDLEHOME\CNPSJ\bin\wsadmin' -lang jython -c `"AdminTask.getSSLConfig('[-alias NodeDefaultSSLSettings -scopeName (cell):ITMCell:(node):ITMNode ]')`" "
+  $cmd = "& '$ITMHOME\CNPSJ\bin\wsadmin' -lang jython -c `"AdminTask.getSSLConfig('[-alias NodeDefaultSSLSettings -scopeName (cell):ITMCell:(node):ITMNode ]')`" "
   $out= Invoke-Expression $cmd
   $pattern = "sslProtocol TLSv1.2"
   $rc=[regex]::Match($out,$pattern)
@@ -703,7 +763,7 @@ function modQop ()
       write-host "INFO - modQop - Quality of Protection (QoP) not set yet. Modifying..."
   } 
   
-  $cmd = "& '$CANDLEHOME\CNPSJ\bin\wsadmin' -lang jython -c `"AdminTask.modifySSLConfig('[-alias NodeDefaultSSLSettings -scopeName (cell):ITMCell:(node):ITMNode -keyStoreName NodeDefaultKeyStore -keyStoreScopeName (cell):ITMCell:(node):ITMNode -trustStoreName NodeDefaultTrustStore -trustStoreScopeName (cell):ITMCell:(node):ITMNode -jsseProvider IBMJSSE2 -sslProtocol TLSv1.2 -clientAuthentication false -clientAuthenticationSupported false -securityLevel HIGH -enabledCiphers ]') `" -c 'AdminConfig.save()'"
+  $cmd = "& '$ITMHOME\CNPSJ\bin\wsadmin' -lang jython -c `"AdminTask.modifySSLConfig('[-alias NodeDefaultSSLSettings -scopeName (cell):ITMCell:(node):ITMNode -keyStoreName NodeDefaultKeyStore -keyStoreScopeName (cell):ITMCell:(node):ITMNode -trustStoreName NodeDefaultTrustStore -trustStoreScopeName (cell):ITMCell:(node):ITMNode -jsseProvider IBMJSSE2 -sslProtocol TLSv1.2 -clientAuthentication false -clientAuthenticationSupported false -securityLevel HIGH -enabledCiphers ]') `" -c 'AdminConfig.save()'"
   $cmd += '; $Success=$?'
   #write-host $cmd
   Invoke-Expression $cmd
@@ -719,7 +779,7 @@ function modQop ()
 
 function disableAlgorithms () 
 {
-  $secxml = "$CANDLEHOME\CNPSJ\profiles\ITMProfile\config\cells\ITMCell\security.xml"
+  $secxml = "$ITMHOME\CNPSJ\profiles\ITMProfile\config\cells\ITMCell\security.xml"
   $pattern = "com.ibm.websphere.tls.disabledAlgorithms.* value=.*none"  
   if ( select-string -Path "$secxml" -Pattern $pattern ) {
       write-host "WARNING - disableAlgorithms - Custom property 'com.ibm.websphere.tls.disabledAlgorithms... value=none' is already set and will not be set again"
@@ -729,8 +789,8 @@ function disableAlgorithms ()
   } 
   
    
-  $jython = "$CANDLEHOME\tmp\org.jy"
-  $null = New-Item  -path "$CANDLEHOME\tmp" -name "org.jy"  -ItemType "file"
+  $jython = "$ITMHOME\tmp\org.jy"
+  $null = New-Item  -path "$ITMHOME\tmp" -name "org.jy"  -ItemType "file"
   Add-Content $jython "sec = AdminConfig.getid('/Security:/')"
   Add-Content $jython "prop = AdminConfig.getid('/Security:/Property:com.ibm.websphere.tls.disabledAlgorithms/' )"
   Add-Content $jython "if prop:" 
@@ -738,7 +798,7 @@ function disableAlgorithms ()
   Add-Content $jython "else: "
   Add-Content $jython " AdminConfig.create('Property',sec,'[[name `"com.ibm.websphere.tls.disabledAlgorithms`"] [description `"Added due ITM TSLv1.2 usage`"] [value `"none`"][required `"false`"]]') "
   Add-Content $jython "AdminConfig.save()"
-  $cmd = "& '$CANDLEHOME\CNPSJ\bin\wsadmin' -lang jython -f '$jython'"
+  $cmd = "& '$ITMHOME\CNPSJ\bin\wsadmin' -lang jython -f '$jython'"
   $cmd += '; $Success=$?'
   #write-host $cmd 
   Invoke-Expression $cmd
@@ -756,11 +816,16 @@ function disableAlgorithms ()
 # --------------------------------------------------------------
 # MAIN ---------------------------------------------------------
 # --------------------------------------------------------------
-$nobackup = $n # getting value provided by param  "[switch]$n = $False", see at top of this script
-$tmphome = $h # getting value provided by param "[string]$h"
 
-$CANDLEHOME = getCandleHome $tmphome
-$BACKUPFOLDER = "$CANDLEHOME\Backup\backup_before_TLS1.2" 
+# check paramerter
+check_param
+
+$backup = $b # getting value (no/yes). Provided by param  "[string]$b", see at top of this script 
+$tmphome = $h # getting value provided by param "[string]$h"
+$certrenew = $r # if cert needs to be renewed (no/yes). Provided by param  "[string]$r"
+
+$ITMHOME = getCandleHome $tmphome
+$BACKUPFOLDER = "$ITMHOME\Backup\backup_before_TLS1.2" 
 $RESTORESCRIPT = "SCRIPTrestore.bat"
 
 $permissions = kincinfo -r
@@ -797,43 +862,43 @@ $tepsstatus = Get-Service -Name KFWSRV
 if ( $tepsstatus.Status -ne "Running" ) {
     write-host "ERROR - main - TEPS not running. Please start it and restart the procedure"
     exit 1
-} elseif ( -not ( Select-String -Path "$CANDLEHOME\logs\kfwservices.msg" -Pattern 'Waiting for requests. Startup complete' -SimpleMatch) ) {
+} elseif ( -not ( Select-String -Path "$ITMHOME\logs\kfwservices.msg" -Pattern 'Waiting for requests. Startup complete' -SimpleMatch) ) {
     write-host "ERROR - main - TEPS started but not connected to TEMS"
     exit 1
 }
 
-if ( -not $nobackup ) { 
+if ( $backup -eq 'yes' ) { 
     if ( test-path "$BACKUPFOLDER" ) { 
         write-host "ERROR - main - This script was started already and the folder $BACKUPFOLDER exists already! To avoid data loss, "
         write-host "before executing this script again, you must restore the original content by using the '$RESTORESCRIPT' script and delete/rename the backup folder."
         exit 1 
     } else {
-        $null = New-Item -Path "$CANDLEHOME\Backup"  -Name (Split-Path -Leaf "$BACKUPFOLDER") -ItemType "directory"
+        $null = New-Item -Path "$ITMHOME\Backup"  -Name (Split-Path -Leaf "$BACKUPFOLDER") -ItemType "directory"
         write-host "INFO - main - Folder $BACKUPFOLDER created."
     }
 } else {
-    write-host "WARNING - main - !!!! Backup will not be done because option `"-n`" was set !!!!. Press CTRL+C in the next 7 secs if it was a mistake."
+    write-host "WARNING - main - !!!! Backup will not be done because option `"-b no`" was set !!!!. Press CTRL+C in the next 7 secs if it was a mistake."
     Start-Sleep -seconds 7 
 }
 
-if ( test-path "$CANDLEHOME\CNPSJ" ) { 
+if ( test-path "$ITMHOME\CNPSJ" ) { 
     write-host "INFO - main - Tivoli Enterpise Portal Server is installed."
 } else {
-    write-host "ERROR - main - Tivoli Enterpise Portal Server not installed. Directory '$CANDLEHOME\CNPSJ' does not exists!"
+    write-host "ERROR - main - Tivoli Enterpise Portal Server not installed. Directory '$ITMHOME\CNPSJ' does not exists!"
     exit 1
 } 
 
 $HFILES = @{ `
-  "httpd.conf"                = "${CANDLEHOME}\IHS\conf\httpd.conf" ; `
-  "kfwenv"                    = "${CANDLEHOME}\CNPS\kfwenv" ; `
-  "tep.jnlpt"                 = "${CANDLEHOME}\Config\tep.jnlpt" ; `
-  "component.jnlpt"           = "${CANDLEHOME}\Config\component.jnlpt" ; `
-  "applet.html.updateparams"  = "${CANDLEHOME}\CNB\applet.html.updateparams" ; `
-  "kcjparms.txt"              = "${CANDLEHOME}\CNP\kcjparms.txt" ; `
-  "java.security"             = "${CANDLEHOME}\CNPSJ\java\jre\lib\security\java.security" ; `
-  "trust.p12"                 = "${CANDLEHOME}\CNPSJ\profiles\ITMProfile\config\cells\ITMCell\nodes\ITMNode\trust.p12" ;  `
-  "key.p12"                   = "${CANDLEHOME}\CNPSJ\profiles\ITMProfile\config\cells\ITMCell\nodes\ITMNode\key.p12" ; `
-  "ssl.client.props"          = "${CANDLEHOME}\CNPSJ\profiles\ITMProfile\properties\ssl.client.props" ;
+  "httpd.conf"                = "${ITMHOME}\IHS\conf\httpd.conf" ; `
+  "kfwenv"                    = "${ITMHOME}\CNPS\kfwenv" ; `
+  "tep.jnlpt"                 = "${ITMHOME}\Config\tep.jnlpt" ; `
+  "component.jnlpt"           = "${ITMHOME}\Config\component.jnlpt" ; `
+  "applet.html.updateparams"  = "${ITMHOME}\CNB\applet.html.updateparams" ; `
+  "kcjparms.txt"              = "${ITMHOME}\CNP\kcjparms.txt" ; `
+  "java.security"             = "${ITMHOME}\CNPSJ\java\jre\lib\security\java.security" ; `
+  "trust.p12"                 = "${ITMHOME}\CNPSJ\profiles\ITMProfile\config\cells\ITMCell\nodes\ITMNode\trust.p12" ;  `
+  "key.p12"                   = "${ITMHOME}\CNPSJ\profiles\ITMProfile\config\cells\ITMCell\nodes\ITMNode\key.p12" ; `
+  "ssl.client.props"          = "${ITMHOME}\CNPSJ\profiles\ITMProfile\properties\ssl.client.props" ;
 }
 
 $global:KCJ=0  # global variable if set to 4 in checkIfFileExists then TEP Desktop Client most likely not installed
@@ -845,7 +910,7 @@ $rc = checkIfFileExists
 # Enable ISCLite 
 EnableICSLIte "true"
 
-if ( -not $nobackup ) { 
+if ( $backup -eq 'yes' ) { 
 
     backupewasAndkeys $BACKUPFOLDER
     $rc = backupfile $HFILES["httpd.conf"]
@@ -864,20 +929,25 @@ if ( -not $nobackup ) {
     # create batch to restore from original files in $BACKUPFOLDER (e.g. in case of failure)
     createRestoreScript $RESTORESCRIPT 
 } else {
-    echo "WARNING - main - !!!! Backup will not be done because option `"-n`" was set !!!!. Press CTRL+C in the next 5 secs if it was a mistake."
+    write-host "WARNING - main - !!!! Backup will not be done because option `"-b no`" was set !!!!. Press CTRL+C in the next 5 secs if it was a mistake."
     Start-Sleep -seconds 7
 }
 
+if ( $certrenew -eq 'yes' ) {
 # Renew the default certificate
-$rc = renewCert
-
-# restart TEPS if  default certificate was renewed. otherwise not needed.
-If ( $rc -eq 4 ) {
-     write-host "INFO - main - No Tivoli Enterpise Portal Server restart required yet."
-} else { 
-    restartTEPS
-    EnableICSLIte "true"
+    $rc = renewCert
+    # restart TEPS if default certificate was renewed. Otherwise not needed.
+    If ( $rc -eq 4 ) {
+        write-host "INFO - main - No Tivoli Enterpise Portal Server restart required yet."
+    } else { 
+        restartTEPS
+        EnableICSLIte "true"
+    }
+} else {
+    write-host "WARNING - main - Certificate will NOT be renewed because option `"-r no`" was set."
 }
+
+
 
 # TLS v1.2 only configuration - TEPS/eWAS TEP, IHS, TEPS,  components
 # TEPS/eWAS modify Quality of Protection (QoP)
@@ -957,10 +1027,14 @@ $elapsedTime = new-timespan $startTime $(get-date)
 $myhost = Invoke-Expression -Command "hostname"
 write-host "------------------------------------------------------------------------------------------"
 write-host "INFO - main - Procedure successfully finished Elapsedtime:$($elapsedTime.ToString("hh\:mm\:ss")) " -ForegroundColor Green
-write-host " - Original files saved in folder $CANDLEHOME\$BACKUPFOLDER "
-write-host " - To restore the level before update run '$CANDLEHOME\$BACKUPFOLDER\BATrestoreBAT.bat' "
+if ( $backup -eq 'yes' ) { 
+    write-host " - Original files saved in folder $ITMHOME\$BACKUPFOLDER "
+    write-host " - To restore the level before update run '$ITMHOME\$BACKUPFOLDER\BATrestoreBAT.bat' "
+} else {
+    write-host "WARNING - main - Backup was NOT done because option `"-b no`" was set"
+}
 write-host "----- POST script execution steps ---" -ForegroundColor Yellow
-write-host " - Reconfigure TEPS and verify connections for TEP, TEPS, HUB" 
+#write-host " - Reconfigure TEPS and verify connections for TEP, TEPS, HUB" 
 write-host " - To check eWAS settings use: https://${myhost}:15206/ibm/console"
 write-host " - To check WenStart Client: https://${myhost}:15201/tep.jnlp"
 write-host "------------------------------------------------------------------------------------------"
