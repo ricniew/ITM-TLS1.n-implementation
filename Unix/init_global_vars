@@ -1,0 +1,108 @@
+#!/bin/bash
+# This file is sourced ("source init_global_vars.ps1") and used by the activate_teps-tlvs.sh procedure.
+# Do not modify it.
+# 20.07.2022: Version 2.0      R. Niewolik EMEA AVP Team 
+#             - initial version 
+# 28.07.2022: Version 2.2      R. Niewolik EMEA AVP Team
+#             - replaced kcjparms.txt by cj.environment due support TEPD (CJ) TLSv1.n changes              
+#             - added JAVAHOME
+#
+
+if [ $1 ] ; then
+    if [ -d "$1/logs" ] ; then
+        export ITMHOME="$1"
+    else 
+        echo "ERROR - init_global_vars - ITMHOME=$1 set by argument is not an ITMHOME folder"  
+        return 1      
+    fi
+else
+    if [ -z $CANDLEHOME ] ; then
+        echo "ERROR - init_global_vars - Variable CANDLEHOME doesn't exists. ITMHOME cannot be evaluated"
+        sourcefilename=$0
+        echo "Please use \". ./init_global_vars [path to ITMHOME]\" (e.g. . ./init_global_vars /opt/IBM/ITM) to set the correct path"
+        return 1
+    else
+        if [ -d  "$CANDLEHOME" ] ; then
+            export ITMHOME=$CANDLEHOME
+        else
+            echo "ERROR - init_global_vars - ITM home folder cannot be evaluated, CANDLEHOME=$CANDLEHOME doesn't exists"
+            echo "Please set the correct path \". ./init_global_vars [path to ITMHOME]\" (e.g. . ./init_global_vars /opt/IBM/ITM lx8266)"
+            return 1
+        fi
+    fi
+fi
+
+if [ ! $2 ] ; then
+    ARCH=`${ITMHOME}/bin/cinfo -d cq|grep "cq.*Tivoli Enterprise Portal Server"|awk -F'","' '{print $3}'`
+    if [ -d "${ITMHOME}/${ARCH}/iw" ]; then
+        export ARCH=$ARCH
+    else
+        echo "ERROR - init_global_vars - ARCH folder cannot be evaluated (TEPS apparently not installed: ${ITMHOME}/${ARCH}/iw is not existing"
+        echo "Please set the correct path \". ./init_global_vars [path to ITMHOME]\" (e.g. . ./init_global_vars /opt/IBM/ITM lx8266)"
+        return 1
+    fi
+else
+    if [ -d "${ITMHOME}/$2/iw" ]; then
+        export ARCH=$2
+    else
+        echo "ERROR - init_global_vars - The ARCH folder name $2 is not correct: '${ITMHOME}/$2/iw'. Please check and restart."  
+        return 
+    fi 
+fi
+
+if [ ! -n "$TLSVER" ] ; then 
+    echo "ERROR - init_global.vars - Global variable TLSVER doesn't exists. Please initialize by using '. .\init_tlsv[n.n.ps1'" ; 
+    return 1 
+fi
+
+export TEPSHTTPSPORT="15201"
+export BACKUPFOLDER="${ITMHOME}/backup/backup_before_${TLSVER}"
+export RESTORESCRIPT="SCRIPTrestore.sh"
+export WSADMIN="$ITMHOME/$ARCH/iw/bin/wsadmin.sh"
+GSKITDIR=$(grep GskitInstallDir_64 $ITMHOME/config/gsKit.config | cut -d= -f2)
+[ -z "$GSKITDIR" ] && GSKITDIR=$(grep GskitInstallDir $ITMHOME/config/gsKit.config | cut -d= -f2)
+GSKIT_LIB=$(ls -d $GSKITDIR/lib*)
+GSKIT_BIN=$(ls -d $GSKITDIR/bin)
+export PATH=$GSKIT_BIN:/usr/bin:$ITMHOME/bin:$PATH
+export LD_LIBRARY_PATH_64=$GSKIT_LIB:$LD_LIBRARY_PATH_64
+export LD_LIBRARY_PATH=$GSKIT_LIB:$LD_LIBRARY_PATH
+export GSKCAPI=$(basename $(ls -d $GSKIT_BIN/gsk*capicmd*))
+export KEYTOOL=$ITMHOME/JRE/${ARCH}/bin/keytool
+export JAVAHOME=$ITMHOME/JRE/${ARCH}
+export KEYKDB=$ITMHOME/keyfiles/keyfile.kdb
+export KEYP12=${ITMHOME}/$ARCH/iw/profiles/ITMProfile/config/cells/ITMCell/nodes/ITMNode/key.p12
+export TRUSTP12=${ITMHOME}/$ARCH/iw/profiles/ITMProfile/config/cells/ITMCell/nodes/ITMNode/trust.p12
+export SIGNERSP12=$ITMHOME/keyfiles/signers.p12 # this will be a new created file
+
+declare -A AFILES=( 
+  ["httpd.conf"]="${ITMHOME}/$ARCH/iu/ihs/HTTPServer/conf/httpd.conf"  \
+  ["cq.ini"]="${ITMHOME}/config/cq.ini" \
+  ["tep.jnlpt"]="${ITMHOME}/config/tep.jnlpt" \
+  ["component.jnlpt"]="${ITMHOME}/config/component.jnlpt" \
+  ["applet.html.updateparams"]="${ITMHOME}/$ARCH/cw/applet.html.updateparams" \
+  ["cj.environment"]="${ITMHOME}/config/cj.environment" \
+  ["java.security"]="${ITMHOME}/$ARCH/iw/java/jre/lib/security/java.security" \
+  ["trust.p12"]="${ITMHOME}/$ARCH/iw/profiles/ITMProfile/config/cells/ITMCell/nodes/ITMNode/trust.p12" \
+  ["key.p12"]="${ITMHOME}/$ARCH/iw/profiles/ITMProfile/config/cells/ITMCell/nodes/ITMNode/key.p12" \
+  ["ssl.client.props"]="${ITMHOME}/$ARCH/iw/profiles/ITMProfile/properties/ssl.client.props" \
+  ["cacerts"]="${ITMHOME}/JRE/$ARCH/lib/security/cacerts" \
+)
+export AFILES 
+
+echo "INFO -------------------------------- Globale variables: ------------------------------------"
+echo "INFO - ITMHOME=$ITMHOME"
+echo "INFO - ARCH=$ARCH"
+echo "INFO - TEPSHTTPSPORT=$TEPSHTTPSPORT"
+echo "INFO - BACKUPFOLDER=$BACKUPFOLDER" 
+echo "INFO - RESTORESCRIPT=$RESTORESCRIPT" 
+echo "INFO - WSADMIN=$WSADMIN" 
+echo "INFO - GSKCAPI=$GSKCAPI" 
+echo "INFO - KEYTOOL=$KEYTOOL" 
+echo "INFO - JAVAHOME=$JAVAHOME"
+echo "INFO - KEYKDB=$KEYKDB"
+echo "INFO - KEYP12=$KEYP12" 
+echo "INFO - TRUSTP12=$TRUSTP12"
+echo "INFO - SIGNERSP12=$SIGNERSP12" 
+echo "INFO - AFILES=" ; for i in `echo "${!AFILES[@]}"` ; do  printf "INFO -   %-25s = %s\n" $i  ${AFILES[$i]}; done
+
+
