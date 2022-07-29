@@ -46,9 +46,9 @@ Content
 =========
 
 This asset can be used to configure ITM components to use only TLS v1.n. So far only TLSv1.2 can be implemented. 
-A step by step descriptionfor TLSv1.2 was provided by IBM Support: https://www.ibm.com/support/pages/tivoli-monitoring-v6307-tls-v12-only-configuration-tep-ihs-teps-teps-ewas-components-and-ewas-default-certificate-renewal. **This** Github entry provides 
+A step by step description for TLSv1.2 created by IBM Support exists: https://www.ibm.com/support/pages/tivoli-monitoring-v6307-tls-v12-only-configuration-tep-ihs-teps-teps-ewas-components-and-ewas-default-certificate-renewal. **This** Github entry provides 
 - automation scripts for the TEPS related configuration changes 
-- and some additional details.
+- and some additional details
 
 1.2 Prerequisites<a id='1.1'></a>
 -----------------
@@ -56,12 +56,12 @@ A step by step descriptionfor TLSv1.2 was provided by IBM Support: https://www.i
 **For TLSv1.2**
 
 1. Your environment **must be at least at ITM 6.3 FP7** and a **WAS 855 uplift must have been performed** before implementing TLSv1.2. 
-If a WAS 855 uplift was not performed in the TEPS host as described in the update readme files, you must execute _Appendix B_ action as described in above document. To check if a WAS uplift was made use `ITMHOME/[arch]/iw/bin/versionInfo.sh` or `ITMHOME\CNPSJ\bin\versionInfo.bat`. The version must be at least `8.5.5.16`
+If a WAS 855 uplift was not performed in the TEPS host as described in the update readme files, you must execute _Appendix B_ action as described in the IBM Support document. To check if a WAS uplift was made use `ITMHOME/[arch]/iw/bin/versionInfo.sh` or `ITMHOME\CNPSJ\bin\versionInfo.bat`. The version must be at least `8.5.5.16`
 
-2. Following ciphers are used in the provided TEPS scripts. If you want to use them, you need to set it wherever the variable `KDEBE_TLSV12_CIPHER_SPECS`is referanced in this document
+2. Following ciphers are used in the provided `init_tlsv1.2` files. If you want to use them, you need to set it wherever the variable `KDEBE_TLSV12_CIPHER_SPECS`is referanced in this document
     - `KDEBE_TLSVNN_CIPHER_SPECS="TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384,TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384"` 
 
-    **Note:** If other cipher specs needs to be used, you **must** modify the `init_tlsv[n].[n]` ( for example "init_tlsv1.2" ) and use them everywhere they are set in this document.
+    **Note:** If other cipher specs needs to be used, you **must** modify the `init_tlsv[n].[n]` file ( for example "init_tlsv1.2" ) and use them everywhere they are set in this document.
     A complete list of TLSv1.2 ciphers available in ITM is [here](https://github.ibm.com/NIEWOLIK/ITM-TLS1.n-implementation/blob/main/itm_allowed_TLSV1.2.cipherspecs.txt)
 
 3. Following new ports will be used and needs to be opened on the firewall **and** on the local firewall on the hosts where the Warehouse Proxy Agent and the Tivoli Enterprise Portal Server are running:
@@ -103,7 +103,7 @@ If all your TEMS use **both IP.SPIPE and IP.PIPE** and **some Agents use IP.PIPE
 2 TEMS
 =======
 
-To use TLS, specifically TLSV1.2, all TEMS server (HUB and remote TEMS) **must** use IP.SPIPE (HTTPS) for communication.
+To use TLSV1.n, all TEMS server (HUB and remote TEMS) **must** use IP.SPIPE (HTTPS) for communication.
 
 **CONFIGURE IP.SPIPE on TEMS:**
 
@@ -151,7 +151,7 @@ LINUX/AIX
 3 TEPS 
 ======
 
-The manual process described in  "_TLS v1.2 only configuration - TEP, IHS, TEPS, TEPS/eWAS components_" section of the PDF file provided (https://www.ibm.com/support/pages/tivoli-monitoring-v6307-tls-v12-only-configuration-tep-ihs-teps-teps-ewas-components-and-ewas-default-certificate-renewal), was automated. It contains the following files:
+The manual process described in the IBM Support document section: "_TLS v1.2 only configuration - TEP, IHS, TEPS, TEPS/eWAS components_"  (https://www.ibm.com/support/pages/tivoli-monitoring-v6307-tls-v12-only-configuration-tep-ihs-teps-teps-ewas-components-and-ewas-default-certificate-renewal), was automated. It contains the following files:
 
 **For WINDOWS**
 
@@ -166,7 +166,7 @@ The manual process described in  "_TLS v1.2 only configuration - TEP, IHS, TEPS,
 3. `init_global_vars`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(global variables; sourced by functions_sources.h)
 4. `init_tlsv1.2`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(TLSv1.2 specific variables; **must** be sourced before starting activate_teps-tlsv.sh or sourcing functions_sources.h) 
 
-The files `init_tlsv1.2` (Linux) and `init_tlsv1.2.ps1` Windows contain the TLS version specific setting you need to set before execution. Below are the current settings for TLSv1.2. In case of any upcoming TLS versions, you need to copy this files (for example to `init_tlsv1.3`) and modify the values.
+The files `init_tlsv1.2` (Linux) and `init_tlsv1.2.ps1` Windows contain the TLS version specifiyc setting you need to set before execution. This are the current settings for TLSv1.2:
 
     TLSVER="TLSv1.2" 
     KDEBE_TLSVNN_CIPHER_SPECS="TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384,TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384"
@@ -331,7 +331,7 @@ On Linux/Unix
 
 Export your DISPLAY Variable and then execute: `itmcmd agent start cj` or `itmcmd agent -o [your instance] start cj`
 
-NOTE: the changes made by the script are global. If your have defined TEPD instances to connect to another TEPS running on a remote host, and this TEPS is not TLSV1.n enabled, you must modify the `ITMHOME/lx8266/cj/bin/cnp_[instance].sh`. Locate 
+NOTE: the changes made by the script are global. If your have defined TEPD instances to connect to another TEPS running on a remote host, and this TEPS is not TLSV1.n enabled, you must modify the `ITMHOME/lx8266/cj/bin/cnp_[instance].sh`. Locate the code and replace  with: 
 
     61: # Check if TEP_JAVA_HOME defined; if not, set to same value as JAVA_HOME
     62: if [ ! ${TEP_JAVA_HOME} ]; then
@@ -399,35 +399,38 @@ Assure WPA port 65100 is open on the firewall (general and local).
 6.1 Alternative A<a id='6.1'></a>
 -----------------
 
+**Samples are for TLSv1.2**
+
 Use ITM `tacmd setagentconnection` command.
 
 If you use failover RTEMS and IP.PIPE was used: <BR>
-- `tacmd setagentconnection -n falcate1:LZ -a -p SERVER=myprimary1 PROTOCOL1=IP.SPIPE IP_SPIPE_PORT=3660 BACKUP=Y BSERVER=mysecondary1 BPROTOCOL1=IP.SPIPE BIP_SPIPE_PORT=3660` <BR>([ITMHOME]/config/.ConfigDate/[pc]env file is modified, agents are reconfigured and restartet)
+- `tacmd setagentconnection -n falcate1:LZ -a -p SERVER=[your primary rtems] PROTOCOL1=IP.SPIPE IP_SPIPE_PORT=3660 BACKUP=Y BSERVER=[your secodary rtems] BPROTOCOL1=IP.SPIPE BIP_SPIPE_PORT=3660` <BR>([ITMHOME]/config/.ConfigDate/[pc]env file is modified, agents are reconfigured and restartet)
 - `tacmd setagentconnection -n falcate1:LZ -a -e  KDEBE_TLS10_ON=NO KDEBE_TLS11_ON=NO KDEBE_TLSV12_CIPHER_SPECS=[your cipher settings]` <BR>([ITMHOME]/config/[pc].environment file is created with the KDEBE settings for each agent running on the system, agents are restarted)
 
 If you don't use failover RTEMS (agent connects to one TEMS only) and IP.PIPE was used: <BR>
-- `tacmd setagentconnection -n falcate1:LZ -a -p SERVER=myprimary1 PROTOCOL=IP.SPIPE IP_SPIPE_PORT=3660` <BR>([ITMHOME]/config/.ConfigDate/[pc]env file is modified, agents are reconfigured and restartet)
+- `tacmd setagentconnection -n falcate1:LZ -a -p SERVER=[your primary tems] PROTOCOL=IP.SPIPE IP_SPIPE_PORT=3660` <BR>([ITMHOME]/config/.ConfigDate/[pc]env file is modified, agents are reconfigured and restartet)
 - `tacmd setagentconnection -n falcate1:LZ -a -e KDEBE_TLS10_ON=NO KDEBE_TLS11_ON=NO KDEBE_TLSV12_CIPHER_SPECS=[your cipher settings]` <BR>([ITMHOME]/config/[pc].environment file is created with the KDEBE settings for each agent running on the system, agents are restarted)
  
 If IP.SPIPE was already used: <BR>
 - `tacmd setagentconnection -n falcate1:LZ -a -e KDEBE_TLS10_ON=NO KDEBE_TLS11_ON=NO KDEBE_TLSV12_CIPHER_SPECS=[your cipher settings]` <BR>([ITMHOME]/config/[pc].environment file is created with the KDEBE settings for each agent running on the system, agents are restarted)
 
 
-
 **Important Notes:** 
 - **(1)**: You can **only** use the `tacmd` when the OS Agent is running. 
 - **(2)**: On windows the `tacmd setagentconnection` commands are **only** working when the agent is running with **administration** rigths.
-- **(3)**: On Windows instead of using option `-a` in  `tacmdsetagentconnection` is not supproted on hosts where ITM TEMSs running (Technote: https://www.ibm.com/support/pages/node/6587038). You need to use the `-t ` to modify the agents (e.c. "-t nt "). For example: `tacmd setagentconnection -n Primary:myhost:NT -t nt -p SERVER=myprimary1 PROTOCOL=IP.SPIPE IP_PIPE_PORT=3660`
+- **(3)**: On Windows instead of using option `-a` in  `tacmdsetagentconnection` is not supproted on hosts where ITM TEMSs running (Technote: https://www.ibm.com/support/pages/node/6587038). You need to use the `-t ` to modify the agents (e.c. "-t nt "). For example: `tacmd setagentconnection -n Primary:myhost:NT -t nt -p SERVER=[your primary tems] PROTOCOL=IP.SPIPE IP_PIPE_PORT=3660`
 - **(4)**: On Windows the option `-e` of `tacmdsetagentconnection` command with multiple variable settings is not supported in versions <= ITM 6.3 FP7 SP6. You would need to execute one comamnd for each KDEBE variable. For example <BR> `tacmd setagentconnection -n Primary:myhost:NT -t nt -e KDEBE_TLS10_ON=NO` <BR> `tacmd setagentconnection -n Primary:myhost:NT -t nt -e KDEBE_TLS11_ON=NO` <BR> `tacmd setagentconnection -n Primary:myhost:NT -t sy -e KDEBE_TLSV12_CIPHER_SPECS=[your cipher settings]`
 
 - **(5)**: On Windows, the `-e` option creates a `[Overwrite local settings]` section in the `ITMHOME\TMAITM6_64\k[pc]cma.ini` file with the new variable settings. Then the agent is reconfigured and a registry entry is added to `HKEY_LOCAL_MACHINE\SOFTWARE\Candle\K[pc]\Ver610\Primary\Environment` for the specified variable (for example KDEBE_TLSV12_CIPHER_SPECS). This means that in the future, any manual change to the registry key of this variable will be overwritten by the override section, regardless of what you have specified.
 
 - **(6)**:On Linux/Unix, the `-e` option creates an `ITMHOME/config/[pc].environment` file with the new variable settings. Then the agent will be reconfigured and restarted. This means that in the future, if you configure the agent for the same values but set them in the [pc].ini file, they will be overwritten by the `[pc].environment` settings.
-- **(7)**: On Windows, the `-p SERVER=myprimary1 PROTOCOL=IP.SPIPE ...` option overrides the CT_CMSLIST and KDC_FAMILIES registry keys. If you have ever used the `Override Local Settings` section of the `ITMHOME\TMAITM6_64\k[pc]cma.ini` file to set the same variables, the `tacmd` command will not change anything because the new settings will be overwritten by the `Override Local Settings` section.
-- **(8)**: On Linux the option `-p SERVER=myprimary1 PROTOCOL=IP.SPIPE ...` is configuring and overiding the TEMS and KDC_FAMILIES values in `ITMHOME/config/.ConfigData/[pc]env` file. Hence if you ever used the `ITMHOME/config/[pc].environment` to set same varaibles, the `tacmd` command will not change anything, because they will be overwritten by the `[pc].environment` file settings.
+- **(7)**: On Windows, the `-p SERVER=[your primary rtems] PROTOCOL=IP.SPIPE ...` option overrides the CT_CMSLIST and KDC_FAMILIES registry keys. If you have ever used the `Override Local Settings` section of the `ITMHOME\TMAITM6_64\k[pc]cma.ini` file to set the same variables, the `tacmd` command will not change anything because the new settings will be overwritten by the `Override Local Settings` section.
+- **(8)**: On Linux the option `-p SERVER=[your primary rtems] PROTOCOL=IP.SPIPE ...` is configuring and overiding the TEMS and KDC_FAMILIES values in `ITMHOME/config/.ConfigData/[pc]env` file. Hence if you ever used the `ITMHOME/config/[pc].environment` to set same varaibles, the `tacmd` command will not change anything, because they will be overwritten by the `[pc].environment` file settings.
 
 6.2 Alternative B<a id='6.2'></a>
 -----------------
+
+**Samples are for TLSv1.2**
 
 Reconfigure Agents using local ITM silent configuration.
 
@@ -441,7 +444,7 @@ ON WINDOWS:
     KDEBE_TLSV12_CIPHER_SPECS=[your cipher settings]
     KDEBE_TLS11_ON=NO
     KDEBE_TLS10_ON=NO
-    CT_CMSLIST=IP.SPIPE:RTEMS-MINUTEST1;IP.SPIPE:RTEMS-MINUTEST2
+    CT_CMSLIST=IP.SPIPE:[your primary rtems];IP.SPIPE:[your secondary rtems]
     KDC_FAMILIES=IP.SPIPE PORT:3660 IP use:n SNA use:n IP.PIPE use:n IP6 use:n IP6.PIPE use:n IP6.SPIPE use:n
     ```
     If you NOT use failover RTEMS:
@@ -451,7 +454,7 @@ ON WINDOWS:
     KDEBE_TLSV12_CIPHER_SPECS=[your cipher settings]
     KDEBE_TLS11_ON=NO
     KDEBE_TLS10_ON=NO
-    CT_CMSLIST=IP.SPIPE:RTEMS-MINUTEST1
+    CT_CMSLIST=IP.SPIPE:[your primary tems]
     KDC_FAMILIES=IP.SPIPE PORT:3660 IP use:n SNA use:n IP.PIPE use:n IP6 use:n IP6.PIPE use:n IP6.SPIPE use:n
     ```
 
@@ -475,8 +478,8 @@ ON LINUX/UNIX:
     IPSPIPEPORTNUMBER=3660
     HSNETWORKPROTOCOL=ip.spipe
     HSIPSPIPEPORTNUMBER=3660
-    HOSTNAME=rtems-falcate1.my.dom.com
-    MIRROR=rtems-minutest1.my.dom.com
+    HOSTNAME=[your primary rtems]
+    MIRROR=[your secondary rtems]
     CUSTOM#KDEBE_TLSV12_CIPHER_SPECS=[your cipher settings]
     CUSTOM#KDEBE_TLS10_ON=NO
     CUSTOM#KDEBE_TLS11_ON=NO
@@ -487,7 +490,7 @@ ON LINUX/UNIX:
     CMSCONNECT=YES
     NETWORKPROTOCOL=ip.spipe
     IPSPIPEPORTNUMBER=3660
-    HOSTNAME=rtems-falcate1.my.dom.com
+    HOSTNAME=[your primary tems]
     CUSTOM#KDEBE_TLSV12_CIPHER_SPECS=[your cipher settings]
     CUSTOM#KDEBE_TLS10_ON=NO
     CUSTOM#KDEBE_TLS11_ON=NO
@@ -502,6 +505,8 @@ ON LINUX/UNIX:
 
 6.3 Other Alternatives<a id='6.3'></a>
 -----------------
+
+**Samples are for TLSv1.2**
 
 You can perform local config steps or modify/create the correspondig config files by using remote commands. For examle tacmd executecommnad, getfile, putfile or use your own distribution tools.
 
@@ -601,15 +606,15 @@ UNIX: open terminal
 8 Appendixes
 ============
 
-Sample run of the activate_teps-tlsv1.2.sh script in Linux:
+Sample run of the activate_teps-tlsv1.2.sh script on Linux:
 ```
 [root@falcate1 scripts]# clear; ./activate_teps-tlsv.sh -h /opt/IBM/ITM -r yes -b yes
-INFO - Script Version 2.0
-INFO - check_param - Parameter '-r' = 'yes'
-INFO - check_param - Parameter '-b' is: yes
-INFO - check_param - Option '-h' is: /opt/IBM/ITM
+INFO - Script Version 2.2
+INFO - check_param - Option '-r' = 'yes'
+INFO - check_param - Option '-b' = 'yes'
+INFO - check_param - Option '-h' = '/opt/IBM/ITM'
 INFO - check_param - Option '-a' for ITM arch folder name was not set. Trying to evaluate ...
-INFO ----------------------------------------------------------------------------------------
+INFO -------------------------------- Globale variables: ------------------------------------
 INFO - ITMHOME=/opt/IBM/ITM
 INFO - ARCH=lx8266
 INFO - TEPSHTTPSPORT=15201
@@ -618,6 +623,7 @@ INFO - RESTORESCRIPT=SCRIPTrestore.sh
 INFO - WSADMIN=/opt/IBM/ITM/lx8266/iw/bin/wsadmin.sh
 INFO - GSKCAPI=gsk8capicmd_64
 INFO - KEYTOOL=/opt/IBM/ITM/JRE/lx8266/bin/keytool
+INFO - JAVAHOME=/opt/IBM/ITM/JRE/lx8266
 INFO - KEYKDB=/opt/IBM/ITM/keyfiles/keyfile.kdb
 INFO - KEYP12=/opt/IBM/ITM/lx8266/iw/profiles/ITMProfile/config/cells/ITMCell/nodes/ITMNode/key.p12
 INFO - TRUSTP12=/opt/IBM/ITM/lx8266/iw/profiles/ITMProfile/config/cells/ITMCell/nodes/ITMNode/trust.p12
@@ -627,22 +633,16 @@ INFO -   tep.jnlpt                 = /opt/IBM/ITM/config/tep.jnlpt
 INFO -   cq.ini                    = /opt/IBM/ITM/config/cq.ini
 INFO -   cacerts                   = /opt/IBM/ITM/JRE/lx8266/lib/security/cacerts
 INFO -   component.jnlpt           = /opt/IBM/ITM/config/component.jnlpt
-INFO -   kcjparms.txt              = /opt/IBM/ITM/lx8266/cj/kcjparms.txt
 INFO -   ssl.client.props          = /opt/IBM/ITM/lx8266/iw/profiles/ITMProfile/properties/ssl.client.props
 INFO -   trust.p12                 = /opt/IBM/ITM/lx8266/iw/profiles/ITMProfile/config/cells/ITMCell/nodes/ITMNode/trust.p12
 INFO -   key.p12                   = /opt/IBM/ITM/lx8266/iw/profiles/ITMProfile/config/cells/ITMCell/nodes/ITMNode/key.p12
 INFO -   java.security             = /opt/IBM/ITM/lx8266/iw/java/jre/lib/security/java.security
 INFO -   applet.html.updateparams  = /opt/IBM/ITM/lx8266/cw/applet.html.updateparams
 INFO -   httpd.conf                = /opt/IBM/ITM/lx8266/iu/ihs/HTTPServer/conf/httpd.conf
-INFO ----------------------------------------------------------------------------------------
-INFO - TLS version specific settings:
-INFO - TLSVER=TLSv1.2
-INFO - KDEBE_TLSVNN_CIPHER_SPECS=TLS_RSA_WITH_AES_128_CBC_SHA256,TLS_RSA_WITH_AES_256_CBC_SHA256
-INFO - KFW_ORB_ENABLED_PROTOCOLS=TLS_Version_1_2_Only
-INFO - KDEBE_TLS_DISABLE=TLS10,TLS11
-INFO - HTTP_SSLCIPHERSPEC=ALL -SSL_RSA_WITH_3DES_EDE_CBC_SHA
-INFO - JAVASEC_DISABLED_ALGORITHMS=MD5, SSLv3, DSA, DESede, DES, RSA keySize < 2048
-INFO ----------------------------------------------------------------------------------------
+INFO -   cj.environment            = /opt/IBM/ITM/config/cj.environment
+INFO -------------------------------------------
+INFO - main - Modifications for TLSVER=TLSv1.2 -
+INFO -------------------------------------------
 INFO - main - TEPS = 06300711 eWAS = 08551600
 INFO - main - Backup directory is: /opt/IBM/ITM/backup/backup_before_TLSv1.2
 INFO - checkIfFileExists - Directory /opt/IBM/ITM/lx8266/iw  OK.
@@ -651,13 +651,13 @@ INFO - checkIfFileExists - File /opt/IBM/ITM/config/tep.jnlpt OK.
 INFO - checkIfFileExists - File /opt/IBM/ITM/config/cq.ini OK.
 INFO - checkIfFileExists - File /opt/IBM/ITM/JRE/lx8266/lib/security/cacerts OK.
 INFO - checkIfFileExists - File /opt/IBM/ITM/config/component.jnlpt OK.
-WARNING - checkIfFileExists - File /opt/IBM/ITM/lx8266/cj/kcjparms.txt does NOT exists. KCJ component probably not installed. Continue...
 INFO - checkIfFileExists - File /opt/IBM/ITM/lx8266/iw/profiles/ITMProfile/properties/ssl.client.props OK.
 INFO - checkIfFileExists - File /opt/IBM/ITM/lx8266/iw/profiles/ITMProfile/config/cells/ITMCell/nodes/ITMNode/trust.p12 OK.
 INFO - checkIfFileExists - File /opt/IBM/ITM/lx8266/iw/profiles/ITMProfile/config/cells/ITMCell/nodes/ITMNode/key.p12 OK.
 INFO - checkIfFileExists - File /opt/IBM/ITM/lx8266/iw/java/jre/lib/security/java.security OK.
 INFO - checkIfFileExists - File /opt/IBM/ITM/lx8266/cw/applet.html.updateparams OK.
 INFO - checkIfFileExists - File /opt/IBM/ITM/lx8266/iu/ihs/HTTPServer/conf/httpd.conf OK.
+INFO - checkIfFileExists - File /opt/IBM/ITM/config/cj.environment OK.
 INFO - EnableICSLite - Set ISCLite to 'true'
 WASX7209I: Connected to process "ITMServer" on node ITMNode using SOAP connector;  The type of process is: UnManagedProcess
 WASX7303I: The following options are passed to the scripting environment and are available as arguments that are stored in the argv variable: "[true]"
@@ -671,6 +671,7 @@ INFO - backupfile - Saving /opt/IBM/ITM/config/cq.ini in /opt/IBM/ITM/backup/bac
 INFO - backupfile - Saving /opt/IBM/ITM/config/tep.jnlpt in /opt/IBM/ITM/backup/backup_before_TLSv1.2
 INFO - backupfile - Saving /opt/IBM/ITM/config/component.jnlpt in /opt/IBM/ITM/backup/backup_before_TLSv1.2
 INFO - backupfile - Saving /opt/IBM/ITM/lx8266/cw/applet.html.updateparams in /opt/IBM/ITM/backup/backup_before_TLSv1.2
+INFO - backupfile - Saving /opt/IBM/ITM/config/cj.environment in /opt/IBM/ITM/backup/backup_before_TLSv1.2
 INFO - backupfile - Saving /opt/IBM/ITM/lx8266/iw/java/jre/lib/security/java.security in /opt/IBM/ITM/backup/backup_before_TLSv1.2
 INFO - backupfile - Saving /opt/IBM/ITM/lx8266/iw/profiles/ITMProfile/config/cells/ITMCell/nodes/ITMNode/trust.p12 in /opt/IBM/ITM/backup/backup_before_TLSv1.2
 INFO - backupfile - Saving /opt/IBM/ITM/lx8266/iw/profiles/ITMProfile/config/cells/ITMCell/nodes/ITMNode/key.p12 in /opt/IBM/ITM/backup/backup_before_TLSv1.2
@@ -683,7 +684,7 @@ TEPSEWASBundle loaded.
 '\nCWPKI0704I: The personal certificate with the default alias in the NodeDefaultKeyStore keystore has been RENEWED.'
 ''
 INFO - renewCert - Running gsk8capicmd_64 commands
-INFO - renewCert - Successfully renewed Certificate (previous renew was 112 days ago)
+INFO - renewCert - Successfully renewed Certificate (previous renew was 121 days ago)
 INFO - restartTEPS - Restarting TEPS ...
 Processing. Please wait...
 systemctl stop ITMAgents1.cq.service RC: 0
@@ -755,13 +756,24 @@ INFO - modcompjnlpt - Modifying /opt/IBM/ITM/config/component.jnlpt
 INFO - modcompjnlpt - /opt/IBM/ITM/config/component.jnlpt.TLSv1.2 created and copied on /opt/IBM/ITM/config/component.jnlpt
 INFO - modapplethtmlupdateparams - Modifying /opt/IBM/ITM/lx8266/cw/applet.html.updateparams
 INFO - modapplethtmlupdateparams - /opt/IBM/ITM/lx8266/cw/applet.html.updateparams.TLSv1.2 created and copied on /opt/IBM/ITM/lx8266/cw/applet.html.updateparams
-INFO - main - Reconfiguring CW
+INFO - main - Reconfiguring TEP WebSstart/Browser client 'cw'
 Agent configuration started...
 Agent configuration completed...
-WARNING - main - TEP Desktop client not installed and was not modified ('kcjparms.txt' not existing).
+INFO - modcjenvironment - Modifying /opt/IBM/ITM/config/cj.environment
+INFO - modcjenvironment - /opt/IBM/ITM/config/cj.environment.TLSv1.2 created and copied on /opt/IBM/ITM/config/cj.environment
+INFO - main - Reconfiguring TEP Desktop Client 'cj'
++------------------------REMINDER-------------------------+
+| KCIIN0219W This Agent was previously configured using   |
+| the 'Host Specific Configuration' option (the '-t'      |
+| option on the command line). To reconfigure, remember   |
+| to select 'CREATE HOST SPECIFIC CONFIGURATION' (on the  |
+| GUI) or use the command line '-t' option.               |
++---------------------------------------------------------+
+Agent configuration started...
+Agent configuration completed...
 
 ------------------------------------------------------------------------------------------
-INFO - main - Procedure successfully finished Elapsedtime: 5 min
+INFO - main - Procedure successfully finished Elapsedtime: 6 min
  - Original files saved in folder /opt/IBM/ITM/backup/backup_before_TLSv1.2
  - To restore the level before update run '/opt/IBM/ITM/backup/backup_before_TLSv1.2/SCRIPTrestore.sh'
 ----- POST script execution steps ---
