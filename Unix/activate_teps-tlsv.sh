@@ -17,7 +17,7 @@
 SECONDS=0
 PROGNAME=$(basename $0)
 USRCMD="$0 $*"
-echo "INFO - Script Version 2.0"
+echo "INFO - Script Version 2.2"
 
 usage()
 { # usage description
