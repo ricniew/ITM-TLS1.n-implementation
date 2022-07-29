@@ -166,7 +166,7 @@ The manual process described in  "_TLS v1.2 only configuration - TEP, IHS, TEPS,
 3. `init_global_vars`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(global variables; sourced by functions_sources.h)
 4. `init_tlsv1.2`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(TLSv1.2 specific variables; **must** be sourced before starting activate_teps-tlsv.sh or sourcing functions_sources.h) 
 
-The files `init_tlsv1.2` (Linux) and `init_tlsv1.2.ps1` Windows contain the TLS version specifiyc setting you need to set before execution. This are the current settings for TLSv1.2:
+The files `init_tlsv1.2` (Linux) and `init_tlsv1.2.ps1` Windows contain the TLS version specific setting you need to set before execution. Below are the current settings for TLSv1.2. In case of any upcoming TLS versions, you need to copy this files (for example to `init_tlsv1.3`) and modify the values.
 
     TLSVER="TLSv1.2" 
     KDEBE_TLSVNN_CIPHER_SPECS="TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384,TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384"
