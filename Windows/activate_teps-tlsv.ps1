@@ -27,7 +27,7 @@ param (
     $UndefinedArgs
 )
 
-write-host "INFO - Script Version 2.0"
+write-host "INFO - Script Version 2.2"
 $startTime = $(get-date)
 $SCRIPTNAME = $MyInvocation.MyCommand.Name
 
