@@ -237,6 +237,9 @@ https://github.ibm.com/NIEWOLIK/ITM-TLS1.n-implementation/archive/2.zip
 3.4 Execution<a id='3.4'></a>
 -----------------
 
+You have two alternatives how to use the scripts. Either you use the script `activate_teps-tlsv` which does everything for you, or you use the functions one by one.
+The prefered way would be to use the script. The second alternative is more usefull for testing purposes.
+
 3.4.1 Via script activate_teps-tlsv <a id='3.4.1'></a>
 -----------------------------------
 &nbsp;&nbsp;&nbsp;**On Windows**:
@@ -247,9 +250,10 @@ https://github.ibm.com/NIEWOLIK/ITM-TLS1.n-implementation/archive/2.zip
 
 &nbsp;&nbsp;&nbsp;Samples: 
 
-      . .\init_tlsv1.2.ps1 ; .\activate_teps-tlsv.ps1 -h /opt/IBM/ITM -r yes       # Backup is performed. Default keystore is renewed"
-      . .\init_tlsv1.2.ps1 ; .\activate_teps-tlsv.ps1 -h /opt/IBM/ITM -b yes -r no # Backup is performed, default keystore is not renewed"
-      . .\init_tlsv1.2.ps1 ; .\activate_teps-tlsv.ps1 -h /opt/IBM/ITM -b no -r no  # NO backup is performed and default keystore is not renewed"
+      . .\init_tlsv1.2.ps1 ; .\activate_teps-tlsv.ps1 -h C:\IBM\ITM -r yes                 # Backup is performed. Default keystore is renewed"
+      . .\init_tlsv1.2.ps1 ; .\activate_teps-tlsv.ps1 -h "C:\Program Files\IBM\ITM" -r yes # Backup is performed. Default keystore is renewed"
+      . .\init_tlsv1.2.ps1 ; .\activate_teps-tlsv.ps1 -h C:\IBM\ITM -b yes -r no           # Backup is performed, default keystore is not renewed"
+      . .\init_tlsv1.2.ps1 ; .\activate_teps-tlsv.ps1 -h C:\IBM\ITM -b no -r no            # NO backup is performed and default keystore is not renewed"
 
 &nbsp;&nbsp;&nbsp;**On UNIX/Linux**:
 
@@ -267,7 +271,7 @@ https://github.ibm.com/NIEWOLIK/ITM-TLS1.n-implementation/archive/2.zip
 3.4.2 Step by step using functions <a id='3.4.2'></a>
 -----------------------------------
 
-You can execute each function from the command prompt. But before starting to modify files or options you must:
+Alternatively, you can execute each function from the command prompt. But before starting to modify files or options you must:
 
 - **Perform a backup of all files and settings you want to modify**. Otherwise you cannot go back in case of failures.
 - Execute `. .\init_tlsv1.2.ps1` for Windows or `. ./init_tlsv1.2` for Unix/Linux to initialize TLS version specific variables
