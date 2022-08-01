@@ -119,9 +119,9 @@ Now you can configure TEPS and agents to connect to the TEMS using IP.SPIPE
 
 **THEN:**
 
-As soon **all ITM components are connected to TEMS using IP.SPIPE with TLSV1.2** and **the specific ciphers** you can disable IP.PIPE + TLS10 + TLS11+ ... on all TEMS.
+As soon **all ITM components are connected to TEMS using IP.SPIPE with TLSV1.n** and **the specific ciphers** you can disable IP.PIPE + TLS10 + TLS11+ ... on all TEMS.
 
-WINDOWS:
+WINDOWS (sample for TLSv1.2):
 
   1.  In: [ITMHOME]\CMS\KBBENV add or modify the following options <BR>
 ```
@@ -134,7 +134,7 @@ WINDOWS:
   
   3. Restart the TEMSs
 
-LINUX/AIX
+LINUX/AIX (sample for TLSv1.2):
 
   1.  In `[ITMHOME]/table/[TEMSNAME]/config/ms.ini` add or modify the following options
 ```
@@ -166,7 +166,7 @@ The manual process described in the IBM Support document section: "_TLS v1.2 onl
 3. `init_global_vars`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(global variables; sourced by functions_sources.h)
 4. `init_tlsv1.2`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(TLSv1.2 specific variables; **must** be sourced before starting activate_teps-tlsv.sh or sourcing functions_sources.h) 
 
-The files `init_tlsv1.2` (Linux) and `init_tlsv1.2.ps1` Windows contain the TLS version specifiyc setting you need to set before execution. This are the current settings for TLSv1.2:
+The files `init_tlsv1.2` (Linux) and `init_tlsv1.2.ps1` Windows contain the TLS version specifiyc setting you need to set before execution. For another TLS version copy this file and change values as required. This are the current settings for TLSv1.2:
 
     TLSVER="TLSv1.2" 
     KDEBE_TLSVNN_CIPHER_SPECS="TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384,TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384"
@@ -243,13 +243,13 @@ The prefered way would be to use the script. The second alternative is more usef
 -----------------------------------
 &nbsp;&nbsp;&nbsp;**On Windows**:
 
-  - Open a PowerShell cmd prompt and go to the temp directory where you have donloaded the script: `cd c:\temp\ITM-TLS1.n-implementation-2\windows`
-  - **Source** the TLS Version specific variables file. For example: `. .\init_tlsv1.2.ps1`
+  - Open a PowerShell cmd prompt and go to the temp directory where you have donloaded the script: `cd c:\temp\ITM-TLS1.n-implementation-[tag]\windows`
+  - **Source** the TLS Version specific variables file. For example: `. .\init_tlsv1.2.ps1`. For another TLS version copy this file and change values as required.
   - Execute `.\activate_teps-tlsv.ps1` 
 
 &nbsp;&nbsp;&nbsp;Samples: 
 
- `> cd c:\temp\ITM-TLS1.n-implementation-2\windows` <BR>
+ `> cd c:\temp\ITM-TLS1.n-implementation-2.2\windows` <BR>
     
        > . .\init_tlsv1.2.ps1 ; .\activate_teps-tlsv.ps1 -h C:\IBM\ITM -r yes                 # Backup is performed. Default keystore is renewed"
        > . .\init_tlsv1.2.ps1 ; .\activate_teps-tlsv.ps1 -h "C:\Program Files\IBM\ITM" -r yes # Backup is performed. Default keystore is renewed"
@@ -258,13 +258,13 @@ The prefered way would be to use the script. The second alternative is more usef
 
 &nbsp;&nbsp;&nbsp;**On UNIX/Linux**:
 
-   - Open shell prompt and go to the temp directory where you have donloaded the script: `cd /tmp/ITM-TLS1.n-implementation-2/unix`
+   - Open shell prompt and go to the temp directory where you have donloaded the script: `cd /tmp/ITM-TLS1.n-implementation-[tag]/unix`
    - **Source** the TLS Version specific variables file. For example: `. ./init_tlsv1.2`
    - Execute´./activate_teps-tlsv.sh` 
 
 &nbsp;&nbsp;&nbsp;Samples: 
 
-`> cd /tmp/ITM-TLS1.n-implementation-2/unix`
+`> cd /tmp/ITM-TLS1.n-implementation-2.2/unix`
 
     > . ./init_tlsv1.2 ; ./activate_teps-tlsv.sh -h /opt/IBM/ITM -r yes                 # A backup is performed and default keystore is renewed"
     > . ./init_tlsv1.2 ; ./activate_teps-tlsv.sh -h /opt/IBM/ITM -b no -r yes -a lx8266 # NO backup is performed, default keystore is renewed, arch folder is lx8266"
@@ -278,7 +278,7 @@ The prefered way would be to use the script. The second alternative is more usef
 Alternatively, you can execute each function from the command prompt. It is more usefull for testing and verification purposes. But before starting to modify files or options you must:
 
 - **Perform a backup of all files and settings you want to modify**. Otherwise you cannot go back in case of failures.
-- Execute `. .\init_tlsv1.2.ps1` for Windows or `. ./init_tlsv1.2` for Unix/Linux to initialize TLS version specific variables
+- Execute `. .\init_tlsv1.2.ps1` for Windows or `. ./init_tlsv1.2` for Unix/Linux to initialize TLS version specific variables. For another TLS version copy this file and change values as required.
 
 Open a Linux terminal or Powershell command prompt and execute each function manually to modify the required option or files. <BR>
 Below the recommended sequence (example for TLSv1.2 changes on Linux; but it applies to Windows as well, you only need to adjust the syntax):
