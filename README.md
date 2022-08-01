@@ -337,7 +337,7 @@ As documented in the support link referenced above, when all the parameters have
 
 On Linux/Unix
 
-Export your DISPLAY Variable and then execute: `itmcmd agent start cj` or `itmcmd agent -o [your instance] start cj`
+Export your DISPLAY Variable and then execute: `itmcmd agent -o [your instance] start cj`. Please note, there is also a TEPD instance for which a system service is defined (for example /usr/lib/systemd/system/ITMAgents1.cj.service). Such instance must be started like: `ITMsystemctl=yes itmcmd agent start cj`. (`ITMsystemctl=yes itmcmd agent -o falcate1 stop cj` respectively).
 
 NOTE: the changes made by the script are global. If your have defined TEPD instances to connect to another TEPS running on a remote host, and this TEPS is not TLSV1.n enabled, you must modify the `ITMHOME/lx8266/cj/bin/cnp_[instance].sh`. Locate the code and replace  with: 
 
