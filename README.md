@@ -250,10 +250,13 @@ The prefered way would be to use the script. The second alternative is more usef
 
 &nbsp;&nbsp;&nbsp;Samples: 
 
-      . .\init_tlsv1.2.ps1 ; .\activate_teps-tlsv.ps1 -h C:\IBM\ITM -r yes                 # Backup is performed. Default keystore is renewed"
-      . .\init_tlsv1.2.ps1 ; .\activate_teps-tlsv.ps1 -h "C:\Program Files\IBM\ITM" -r yes # Backup is performed. Default keystore is renewed"
-      . .\init_tlsv1.2.ps1 ; .\activate_teps-tlsv.ps1 -h C:\IBM\ITM -b yes -r no           # Backup is performed, default keystore is not renewed"
-      . .\init_tlsv1.2.ps1 ; .\activate_teps-tlsv.ps1 -h C:\IBM\ITM -b no -r no            # NO backup is performed and default keystore is not renewed"
+       > cd c:\temp\ITM-TLS1.n-implementation-2\windows
+<BR>
+    
+       > . .\init_tlsv1.2.ps1 ; .\activate_teps-tlsv.ps1 -h C:\IBM\ITM -r yes                 # Backup is performed. Default keystore is renewed"
+       > . .\init_tlsv1.2.ps1 ; .\activate_teps-tlsv.ps1 -h "C:\Program Files\IBM\ITM" -r yes # Backup is performed. Default keystore is renewed"
+       > . .\init_tlsv1.2.ps1 ; .\activate_teps-tlsv.ps1 -h C:\IBM\ITM -b yes -r no           # Backup is performed, default keystore is not renewed"
+       > . .\init_tlsv1.2.ps1 ; .\activate_teps-tlsv.ps1 -h C:\IBM\ITM -b no -r no            # NO backup is performed and default keystore is not renewed"
 
 &nbsp;&nbsp;&nbsp;**On UNIX/Linux**:
 
