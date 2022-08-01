@@ -238,7 +238,7 @@ https://github.ibm.com/NIEWOLIK/ITM-TLS1.n-implementation/archive/2.zip
 -----------------
 
 You have two alternatives how to use the scripts. Either you use the script `activate_teps-tlsv` which does everything for you, or you use the functions one by one.
-The prefered way would be to use the script. The second alternative is more usefull for testing purposes.
+The prefered way would be to use the script. The second alternative is more usefull for testing and verification purposes.
 
 3.4.1 Via script activate_teps-tlsv <a id='3.4.1'></a>
 -----------------------------------
@@ -250,8 +250,7 @@ The prefered way would be to use the script. The second alternative is more usef
 
 &nbsp;&nbsp;&nbsp;Samples: 
 
-       > cd c:\temp\ITM-TLS1.n-implementation-2\windows
-<BR>
+ `> cd c:\temp\ITM-TLS1.n-implementation-2\windows` <BR>
     
        > . .\init_tlsv1.2.ps1 ; .\activate_teps-tlsv.ps1 -h C:\IBM\ITM -r yes                 # Backup is performed. Default keystore is renewed"
        > . .\init_tlsv1.2.ps1 ; .\activate_teps-tlsv.ps1 -h "C:\Program Files\IBM\ITM" -r yes # Backup is performed. Default keystore is renewed"
@@ -266,15 +265,18 @@ The prefered way would be to use the script. The second alternative is more usef
 
 &nbsp;&nbsp;&nbsp;Samples: 
 
-      . ./init_tlsv1.2 ; ./activate_teps-tlsv.sh -h /opt/IBM/ITM -r yes                 # A backup is performed and default keystore is renewed"
-      . ./init_tlsv1.2 ; ./activate_teps-tlsv.sh -h /opt/IBM/ITM -b no -r yes -a lx8266 # NO backup is performed, default keystore is renewed, arch folder is lx8266"
-      . ./init_tlsv1.2 ; ./activate_teps-tlsv.sh -h /opt/IBM/ITM -b no -r no            # NO backup is performed and default keystore is not renewed"
+`> cd /tmp/ITM-TLS1.n-implementation-2/unix`
+
+    > . ./init_tlsv1.2 ; ./activate_teps-tlsv.sh -h /opt/IBM/ITM -r yes                 # A backup is performed and default keystore is renewed"
+    > . ./init_tlsv1.2 ; ./activate_teps-tlsv.sh -h /opt/IBM/ITM -b no -r yes -a lx8266 # NO backup is performed, default keystore is renewed, arch folder is lx8266"
+    > . ./init_tlsv1.2 ; ./activate_teps-tlsv.sh -h /opt/IBM/ITM -b no -r no            # NO backup is performed and default keystore is not renewed"
+
 <BR>
 
 3.4.2 Step by step using functions <a id='3.4.2'></a>
 -----------------------------------
 
-Alternatively, you can execute each function from the command prompt. But before starting to modify files or options you must:
+Alternatively, you can execute each function from the command prompt. It is more usefull for testing and verification purposes. But before starting to modify files or options you must:
 
 - **Perform a backup of all files and settings you want to modify**. Otherwise you cannot go back in case of failures.
 - Execute `. .\init_tlsv1.2.ps1` for Windows or `. ./init_tlsv1.2` for Unix/Linux to initialize TLS version specific variables
