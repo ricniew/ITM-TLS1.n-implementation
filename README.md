@@ -62,7 +62,7 @@ If a WAS 855 uplift was not performed in the TEPS host as described in the updat
     - `KDEBE_TLSVNN_CIPHER_SPECS="TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384,TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384"` 
 
     **Note:** If other cipher specs needs to be used, you **must** modify the `init_tlsv[n].[n]` file ( for example "init_tlsv1.2" ) and use them everywhere they are set in this document.
-    A complete list of TLSv1.2 ciphers available in ITM is [here](https://github.ibm.com/NIEWOLIK/ITM-TLS1.n-implementation/blob/main/itm_allowed_TLSV1.2.cipherspecs.txt)
+    The list above is a subset of the allowed ciphers which considered as save. A complete list of TLSv1.2 ciphers available in ITM is [here](https://github.ibm.com/NIEWOLIK/ITM-TLS1.n-implementation/blob/main/itm_allowed_TLSV1.2.cipherspecs.txt
 
 3. Following new ports will be used and needs to be opened on the firewall **and** on the local firewall on the hosts where the Warehouse Proxy Agent and the Tivoli Enterprise Portal Server are running:
     - 15201 port to connect to the TEPS. 
@@ -187,8 +187,7 @@ The Bash shell functions and files ware tested on RedHat linux only, but should 
     - WINDOWS: <BR>`%CANDLE_HOME%\CNPSJ\scripts\updateTEPSEPass.bat wasadmin {newpass}` <BR> For example<BR>  _C:\IBM\ITM\CNPSJ\scripts\updateTEPSEPass.bat wasadmin mypass_ 
 - PowerShell on Windows and Bash Shell on Linux must exists
 - For TLSv1.2, if a WAS 855 uplift was not performed on the TEPS host as described in the update readme files, you must execute _Appendix B_ action as described in the PDF  document mentioned above. To check if a WAS uplift was made use ITMHOME/[arch]/iw/bin/versionInfo.sh or ITMHOME\CNPSJ\bin\versionInfo.bat. The version must be at least 8.5.5.16
-- **If you use your own CA root and issuer certs** in `keyfiles/keyfile.kdb` and eWAS, you should execute the script witht he option `-r no` to suppress the ITM default certification renewal. For example `./activate_teps-tlsv1.2.sh -h /opt/IBM/ITM -r no`. If you not set this option, you need to check if our own certificates are still present in the newly created keyfile.kdb and add them back if required.
-
+- **If you use your own CA root and issuer certs** in `keyfiles/keyfile.kdb` and eWAS, you should execute the script with the option `-r no` to suppress the ITM default certification renewal. For example `./activate_teps-tlsv1.2.sh -h /opt/IBM/ITM -r no`. If you not set this option, the selfesigned **default** and the **root** cert will be deleted in the `keyfile.db` and imported from the newly created `key.p12` (from eWAS) file. This can break your certification chain. Hence, your own certificates will most likely be not present anymore in the newly created `keyfile.kdb`.
     
 3.2 Download script files<a id='3.2'></a>
 -------------------------
@@ -285,7 +284,7 @@ Open a Linux terminal or Powershell command prompt and execute each function man
 Below the recommended sequence (example for TLSv1.2 changes on Linux; but it applies to Windows as well, you only need to adjust the syntax):
 
     # cd /tmp/ITM-TLS1.n-implementation-2/unix
-    # . ./init_tlsv1.2 ; . ./functions_sources.h 
+    # . ./init_tlsv1.2 ; . ./functions_sources.h /opt/IBM/ITM
     # checkIfFileExists
     # EnableICSLite "true"
     # renewCert
