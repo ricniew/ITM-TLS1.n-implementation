@@ -181,7 +181,7 @@ The Bash shell functions and files ware tested on RedHat linux only, but should 
 -----------------
 
 - Before starting the script, please verify that the TEPS is started and **connected to TEMS using IP.SPIPE**
-- Assure that port 15201 is open on the Firewall and on the local firewall on the TEPS host (needed to connect using TEP client)
+- The default TEPS HTTPS port is 15201. Assure that port is open on the Firewall and on the local firewall on the TEPS host (needed to connect using TEP client). **If you attend** to use another port, you need to modify the `init_global.vars` file and set the TEPSHTTPSPORT="[your port]"
 - Update the `wasadmin` password if **not** done so far
     - UNIX: <BR>`$CANDLEHOME/{archdir}/iw/scripts/updateTEPSEPass.sh wasadmin {newpass}` <BR> For example <BR> _/opt/IBM/ITM/lx8266/iw/scripts/ updateTEPSEPass.sh wasadmin mypass_
     - WINDOWS: <BR>`%CANDLE_HOME%\CNPSJ\scripts\updateTEPSEPass.bat wasadmin {newpass}` <BR> For example<BR>  _C:\IBM\ITM\CNPSJ\scripts\updateTEPSEPass.bat wasadmin mypass_ 
