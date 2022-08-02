@@ -65,7 +65,7 @@ If a WAS 855 uplift was not performed in the TEPS host as described in the updat
     The list above is a subset of the allowed ciphers which considered as save. A complete list of TLSv1.2 ciphers available in ITM is [here](https://github.ibm.com/NIEWOLIK/ITM-TLS1.n-implementation/blob/main/itm_allowed_TLSV1.2.cipherspecs.txt
 
 3. Following new ports will be used and needs to be opened on the firewall **and** on the local firewall on the hosts where the Warehouse Proxy Agent and the Tivoli Enterprise Portal Server are running:
-    - 15201 port to connect to the TEPS. 
+    - 15201 (if you did not modify the default set in `ìnit_global_vars`) port to connect to the TEPS. 
     - 65100 port for the Warehouse proxy agent (WPA). **Note**: You must configure the WPA to bind to HTTP  (listening on port 63358) and HTTPS (listening on port 65100) before you configure all the agents to connect using HTTPS for TEMS connection. The WPA must be able to handle both HTTP and HTTPS connections during the time you update the ITM Agents to use HTTPS and TLSv1.2 only. This, because you cannot update all the agents at the same time and you will have a mix of Agents using HTTP (connect over 63358 to WPA) and HTTPS (connect over 65100 to WPA). 
     - If you did not use HTTPS so far and firewall is in use, port 3660 needs to be opened on the firewall between the Agents and the TEMS. 
     - Also, if you use a local firewalls (TEMS,TEPS, WPA hsots), you need to allow incomming traffic on port 3660, 15201 and 65100
