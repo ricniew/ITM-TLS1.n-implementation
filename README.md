@@ -68,7 +68,7 @@ If a WAS 855 uplift was not performed in the TEPS host as described in the updat
     - 15201 (if you did not modify the default set in `ìnit_global_vars`) port to connect to the TEPS. 
     - 65100 port for the Warehouse proxy agent (WPA). **Note**: You must configure the WPA to bind to HTTP  (listening on port 63358) and HTTPS (listening on port 65100) before you configure all the agents to connect using HTTPS for TEMS connection. The WPA must be able to handle both HTTP and HTTPS connections during the time you update the ITM Agents to use HTTPS and TLSv1.2 only. This, because you cannot update all the agents at the same time and you will have a mix of Agents using HTTP (connect over 63358 to WPA) and HTTPS (connect over 65100 to WPA). 
     - If you did not use HTTPS so far and firewall is in use, port 3660 needs to be opened on the firewall between the Agents and the TEMS. 
-    - Also, if you use a local firewalls (TEMS,TEPS, WPA hsots), you need to allow incomming traffic on port 3660, 15201 and 65100
+    - Also, if you use a local firewalls (TEMS,TEPS, WPA hsots), you need to allow incomming traffic on port 3660, 15201 (if you did not modify the default set in `ìnit_global_vars`) and 65100
 
 
 1.2 General Approaches<a id='1.2'></a>
@@ -78,7 +78,7 @@ If a WAS 855 uplift was not performed in the TEPS host as described in the updat
   
   1. Leave the TEMS configuration as it is.
   2. Configure your TEPS to use IP.SPIPE with TLSV1.2 and the specific ciphers for the TEMS connection (**how to**: See TEPS section for further config TEPS actions related to TLSv1.2 only usage)
-  3. Check if the Summarization and Pruning Agent is using HTTPS and port 15201 to connect to TEPS. If not, configure it accordignly.
+  3. Check if the Summarization and Pruning Agent is using HTTPS and port 15201 (if you did not modify the default set in `ìnit_global_vars`) to connect to TEPS. If not, configure it accordignly.
   4. Configure all your Agents to use TLSV1.2 and the specific ciphers for the TEMS connenction (**how to**: see Agents section)
   
 
@@ -87,15 +87,15 @@ If a WAS 855 uplift was not performed in the TEPS host as described in the updat
   1. Make sure that port 3660 is open on the firewall (Agent/TEPS - TEMS connection). If a local firewall is in use, also here allow incomming connection on 3660.
   2. First configure your TEMS and the WPA to use IP.SPIPE and IP.PIPE (**how to**: see TEMS and WPA section). By default TLSV1.x and all existing ciphers are allowed to be used.
   3. Configure your TEPS to use IP.SPIPE with TLSV1.2 and the specific ciphers for the TEMS connection (**how to**: See TEPS section for further config TEPS actions related to TLSv1.2 only usage)
-  4. Configure the Summarization and Pruning Agent to use HTTPS and port 15201 to connect to TEPS.
-  5. Configure all your Agents to use IP.SPIPE with  TLSV1.2 and the specific ciphers only for the TEMS connenction (**how to**: see Agents section)
+  4. Configure the Summarization and Pruning Agent to use HTTPS and port 15201 (if you did not modify the default set in `ìnit_global_vars`) to connect to TEPS.
+  5. Configure all your Agents to use IP.SPIPE with TLSV1.2 and the specific ciphers only for the TEMS connenction (**how to**: see Agents section)
 
 **C.**
 If all your TEMS use **both IP.SPIPE and IP.PIPE** and **some Agents use IP.PIPE and others IP.SPIPE** you need:
 
   1. Leave the TEMS configuration as it is.
   2. Configure your TEPS to use IP.SPIPE with TLSV1.2 and the specific ciphers for the TEMS connection (**how to**: See TEPS section for further config TEPS actions related to TLSv1.2 only usage)
-  3. Check if the Summarization and Pruning Agent is using HTTPS and port 15201 to connect to TEPS. If not, configure it accordignly.
+  3. Check if the Summarization and Pruning Agent is using HTTPS and port 15201 (if you did not modify the default set in `ìnit_global_vars`)  to connect to TEPS. If not, configure it accordignly.
   4. Configure all your Agents to use IP.SPIPE with TLSV1.2 and the specific ciphers only for the TEMS connenction (**how to**: see Agents section)
 
 <BR> [\[goto top\]](#content)
