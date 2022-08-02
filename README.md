@@ -381,7 +381,7 @@ NOTE: the changes made by the script are global. If your have defined TEPD insta
 4 Summarization and Pruning Agent
 =================================
 
-Configure and check if the S&P Agent is connecting through HTTPS port (for example 15201 if you do not overwrite the default) to the TEPS. <BR>
+Configure and check if the S&P Agent is connecting through HTTPS port (if you did not modify the default set in `ìnit_global_vars`) to the TEPS. <BR>
 You  **must**  perform this step just after you have configured the TEPS to use HTTPS only, otherwise your Warehouse Database will not be summarized and pruned:
 
 <img src="https://media.github.ibm.com/user/85313/files/dc6d4d00-c640-11ec-9f31-40b1c555503f" width="40%" height="40%">
