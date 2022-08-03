@@ -404,6 +404,8 @@ Assure WPA port 65100 is open on the firewall (general and local).
 6 Agents
 ========
 
+Before mass changes, please check the agent version and if it supports the new ciphers. This can be done be checking agents's trace file where normally all the supported ciphers are listed.
+
 6.1 Alternative A<a id='6.1'></a>
 -----------------
 
