@@ -301,6 +301,8 @@ Below the recommended sequence (example for TLSv1.2 changes on Linux; but it app
     # modcompjnlpt "${AFILES["component.jnlpt"]}"
     # modapplethtmlupdateparams "${AFILES["applet.html.updateparams"]}"
     # ${ITMHOME}/bin/itmcmd config -A cw
+    # modcjenvironment "${AFILES["cj.environment"]}"
+    # ${ITMHOME}/bin/itmcmd config -A cj
 
 As you can see  `modtepjnlpt "${AFILES["tep.jnlpt"]}"` (on windows the option would be `$HFILES["tep.jnlpt"]`), an array/hash element containing the file path is passed to some functions. The FILES variable is declared by file `init_global_vars` ( or `init_global_vars.ps1` on Windows) which is sourced by the `functions_sources.h` (or `functions_sources.ps1` on Windows).
 
