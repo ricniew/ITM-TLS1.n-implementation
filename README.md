@@ -4,7 +4,7 @@ Author: Richard Niewolik
 
 Contact: niewolik@de.ibm.com
 
-Revision: 2.2
+Revision: 2.3
 
 
 Content
@@ -58,11 +58,11 @@ A step by step description for TLSv1.2 created by IBM Support exists: https://ww
 1. Your environment **must be at least at ITM 6.3 FP7** and a **WAS 855 uplift must have been performed** before implementing TLSv1.2. 
 If a WAS 855 uplift was not performed in the TEPS host as described in the update readme files, you must execute _Appendix B_ action as described in the IBM Support document. To check if a WAS uplift was made use `ITMHOME/[arch]/iw/bin/versionInfo.sh` or `ITMHOME\CNPSJ\bin\versionInfo.bat`. The version must be at least `8.5.5.16`
 
-2. Following ciphers are used in the provided `init_tlsv1.2` files. If you want to use them, you need to set it wherever the variable `KDEBE_TLSV12_CIPHER_SPECS`is referanced in this document
+2. Following ciphers are used in the provided `init_tlsv1.2` files. If you want to use them, you need to set it wherever the variable `KDEBE_TLSV12_CIPHER_SPECS`is referanced in this document. 
     - `KDEBE_TLSVNN_CIPHER_SPECS="TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384,TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384"` 
 
     **Note:** If other cipher specs needs to be used, you **must** modify the `init_tlsv[n].[n]` file ( for example "init_tlsv1.2" ) and use them everywhere they are set in this document.
-    The list above is a subset of the allowed ciphers which considered as save. A complete list of TLSv1.2 ciphers available in ITM is [here](https://github.ibm.com/NIEWOLIK/ITM-TLS1.n-implementation/blob/main/itm_allowed_TLSV1.2.cipherspecs.txt
+    The list above is a subset of the allowed ciphers which considered as save. A complete list of TLSv1.2 ciphers available in ITM is [here](https://github.ibm.com/NIEWOLIK/ITM-TLS1.n-implementation/blob/main/itm_allowed_TLSV1.2.cipherspecs.txt)
 
 3. Following new ports will be used and needs to be opened on the firewall **and** on the local firewall on the hosts where the Warehouse Proxy Agent and the Tivoli Enterprise Portal Server are running:
     - 15201 (if you did not modify the default set in `ìnit_global_vars`) port to connect to the TEPS. 
@@ -88,14 +88,14 @@ If a WAS 855 uplift was not performed in the TEPS host as described in the updat
   2. First configure your TEMS and the WPA to use IP.SPIPE and IP.PIPE (**how to**: see TEMS and WPA section). By default TLSV1.x and all existing ciphers are allowed to be used.
   3. Configure your TEPS to use IP.SPIPE with TLSV1.2 and the specific ciphers for the TEMS connection (**how to**: See TEPS section for further config TEPS actions related to TLSv1.2 only usage)
   4. Configure the Summarization and Pruning Agent to use HTTPS and port 15201 (if you did not modify the default set in `ìnit_global_vars`) to connect to TEPS.
-  5. Configure all your Agents to use IP.SPIPE with TLSV1.2 and the specific ciphers only for the TEMS connenction (**how to**: see Agents section)
+  5. Configure all your Agents to use IP.SPIPE with  TLSV1.2 and the specific ciphers only for the TEMS connenction (**how to**: see Agents section)
 
 **C.**
 If all your TEMS use **both IP.SPIPE and IP.PIPE** and **some Agents use IP.PIPE and others IP.SPIPE** you need:
 
   1. Leave the TEMS configuration as it is.
   2. Configure your TEPS to use IP.SPIPE with TLSV1.2 and the specific ciphers for the TEMS connection (**how to**: See TEPS section for further config TEPS actions related to TLSv1.2 only usage)
-  3. Check if the Summarization and Pruning Agent is using HTTPS and port 15201 (if you did not modify the default set in `ìnit_global_vars`)  to connect to TEPS. If not, configure it accordignly.
+  3. Check if the Summarization and Pruning Agent is using HTTPS and port 15201 (if you did not modify the default set in `ìnit_global_vars`) to connect to TEPS. If not, configure it accordignly.
   4. Configure all your Agents to use IP.SPIPE with TLSV1.2 and the specific ciphers only for the TEMS connenction (**how to**: see Agents section)
 
 <BR> [\[goto top\]](#content)
@@ -166,7 +166,9 @@ The manual process described in the IBM Support document section: "_TLS v1.2 onl
 3. `init_global_vars`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(global variables; sourced by functions_sources.h)
 4. `init_tlsv1.2`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(TLSv1.2 specific variables; **must** be sourced before starting activate_teps-tlsv.sh or sourcing functions_sources.h) 
 
-The files `init_tlsv1.2` (Linux) and `init_tlsv1.2.ps1` Windows contain the TLS version specifiyc setting you need to set before execution. For another TLS version copy this file and change values as required. This are the current settings for TLSv1.2:
+**File init_tlsvn.n**
+
+The files `init_tlsv1.2` (Linux) and `init_tlsv1.2.ps1` Windows contain the TLS version specific setting you need to set before execution. For another TLS version copy this file and change values as required. This are the current settings for TLSv1.2:
 
     TLSVER="TLSv1.2" 
     KDEBE_TLSVNN_CIPHER_SPECS="TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384,TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384"
@@ -174,6 +176,18 @@ The files `init_tlsv1.2` (Linux) and `init_tlsv1.2.ps1` Windows contain the TLS 
     KDEBE_TLS_DISABLE="TLS10,TLS11"
     HTTP_SSLCIPHERSPEC="ALL -SSL_RSA_WITH_3DES_EDE_CBC_SHA"
     JAVASEC_DISABLED_ALGORITHMS="SSLv3, TLSv1, TLSv1.1, RC4, DES, SHA1, DHE, MD5withRSA, DH keySize < 2048, DESede, \ EC keySize < 224, 3DES_EDE_CBC, anon, NULL, DES_CBC"
+
+About **init_tlsvn.n** variables:
+
+   | Variable | Description | 
+   | -------- | ----------- | 
+   | TLSVER | Contains the TLS Version which should be implemented. Used in several functions | 
+   | KDEBE_TLSVNN_CIPHER_SPECS | User defined. Contains the CIPHER SPECS which have to be set on TEPS. Values will be set in TEPS cq.ini/KFWENV into variable "KDEBE_TLSV**12**\_CIPHER_SPECS". The version number (here "**12**") is derived from the TLSVER userd defined variable | 
+   | KFW_ORB_ENABLED_PROTOCOLS | ITM TEPS variable. Will be set in in TEPS cq.ini/KFWENV  file | 
+   | KDEBE_TLS_DISABLE | Used to get protocols which have to be disabled on the TEPS (function modcqin/modkfwenv, e.g. : KDEBE_**TLS11**\_ON=NO) and HTTP Server (function modhttpconf, e.g: SSLProtocolDisable **TLS**v**11** ) | 
+   | HTTP_SSLCIPHERSPEC | Used to set variable SSLCipherSpec in httpd.conf file | 
+   | JAVASEC_DISABLED_ALGORITHMS | Values used to set variable jdk.tls.disabledAlgorithms in java.security file. **NOTE**: For long values it is required to use "\\" to split settings into two lines | 
+
 
 The Bash shell functions and files ware tested on RedHat linux only, but should run on other Linux Distributions and Unix systems as well.
 
@@ -188,16 +202,17 @@ The Bash shell functions and files ware tested on RedHat linux only, but should 
 - PowerShell on Windows and Bash Shell on Linux must exists
 - For TLSv1.2, if a WAS 855 uplift was not performed on the TEPS host as described in the update readme files, you must execute _Appendix B_ action as described in the PDF  document mentioned above. To check if a WAS uplift was made use ITMHOME/[arch]/iw/bin/versionInfo.sh or ITMHOME\CNPSJ\bin\versionInfo.bat. The version must be at least 8.5.5.16
 - **If you use your own CA root and issuer certs** in `keyfiles/keyfile.kdb` and eWAS, you should execute the script with the option `-r no` to suppress the ITM default certification renewal. For example `./activate_teps-tlsv1.2.sh -h /opt/IBM/ITM -r no`. If you not set this option, the selfesigned **default** and the **root** cert will be deleted in the `keyfile.db` and imported from the newly created `key.p12` (from eWAS) file. This can break your certification chain. Hence, your own certificates will most likely be not present anymore in the newly created `keyfile.kdb`.
+
     
 3.2 Download script files<a id='3.2'></a>
 -------------------------
 
-Download latest version and unzip/tar the downloaded archive to a temporary folder.
+Download latest version and unzip/tar the downloaded archive to a temporary folder. 
 
 Use these links:
  
-- For Windows: [ZIP format](https://github.com/ricniew/ITM-TLS1.n-implementation/archive/refs/tags/2.2.zip) 
-- For Unix/linux: [TAR format](https://github.com/ricniew/ITM-TLS1.n-implementation/archive/refs/tags/2.2.tar.gz) 
+- For Windows: [ZIP format](https://github.ibm.com/NIEWOLIK/ITM-TLS1.n-implementation/archive/2.2.zip) 
+- For Unix/linux: [TAR format](https://github.ibm.com/NIEWOLIK/ITM-TLS1.n-implementation/archive/2.2.tar.gz) 
 
 Or Use "Download ZIP" to save asset to a temporary folder. Then unzip it.
 
@@ -239,6 +254,8 @@ https://github.ibm.com/NIEWOLIK/ITM-TLS1.n-implementation/archive/2.zip
 You have two alternatives how to use the scripts. Either you use the script `activate_teps-tlsv` which does everything for you, or you use the functions one by one.
 The prefered way would be to use the script. The second alternative is more usefull for testing and verification purposes.
 
+
+
 3.4.1 Via script activate_teps-tlsv <a id='3.4.1'></a>
 -----------------------------------
 &nbsp;&nbsp;&nbsp;**On Windows**:
@@ -259,12 +276,13 @@ The prefered way would be to use the script. The second alternative is more usef
 &nbsp;&nbsp;&nbsp;**On UNIX/Linux**:
 
    - Open shell prompt and go to the temp directory where you have donloaded the script: `cd /tmp/ITM-TLS1.n-implementation-[tag]/unix`
-   - **Source** the TLS Version specific variables file. For example: `. ./init_tlsv1.2`
+   - **Source** the TLS Version specific variables file. For example: `. ./init_tlsv1.2`. For another TLS version copy this file and change values as required.
    - Execute´./activate_teps-tlsv.sh` 
 
 &nbsp;&nbsp;&nbsp;Samples: 
 
 `> cd /tmp/ITM-TLS1.n-implementation-2.2/unix`
+
 
     > . ./init_tlsv1.2 ; ./activate_teps-tlsv.sh -h /opt/IBM/ITM -r yes                 # A backup is performed and default keystore is renewed"
     > . ./init_tlsv1.2 ; ./activate_teps-tlsv.sh -h /opt/IBM/ITM -b no -r yes -a lx8266 # NO backup is performed, default keystore is renewed, arch folder is lx8266"
@@ -278,13 +296,13 @@ The prefered way would be to use the script. The second alternative is more usef
 Alternatively, you can execute each function from the command prompt. It is more usefull for testing and verification purposes. But before starting to modify files or options you must:
 
 - **Perform a backup of all files and settings you want to modify**. Otherwise you cannot go back in case of failures.
-- Execute `. .\init_tlsv1.2.ps1` for Windows or `. ./init_tlsv1.2` for Unix/Linux to initialize TLS version specific variables. For another TLS version copy this file and change values as required.
+- Execute `. .\init_tlsv1.2.ps1` for Windows or `. ./init_tlsv1.2` for Unix/Linux to initialize TLS version specific variables
 
 Open a Linux terminal or Powershell command prompt and execute each function manually to modify the required option or files. <BR>
 Below the recommended sequence (example for TLSv1.2 changes on Linux; but it applies to Windows as well, you only need to adjust the syntax):
 
-    # cd /tmp/ITM-TLS1.n-implementation-2/unix
-    # . ./init_tlsv1.2 ; . ./functions_sources.h /opt/IBM/ITM
+    # cd /tmp/ITM-TLS1.n-implementation-2.2/unix
+    # . ./init_tlsv1.2 ; . ./functions_sources.h  /opt/IBM/ITM
     # checkIfFileExists
     # EnableICSLite "true"
     # renewCert
@@ -338,6 +356,7 @@ Use the MTEMS tool (Management Tivoli Enterprise Monitoring Services) to reconfi
 As documented in the support link referenced above, when all the parameters have been edited, click OK to save your changes. The changes will take effect the next time the TEP Desktop client is launched.
 
 On Linux/Unix
+
 
 Export your DISPLAY Variable and then execute: `itmcmd agent -o [your instance] start cj`. Please note, there is also a TEPD instance for which a system service is defined (for example /usr/lib/systemd/system/ITMAgents1.cj.service). Such instance must be started like: `ITMsystemctl=yes itmcmd agent start cj`. (`ITMsystemctl=yes itmcmd agent -o falcate1 stop cj` respectively).
 
