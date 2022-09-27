@@ -13,7 +13,13 @@
 #             - Modified saveorgcreatenew 
 # 22.07.2022: Version 2.1      R. Niewolik EMEA AVP Team
 #             - Modfied modjavasecurity to support "\" in jdk.tls.disabledAlgorithms value (set in init_tlsvn.n)
-##
+# 27.09.2023: Version 2.3 R. Niewolik EMEA AVp Team
+#             - Function modhttpconf was modified to evaluate new variable HTTPD_DISABLE_15200 introduced
+#               Now it will be exeuted like: modhttpconf [httpd.conf file] [yes,no].
+#               It was done to control if the HTTP port 15200 should be still allowed to be accessed outside of the localhost.
+#             - Function modkfwenv was modfied to support KFW_ORBPARM FOR TEPS VERSION >= 6.3 fp7 sp8
+#             - Modified function importSelfSignedToJREcacerts to check if label "IBM_Tivoli_Monitoring_Certificate" exists in $KEYKDB.
+#               If not function returns rc=5 and Self Signed Cert is not copied from $KEYKDB To JRE cacerts 
 ##
 
 if (  $Args ) {
@@ -240,41 +246,68 @@ function saveorgcreatenew ($orgfile) # saveorgcreatenew [path to filename]
 }
 
 
-function modhttpconf ($httpdfile) # modhttpconf $HFILES["httpd.conf"]
+function modhttpconf ($httpdfile,$httpd_disable_15200) # modhttpconf $HFILES["httpd.conf"]
 {
   # returns rc=4 if file already modified
   # !! modification for versions > TLSV1.2 may be required
+  if ( $httpd_disable_15200 -eq "" ) { 
+      write-host "ERROR - modhttpconf - You must provide a second parameter to control whether external TEPS login on port 15200 should be disabled or not"
+      write-host "ERROR - modhttpconf - For example 'modhttpconf [path to httpd.conf] yes' to disable or 'modhttpconf [path to httpd.conf] no' to not disable"
+      return 1
+  } elseif ( ( $httpd_disable_15200  -ne "no" ) -and ( $httpd_disable_15200  -ne "yes" ) ) { 
+      write-host "ERROR - modhttpconf - Bad execution syntax. 'modhttpconf [path to httpd.conf] [yes/no]' "
+      return 1
+  }
   $ver = $TLSVER -replace "\.","" # TLSVn.n to TLSvnn
-
-  $pattern = "^\s*SSLProtocolDisable\s*TLSv11" 
-  if (select-string -Path "$httpdfile" -Pattern $pattern) {
+  $disArray =$KDEBE_TLS_DISABLE.Split(",")
+  $i1=0
+  $i2=0
+  foreach ($item in $disArray) { 
+      $pn=$item.ToUpper() ; $pn = $item -replace "TLS","TLSv" # change TLSnn to TLSvnn
+      $pattern = "^\s*SSLProtocolDisable\s*$pn" 
+      if (select-string -Path "$httpdfile" -Pattern $pattern) { } 
+      else { $i1=$i1+1 }
+  }
+  if ( $i1 -eq 0 ) {
       $pattern = "^\s*SSLProtocolEnable\s*$ver" 
       if (select-string -Path "$httpdfile" -Pattern $pattern) {
-          write-host "INFO - modhttpconf - $httpdfile contains 'SSLProtocolEnable $ver' + TLS11,10 disabled and will not be modified"
+          write-host "INFO - modhttpconf - $httpdfile contains 'SSLProtocolEnable $ver' + TLS10,11, ... disabled and will not be modified"
           return 4
       }
+      $i2=$i2+1
   }
 
-  write-host "INFO - modhttpconf - Modifying $httpdfile"
+  write-host "INFO - modhttpconf - Modifying $httpdfile ($i1,$i2) "
   
   $rc = saveorgcreatenew $httpdfile 
   $newhttpdfile = $rc.new
   $savehttpdfile = $rc.save
 
-  $disArray =$KDEBE_TLS_DISABLE.Split(",")
   $foundsslcfg = 1
   foreach( $line in Get-Content $savehttpdfile ) {
       #write-host -- $foundsslcfg
       if ( $line.StartsWith("#") ) { Add-Content $newhttpdfile "${line}" ; continue }
       if ( "$line" -match "ServerName\s*(.*):15200" ) {
           $temp = "ServerName " + $matches[1] + ":${TEPSHTTPSPORT}"
-          Add-Content $newhttpdfile $temp
-          Add-Content $newhttpdfile "#${line}"
+          if ( select-string -Path "$httpdfile" -Pattern "^\s*$temp") {
+              write-host "INFO - modhttpconf - '$temp' exists already"
+          } else { 
+              Add-Content $newhttpdfile $temp 
+          }
+          if ( $httpd_disable_15200  -eq "yes" ) { 
+              Add-Content $newhttpdfile "#${line}"
+          } else { 
+              Add-Content $newhttpdfile "${line}"
+          }
           continue
       }
       if ( "$line" -match "Listen\s*0.0.0.0:15200" ) {
-          Add-Content $newhttpdfile "Listen 127.0.0.1:15200" # local HTTP usage allowed
-          Add-Content $newhttpdfile "#${line}"
+          if ( $httpd_disable_15200  -eq "yes" ) { 
+              Add-Content $newhttpdfile "Listen 127.0.0.1:15200" # local HTTP usage allowed
+              Add-Content $newhttpdfile "#${line}"
+          } else { 
+              Add-Content $newhttpdfile "${line}"
+          }
           continue
       }
       if ( $foundsslcfg -eq 1 ) {  
@@ -288,7 +321,7 @@ function modhttpconf ($httpdfile) # modhttpconf $HFILES["httpd.conf"]
               Add-Content $newhttpdfile "  SSLEnable"
               Add-Content $newhttpdfile "  SSLProtocolDisable SSLv2"
               Add-Content $newhttpdfile "  SSLProtocolDisable SSLv3"
-              Foreach ($item in $disArray) { 
+              foreach ($item in $disArray) { 
                   $pn=$item.ToUpper() ; $pn = $item -replace "TLS","TLSv" # change TLSnn to TLSvnn
                   Add-Content $newhttpdfile "  SSLProtocolDisable $pn"
               }
@@ -323,15 +356,49 @@ function modkfwenv ($kfwenv) # modkfwenv $HFILES["kfwenv"]
 {
   # returns rc=4 if file already modified
   # !! modification for > TLSV1.2 may be required
-  $ver=$TLSVER.ToUpper() ; $ver = $ver -replace "\.","" # change e.g. from TLSvn.n to TLSVnn
+  $tepsver_sp8 = 06300710
+  $cmd = 'kincinfo -t cq|find "CQ  TEPS"'
+  $tmp = Invoke-Expression $cmd
+  $tmparray = $($tmp -replace '\s+',' ').Split(" ")
+  $tepsver_current = [int]$($tmparray[8] -replace '\.', '')
+  $tepsver_current = 06300704
 
-  $pattern="^[^#]*KFW_ORB_ENABLED_PROTOCOLS=${KFW_ORB_ENABLED_PROTOCOLS}" 
-  if (select-string -Path "$kfwenv" -Pattern $pattern) {
-     $pattern="^[^#]*KDEBE_${ver}_CIPHER_SPECS=$KDEBE_TLSVNN_CIPHER_SPECS"
-     if (select-string -Path "$kfwenv" -Pattern $pattern) {
-         write-host "INFO - modkfwenv - $kfwenv contains 'KFW_ORB_ENABLED_PROTOCOLS=${KFW_ORB_ENABLED_PROTOCOLS}' and the '${KDEBE_TLSVNN_CIPHER_SPECS}' and will not be modified"
-         return 4
-     }
+  $ver=$TLSVER.ToUpper() ; $ver = $ver -replace "\.","" # change e.g. from TLSvn.n to TLSVnn
+  # KFW_ORB_ENABLED_PROTOCOLS used for TEPS vers < 6.3 FP7 SP8
+  $vtmp=$($TLSVER -replace '\.','_').Split("v")[1].trim() # will be e.g. "n_n"
+  $KFW_ORB_ENABLED_PROTOCOLS="TLS_Version_${vtmp}_Only" 
+  # KFW_ORBPARM used for TEPS vers >= 6.3 FP7 SP8
+  $vtmp=$($TLSVER -replace 'TLSv','TLS')  # will be e.g. "TLSn.n"
+  $vtmp2=$($vtmp -replace '\.','_')  # will be e.g. "TLSn_n"
+  $KFW_ORBPARM="-Dvbroker.security.server.socket.minTLSProtocol=$vtmp2 -Dvbroker.security.server.socket.maxTLSProtocol=TLS_MAX"
+  $i1 = 0
+  if ( $tepsver_current -lt $tepsver_sp8 ) {
+      $pattern="^[^#]*KFW_ORB_ENABLED_PROTOCOLS=${KFW_ORB_ENABLED_PROTOCOLS}" 
+      if ( select-string -Path "$kfwenv" -Pattern $pattern ) {
+          $message = "contains 'KFW_ORB_ENABLED_PROTOCOLS=$KFW_ORB_ENABLED_PROTOCOLS'"
+      } else { 
+          $i1 = 1 
+      }
+  } else {
+      $pattern = "^[^#]*KFW_ORBPARM="
+      if ( select-string -Path "$kfwenv" -Pattern $pattern ) {
+          $tmpa = $($KFW_ORBPARM).Split(" ")
+          foreach ( $item in $tmpa ) { 
+              $pattern="^[^#]*$item"
+              if ( select-string -Path "$kfwenv" -Pattern $pattern ) { }
+              else {  $i1= $i1 + 1 }
+          }
+          if ( $i1 -eq 0 ) { $message = "contains 'KFW_ORBPARM=$KFW_ORBPARM'" }
+      } else { 
+          $i1=4 
+      }
+  }
+  if ( $i1 -eq 0 ) {
+      $pattern="^[^#]*KDEBE_${ver}_CIPHER_SPECS=$KDEBE_TLSVNN_CIPHER_SPECS"
+      if ( select-string -Path "$kfwenv" -Pattern $pattern ) {
+          write-host "INFO - modcqini - $message  and the '$KDEBE_TLSVNN_CIPHER_SPECS' and will not be modified"
+          return 4
+      }
   }
 
   write-host "INFO - modkfwenv - Modifying $kfwenv"
@@ -340,29 +407,45 @@ function modkfwenv ($kfwenv) # modkfwenv $HFILES["kfwenv"]
   $newkfwenv = $rc.new
   $savekfwenv = $rc.save
 
+  $foundKFWORB = $foundORBPARM = $foundTLSDisable = $foundTLSn = 1
+
   $disArray =$KDEBE_TLS_DISABLE.Split(",")
-
-  $foundKFWORB = $foundTLSDisable = $foundTLSn = 1
-
   foreach( $line in Get-Content $savekfwenv ) {
       if ( $line.StartsWith("#") ) { Add-Content $newkfwenv "${line}" ; continue }
+
       if ( "$line" -match "KFW_ORB_ENABLED_PROTOCOLS" ) {
-          Add-Content $newkfwenv "KFW_ORB_ENABLED_PROTOCOLS=${KFW_ORB_ENABLED_PROTOCOLS}" 
-          $foundKFWORB = 0 ; continue
+          if ( $tepsver_current -lt $tepsver_sp8 ) { 
+              Add-Content $newkfwenv "KFW_ORB_ENABLED_PROTOCOLS=${KFW_ORB_ENABLED_PROTOCOLS}" 
+              $foundKFWORB = 0 
+          } else {
+              Add-Content $newkfwenv "#${line}"
+          } 
+      } elseif ( "$line" -match "KFW_ORBPARM" ) {
+          if ( $tepsver_current -lt $tepsver_sp8 ) {
+              Add-Content $newkfwenv "#${line}" 
+          } else {
+              Add-Content $newkfwenv "${line} $KFW_ORBPARM" 
+              $foundORBPARM=0 
+          } 
       } elseif ( "$line" -match "KDEBE_TLS[0-9][0-9]_ON" ) {
           if ( $foundTLSDisable -eq 0 ) { 
           } else {
-              Foreach ($item in $disArray) { 
+              foreach ($item in $disArray) { 
                   Add-Content $newkfwenv "KDEBE_${item}_ON=NO"
               }
-              $foundTLSDisable = 0 ; continue
+              $foundTLSDisable = 0 
           }
       } elseif ( "$line" -match "KDEBE_.*_CIPHER_SPECS" ) {
           Add-Content $newkfwenv "KDEBE_${ver}_CIPHER_SPECS=${KDEBE_TLSVNN_CIPHER_SPECS}"
           $foundTLSn = 0 ; continue
       } else { Add-Content $newkfwenv "${line}" }
   }
-  if ( $foundKFWORB -eq 1 ) { Add-Content $newkfwenv "KFW_ORB_ENABLED_PROTOCOLS=${KFW_ORB_ENABLED_PROTOCOLS}" } 
+
+  if ( $tepsver_current -lt $tepsver_sp8 ) {
+      if ( $foundKFWORB -eq 1 ) { Add-Content $newkfwenv "KFW_ORB_ENABLED_PROTOCOLS=${KFW_ORB_ENABLED_PROTOCOLS}" } 
+  } else {
+      if ( $foundORBPARM -eq 1 ) { Add-Content $newkfwenv "KFW_ORBPARM=$KFW_ORBPARM" } 
+  } 
   if ( $foundTLSDisable -eq 1 )  { 
       Foreach ($item in $disArray) { 
           Add-Content $newkfwenv "KDEBE_${item}_ON=NO"
@@ -717,8 +800,13 @@ function modsslclientprops ($sslclientprops) # modsslclientprops $HFILES["ssl.cl
 
 function importSelfSignedToJREcacerts ($cacerts) # importSelfSignedToJREcacerts $HFILES["cacerts"]
 {
-  # returns rc=4 if file already modified
-  # required otherwise tacmd tesplogin will not work
+  # returns rc=4 if file already modified and rc=5 if KEYKDB does not contain ITM selfsigned certs
+  # required otherwise https tacmd tesplogin may not work
+  $tempstr = & GSKitcmd gsk8capicmd  -cert -details -stashed -db "$KEYKDB" -label "IBM_Tivoli_Monitoring_Certificate"
+  if ( $tempstr -like '*does not contain*') {
+      Write-host "INFO - importSelfSignedToJREcacerts - $KEYKDB does not contain label 'IBM_Tivoli_Monitoring_Certificate'. Hence the self seigned certs cannot be copied to the $cacerts file. Continue..."
+      return 5
+  }
   $out = & $KEYTOOL  -list -v -keystore  "$cacerts" -storepass changeit | Select-String "IBM Tivoli Monitoring"
   if ( $out -like '*IBM Tivoli Monitoring*') {
       $tempstr = & GSKitcmd gsk8capicmd  -cert -details -stashed -db "$KEYKDB" -label "IBM_Tivoli_Monitoring_Certificate" | Select-String "Serial "
@@ -782,7 +870,7 @@ function renewCert ()
   if ( $Success ) {
       #$cmd ="& '$WSADMIN' -lang jython -c `"AdminTask.getCertificateChain('[-certificateAlias default -keyStoreName NodeDefaultKeyStore -keyStoreScope (cell):ITMCell:(node):ITMNode ]')`" "
       #Invoke-Expression $cmd 
-      write-host "INFO - renewCert - Successfully renewed default self signed certificate in eWAS"
+      write-host "INFO - renewCert - Successfully renewed default self signed certificate in eWAS (previous renew was $days days ago)"
      
   } else {
       write-host "$success"
@@ -847,8 +935,7 @@ function disableAlgorithms ()
   } else {
      write-host "INFO - disableAlgorithms - Modifying com.ibm.websphere.tls.disabledAlgorithms WAS custom setting"
   } 
-  
-   
+    
   $jython = "$ITMHOME\tmp\org.jy"
   $null = New-Item  -path "$ITMHOME\tmp" -name "org.jy"  -ItemType "file"
   Add-Content $jython "sec = AdminConfig.getid('/Security:/')"

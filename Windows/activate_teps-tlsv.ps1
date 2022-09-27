@@ -10,6 +10,8 @@
 #               the required variables
 # 28.07.2022: Version 2.2      R. Niewolik EMEA AVP Team
 #             - Minor display changes, changed variable KCJ handling
+# 23.09.2022: Version 2.3      R. Niewolik EMEA AVP Team
+#             - added new parameter "-d" to allow to decide if TEPS login port 15200 should be externally disabled
 ##
 
 param (
@@ -22,12 +24,15 @@ param (
 
     [Parameter(HelpMessage="Certificate renew or not")]
     [string]$r = '',
+    
+    [Parameter(HelpMessage="Disable TEPS Port 15200 for external access or not")]
+    [string]$d = '',
 
     [Parameter(Mandatory=$false, ValueFromRemainingArguments=$true)]
     $UndefinedArgs
 )
 
-write-host "INFO - Script Version 2.2"
+write-host "INFO - Script Version 2.3"
 $startTime = $(get-date)
 $SCRIPTNAME = $MyInvocation.MyCommand.Name
 
@@ -35,15 +40,16 @@ function usage ()
 {
     write-host "----"
     write-host " Usage:"
-    write-host "  $SCRIPTNAME { -h ITM home } [-b [no, yes] ] {-r {no, yes} }"
+    write-host "  $SCRIPTNAME { -h ITM home } [-b [no, yes] ] {-r {no, yes} } {-d {no, yes} }"
     write-host "    -h = MANDATORY. ITM home folder"
     write-host "    -b = If backup should be performed or not, default is 'yes'. Please use that parameter carefully!!!!!!"
     write-host "    -r = MANDATORY. If default cert should be renewed"
+    write-host "    -d = MANDATORY. If set to 'no' then TEPS port 15200 is not disabled for external access"
     write-host ""
     write-host " Sample executions:"
-    write-host "    $SCRIPTNAME -h /opt/IBM/ITM -r yes       # Backup is performed. Default keystore is renewed"
-    write-host "    $SCRIPTNAME -h /opt/IBM/ITM -b yes -r no # Backup is performed, default keystore is not renewed"
-    write-host "    $SCRIPTNAME -h /opt/IBM/ITM -b no -r no  # NO backup is performed and default keystore is not renewed"
+    write-host "    $SCRIPTNAME -h /opt/IBM/ITM -r yes -d no        # Backup is performed. Default keystore is renewed and TEPS port 15200 is not disabled for external access"
+    write-host "    $SCRIPTNAME -h /opt/IBM/ITM -b yes -r no -d yes # Backup is performed, default keystore is not renewed and TEPS port 15200 is disabled for external access"
+    write-host "    $SCRIPTNAME -h /opt/IBM/ITM -b no -r no -d no   # NO backup is performed, default keystore is not renewed and TEPS port 15200 is not disabled for external access"
     write-host "----"
     exit 1 
 
@@ -54,6 +60,17 @@ function check_param ()
 {
   if ( $UndefinedArgs ) { 
     usage
+  }
+  if ( $d ) {  
+      if ( $d -ne 'no' -and $d -ne 'yes'  ) { 
+          write-host "ERROR - check_param - Bad execution syntax. Option '-d' value not correct (yes/no)"
+          usage
+      } else {
+          write-host "INFO - check_param - Option '-d' = '$d'"
+      }
+  } else {
+      write-host "ERROR - check_param - Option '-d' is required (yes/no)"
+      usage
   }
    
   if ( $r ) {  
@@ -106,6 +123,7 @@ check_param
 $backup = $b # getting value (no/yes). Provided by param  "[string]$b", see at the top of this script 
 $homeitm = $h # getting value provided by param "[string]$h"
 $certrenew = $r # if cert needs to be renewed (no/yes). Provided by param  "[string]$r"
+$httpd_disable_15200 = $d
 
 # initialize functions and global variables
 if ( test-path functions_sources.ps1 ) {
@@ -250,7 +268,7 @@ if ( $rc -eq 1 ) { exit 1 }
 $rcs = $rcs + $rc
 
 # IHS httpd.conf modification
-$rc = modhttpconf $HFILES["httpd.conf"]
+$rc = modhttpconf $HFILES["httpd.conf"] $httpd_disable_15200
 if ( $rc -eq 1 ) { exit 1 }
 $rcs = $rcs + $rc
 

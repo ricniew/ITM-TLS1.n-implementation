@@ -12,33 +12,47 @@
 #               the required variables
 # 28.07.2022: Version 2.2      R. Niewolik EMEA AVP Team
 #             - changed modkcjparmstxt execution to modcjenvironment to support TEPD (CJ) TLSv1.n changes 
+# 23.09.2022: Version 2.3      R. Niewolik EMEA AVP Team
+#             - added new parameter "-d" to allow to decide if TEPS login port 15200 should be externally disabled 
 ##
  
 SECONDS=0
 PROGNAME=$(basename $0)
 USRCMD="$0 $*"
-echo "INFO - Script Version 2.2"
+echo "INFO - Script Version 2.3"
 
 usage()
 { # usage description
   echo "----"
   echo " Usage:"
-  echo "  $PROGNAME { -h ITM home } [ -a arch ] [-b {no, yes[default]} ] { -r [no, yes] }"
+  echo "  $PROGNAME { -h ITM home } [ -a arch ] [-b {no, yes[default]} ] { -r [no, yes] } { -d [no, yes] }"
   echo "    -h = Required. ITM home folder"
   echo "    -a = Arch folder name (e.g. lx8266)"
   echo "    -b = If backup should be performed or not, default is 'yes'. Please use that parameter carefully!!!!!!"
   echo "    -r = Required. If set to 'no' the ITM default cert will NOT be renewed. "
+  echo "    -d = Required. If set to 'yes' the TEPS login port 15200 will be disabled in httpd.conf file (yes/no)"
   echo ""
   echo " Sample executions:"
-  echo "    $PROGNAME -h /opt/IBM/ITM -r yes  # A backup is performed and default keystore is renewed"
-  echo "    $PROGNAME -h /opt/IBM/ITM -b no -r yes -a lx8266  # NO backup is performed, default keystore is renewed, arch folder is lx8266"
-  echo "    $PROGNAME -h /opt/IBM/ITM -b no -r no  # NO backup is performed and default keystore is not renewed"
+  echo "    $PROGNAME -h /opt/IBM/ITM -r yes -d yes                 # A backup is performed and default keystore is renewed and login port 15200 will be disabled"
+  echo "    $PROGNAME -h /opt/IBM/ITM -b no -r yes -d no -a lx8266  # NO backup is performed, default keystore is renewed, arch folder is lx8266, and login port 15200 will not be disabled"
+  echo "    $PROGNAME -h /opt/IBM/ITM -b no -r no -d no             # NO backup is performed and default keystore is not renewed and login port 15200 will not be disabled"
   echo "----"
   exit 1
 }
 
 check_param ()
 {
+  if  [ "$HTTPD_DISABLE_15200" != ""  ] ; then
+      if [ "$HTTPD_DISABLE_15200" != "no" ] && [ "$HTTPD_DISABLE_15200" != "yes"  ] ; then 
+          echo "ERROR - check_param - Bad execution syntax. Option '-d' ("$HTTPD_DISABLE_15200") value not correct (true/false)"
+          usage
+      else
+          echo "INFO - check_param - Option '-d' = '$HTTPD_DISABLE_15200'"
+      fi
+  else
+      echo "ERROR - check_param - Bad execution syntax. Option '-d' is mandatory (true/false)"
+      usage
+  fi
   if  [ "$CERTRENEW" != ""  ] ; then
       if [ "$CERTRENEW" != "no" ] && [ "$CERTRENEW" != "yes"  ] ; then 
           echo "ERROR - check_param - Bad execution syntax. Option '-r' ("$CERTRENEW") value not correct (yes/no)"
@@ -95,13 +109,14 @@ check_param ()
 # MAIN ---------------------------------------------------------
 # --------------------------------------------------------------
 
-while getopts "a:h:b:r:" OPTS
+while getopts "a:h:b:r:d:" OPTS
 do
   case $OPTS in
     h) CITMHOME=${OPTARG} ;;
     a) CHARCH=${OPTARG} ;;
     b) BACKUP=${OPTARG} ;;
     r) CERTRENEW=${OPTARG} ;;
+    d) HTTPD_DISABLE_15200=${OPTARG} ;;
     *) echo "ERROR - main - You have used a not valid switch"; usage ; exit ;;
   esac
 done
@@ -158,7 +173,7 @@ fi
 if [ "$BACKUP" != "no" ] ; then
     if [ -d "${BACKUPFOLDER}" ]; then
         echo "ERROR - main - This script was started already and the folder $BACKUPFOLDER exists! To avoid data loss, "
-        echo "before executing this script again, you must restore the original content by using the '$BACKUPFOLDER/$RESTORESCRIPT' script and delete/rename the backup folder."
+        echo "before executing this script again, you must restore the original content by using the '$BACKUPFOLDER/$RESTORESCRIPT' script and delete/rename the backup folder. Or use '-b no' option to supress backup creation"
         exit 1
     else
         mkdir ${BACKUPFOLDER}
@@ -243,7 +258,7 @@ if [ $rc -eq 1 ] ; then exit 1 ; fi
 rcs=$(( $rc + $rcs ))
 
 # IHS httpd.conf modification
-modhttpconf "${AFILES["httpd.conf"]}" 
+modhttpconf "${AFILES["httpd.conf"]}" $HTTPD_DISABLE_15200
 rc=$?
 if [ $rc -eq 1 ] ; then exit 1 ; fi
 rcs=$(( $rc + $rcs ))

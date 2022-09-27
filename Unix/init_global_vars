@@ -51,7 +51,7 @@ else
 fi
 
 if [ ! -n "$TLSVER" ] ; then 
-    echo "ERROR - init_global.vars - Global variable TLSVER doesn't exists. Please initialize by using '. .\init_tlsv[n.n.ps1'" ; 
+    echo "ERROR - init_global.vars - Global variable TLSVER doesn't exists. Please initialize by using '. ./init_tlsv[n.n.ps1'" ; 
     return 1 
 fi
 

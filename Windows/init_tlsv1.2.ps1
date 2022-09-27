@@ -3,14 +3,20 @@
 # Do not modify this file.
 # 20.07.2022: Version 2.0      R. Niewolik EMEA AVP Team 
 #             - initial version                 
-#
+# 22.07.2022: Version 2.1      R. Niewolik EMEA AVP Team
+#             - modfied KDEBE_TLSVNN_CIPHER_SPECS and JAVASEC_DISABLED_ALGORITHMS with new values
+# 20.09.2023: Version 2.3      R. Niewolik EMEA AVp Team
+#             - Removed KFW_ORB_ENABLED_PROTOCOLS now set in modcqini function
+#             - Added check for TLSVER syntax
 
 $global:TLSVER = "TLSv1.2"
+$pattern = "^TLSv[0-9]\.[0-9]"
+if ( $TLSVER -notmatch $pattern ) {
+    write-host "ERROR - init_tls - Variable TLSVER=$TLSVER . Value is not correct. It should be in format 'TLSvn.n' for example 'TLSv1.2'."
+    return 1
+}
 
-$global:KDEBE_TLSVNN_CIPHER_SPECS="TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384,TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384"
-
-$vtmp=$($TLSVER -replace '\.','_').Split("v")[1].trim() # will be e.g. "1_2"
-$global:KFW_ORB_ENABLED_PROTOCOLS="TLS_Version_${vtmp}_Only" 
+$global:KDEBE_TLSVNN_CIPHER_SPECS="TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"
 
 $global:KDEBE_TLS_DISABLE="TLS10,TLS11"
 
@@ -20,8 +26,6 @@ $global:JAVASEC_DISABLED_ALGORITHMS="SSLv3, TLSv1, TLSv1.1, RC4, DES, SHA1, DHE,
 
 write-host "INFO - TLSVER=$TLSVER"
 write-host "INFO - KDEBE_TLSVNN_CIPHER_SPECS=$KDEBE_TLSVNN_CIPHER_SPECS"
-write-host "INFO - KFW_ORB_ENABLED_PROTOCOLS=$KFW_ORB_ENABLED_PROTOCOLS"
 write-host "INFO - KDEBE_TLS_DISABLE=$KDEBE_TLS_DISABLE"
 write-host "INFO - HTTP_SSLCIPHERSPEC=$HTTP_SSLCIPHERSPEC"
 write-host "INFO - JAVASEC_DISABLED_ALGORITHMS=$JAVASEC_DISABLED_ALGORITHMS"
-

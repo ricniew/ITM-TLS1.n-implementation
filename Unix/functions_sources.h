@@ -15,6 +15,14 @@
 # 28.07.2022: Version 2.2      R. Niewolik EMEA AVP Team
 #             - removed modkcjparmstxt, add modcjenvironment to support TEPD (CJ) TLSv1.n changes
 #             - made grep and match case insensitive
+# 27.09.2022: Version 2.3 R. Niewolik EMEA AVP Team
+#             - Function modhttpconf was modified to evaluate new variable HTTPD_DISABLE_15200 
+#               Now it will be exeuted:  modhttpconf [httpd.conf file] [yes,no].
+#               It was done to control if the HTTP port 15200 should be still allowed to be accessed outside of the localhost. 
+#             - Function modkfwenv was modfied to support KFW_ORBPARM for TEPS version >= 6.3 fp7 sp8
+#             - Modified function importSelfSignedToJREcacerts to check if label "IBM_Tivoli_Monitoring_Certificate" exists in $KEYKDB.
+#               If not function returns rc=5 and Self Signed Cert is not copied from $KEYKDB To JRE cacerts 
+##
 ##
 
 if [ $1 ] ; then
@@ -62,6 +70,9 @@ fi
 # initialize global variables
 if [ -f init_global_vars ] ; then 
    source ./init_global_vars $ITMHOME $ARCH
+   if [ $? -ne 0 ] ; then 
+       return 1
+   fi 
 else 
   echo "ERROR - functions_sources - File init_global_vars doesn't exists in the current directory"
   return 1
@@ -76,7 +87,7 @@ backupfile ()  # e.g backupfile "${AFILES["httpd.conf"]}"
   filen=$1
   if [ -f $filen  ] ; then 
       echo "INFO - backupfile - Saving $filen in $BACKUPFOLDER "
-      cp -p $filen $BACKUPFOLDER/.
+      \cp -p $filen $BACKUPFOLDER/.
       if [ $? -ne 0 ] ; then
           echo "ERROR - backupfile - Error during copy of file $filen to $BACKUPFOLDER. Check permissions and space available."
           return 1
@@ -92,13 +103,13 @@ backupfile ()  # e.g backupfile "${AFILES["httpd.conf"]}"
 backupewasAndKeyfiles() #  backupewasAndKeyfiles
 {
   echo "INFO - backup - Saving Directory $ITMHOME/$ARCH/iw in $BACKUPFOLDER. This can take a while..." 
-  cp -pR $ITMHOME/$ARCH/iw  $BACKUPFOLDER/ 
+  \cp -pR $ITMHOME/$ARCH/iw  $BACKUPFOLDER/ 
   if [ $? -ne 0 ]; then
       echo "ERROR - backup - Could not backup  $ITMHOME/$ARCH/iw to folder $BACKUPFOLDER. Check permissions and space."
       return 1
   fi 
   echo "INFO - backup - Saving $ITMHOME/keyfiles/ in $BACKUPFOLDER..." 
-  cp -pR  $ITMHOME/keyfiles/ $BACKUPFOLDER/ 
+  \cp -pR  $ITMHOME/keyfiles/ $BACKUPFOLDER/ 
   if [ $? -ne 0 ]; then
       echo "ERROR - backup - Could not backup  $ITMHOME/keyfiles/ to folder $BACKUPFOLDER. Check permissions and space."
       return 1
@@ -118,15 +129,15 @@ createRestoreScript () # createRestoreScript
   echo "set -x" >>  $restorebatfull 
   echo "cd $BACKUPFOLDER" >> $restorebatfull
   echo "" >>  $restorebatfull 
-  echo "cp -pR iw $ITMHOME/$ARCH/." >> $restorebatfull
-  echo "cp -pR keyfiles $ITMHOME/." >> $restorebatfull
+  echo "\cp -pR iw $ITMHOME/$ARCH/." >> $restorebatfull
+  echo "\cp -pR keyfiles $ITMHOME/." >> $restorebatfull
   echo "" >>  $restorebatfull 
   for filename in "${!AFILES[@]}"; do
       if [[ $filename =~ "cj\.environment" ]] && [[ $KCJ -eq 4 ]] ; then
           #echo "WARNING - createRestoreScript - TEP Desktop Client apparently not installed. File 'cj.environment' not added to restore script"
           continue
       fi
-      echo "cp -p $filename ${AFILES[$filename]} " >> $restorebatfull   
+      echo "\cp -p $filename ${AFILES[$filename]} " >> $restorebatfull   
       echo "rm -f ${AFILES[$filename]}.before${TLSVER}" >> $restorebatfull   
       echo "rm -f ${AFILES[$filename]}.${TLSVER}" >> $restorebatfull  
       echo "" >>   $restorebatfull      
@@ -244,11 +255,11 @@ saveorgcreatenew ()
       echo "INFO - saveorgcreatenew - $SAVEORGFILE exists and will be deleted"
       rm -f $SAVEORGFILE
   fi 
-  cp -p $orgfile $SAVEORGFILE
+  \cp -p $orgfile $SAVEORGFILE
   
   if [ -f $NEWORGFILE ] ; then
       echo "INFO - saveorgcreatenew - $NEWORGFILE exists already and will be deleted"
-      rm $NEWORGFILE 
+      rm -f $NEWORGFILE 
   fi
   touch $NEWORGFILE; chmod 755 $NEWORGFILE
   
@@ -259,24 +270,45 @@ modhttpconf () # modhttpconf [path to httpd.conf]
 { 
   # returns rc=4 if file already modified 
   httpdfile=$1
+  HTTPD_DISABLE_15200=$2
+  if [ "$2" = "" ] ; then
+      echo "ERROR - modhttpconf - You must provide a second parameter to control whether external TEPS login on port 15200 should be disabled or not"
+      echo "ERROR - modhttpconf - For example 'modhttpconf [path to httpd.conf] yes' to disable or 'modhttpconf [path to httpd.conf] no' to not disable"
+      return 1
+  elif [ "$2" != "no" ] && [ "$2" != "yes"  ] ; then
+      echo "ERROR - modhttpconf - Bad execution syntax. 'modhttpconf [path to httpd.conf] [yes/no]' "
+      return 1
+  fi
   ver=`echo $TLSVER| sed 's/\.//g'` # change TLSvn.n to TLSvnn
   tlsvdis=`echo $KDEBE_TLS_DISABLE| sed 's/,/ /g'` # change "," to  " " if there 
-  grep -i "^\s*SSLProtocolDisable\s*TLSv11"  $httpdfile | grep "^[^#].*" > /dev/null
-  if [ $? -eq 0 ] ; then
+  #grep -i "^\s*SSLProtocolDisable\s*TLSv11"  $httpdfile | grep "^[^#].*" > /dev/null
+  i1=0
+  i2=0
+  for p in $tlsvdis ; do
+      pn=`echo $p | sed 's/TLS/TLSv/'` # change TLSnn to TLSvnn
+      grep -i "^\s*SSLProtocolDisable\s*$pn"  $httpdfile | grep "^[^#].*" > /dev/null
+      it=$?
+      i1=$(( i1+it ))
+  done
+  if [ $i1 -eq 0 ] ; then
       grep -i "^\s*SSLProtocolEnable\s*$ver"  $httpdfile | grep "^[^#].*" > /dev/null
+      it=$?
       if [  $? -eq 0  ] ; then
           echo "INFO - modhttpconf - $httpdfile contains 'SSLProtocolEnable $ver' + TLS10,11,.. disabled and will not be modified"
           return 4
+      else
+         i2=$(( i2+it  ))
       fi
   fi
-  echo "INFO - modhttpconf - Modifying $httpdfile"
+  echo "INFO - modhttpconf - Modifying $httpdfile ($i1,$i2)"
+  echo "INFO - modhttpconf - TEPS port 15200 control set to 'HTTPD_DISABLE_15200=$HTTPD_DISABLE_15200'"
   
   saveorgcreatenew $httpdfile
   newhttpdfile=$NEWORGFILE
   savehttpdfile=$SAVEORGFILE
   
   foundsslcfg=1
-  #echo "DEBUG - modhttpconf - $NEWORGFILE $SAVEORGFILE " ; return
+  #echo "DEBUG - modhttpconf - $NEWORGFILE $SAVEORGFILE " ; 
   shopt -s nocasematch
   while IFS= read -r line || [[ -n "$line" ]]
   do
@@ -289,14 +321,28 @@ modhttpconf () # modhttpconf [path to httpd.conf]
       tregex='ServerName (.*):15200'
       if [[ $line =~ $tregex ]] ; then 
           temp="ServerName ${BASH_REMATCH[1]}:$TEPSHTTPSPORT"
-          echo "$temp" >> $newhttpdfile
-          echo "#${line}" >> $newhttpdfile
+          grep "^\s*$temp" $savehttpdfile > /dev/null
+          if [ $? -eq 0 ] ; then 
+              echo "INFO - modhttpconf - '$temp' exists already"
+          else
+              echo "INFO - modhttpconf - adding $temp"
+              echo "$temp" >> $newhttpdfile
+          fi
+          if [ "$HTTPD_DISABLE_15200" = "yes" ] ; then
+              echo "#${line}" >> $newhttpdfile
+          else
+              echo "${line}" >> $newhttpdfile
+          fi
           continue
       fi
       tregex='^Listen[[:space:]]*15200'
       if [[ $line =~ $tregex ]] ; then
-          echo "Listen 127.0.0.1:15200" >> $newhttpdfile
-          #echo "${line}" >> $newhttpdfile
+          if [ "$HTTPD_DISABLE_15200" =  "yes" ] ; then
+              echo "Listen 127.0.0.1:15200" >> $newhttpdfile
+              echo "#${line}" >> $newhttpdfile
+          else
+              echo "${line}" >> $newhttpdfile
+          fi
           continue
       fi
       if [ $foundsslcfg -eq 1 ] ; then  
@@ -335,7 +381,7 @@ modhttpconf () # modhttpconf [path to httpd.conf]
     fi
   done < $savehttpdfile
   shopt -u nocasematch 
-  cp -p $newhttpdfile $httpdfile
+  \cp -p $newhttpdfile $httpdfile
   echo "INFO - modhttpconf - $newhttpdfile created and copied on $httpdfile"  
 
   #echo Debug ------line= $line -- foundsslcfg= $foundsslcfg
@@ -345,12 +391,40 @@ modcqini () # modcqini [path to cq.ini]
 { 
   # returns rc=4 if file already modified 
   cqini=$1
+  tepsver_sp8=06300710
+  tepsver_current=`${ITMHOME}/bin/cinfo -d cq | grep "cq.*Tivoli Enterprise Portal Server" | awk -F'","' '{print $4}'`
   ver=`echo ${TLSVER^^} | sed 's/\.//g'` # change e.g. from TLSvn.n to TLSVnn
-  grep -i "KFW_ORB_ENABLED_PROTOCOLS=$KFW_ORB_ENABLED_PROTOCOLS" $cqini | grep "^[^#].*"  > /dev/null
-  if [ $? -eq 0 ] ; then
+  # KFW_ORB_ENABLED_PROTOCOLS used for TEPS vers < 6.3 FP7 SP8 
+  vtmp=`echo $TLSVER | cut -d'v' -f2| sed 's/\./_/'` # will be e.g. "1_2"
+  KFW_ORB_ENABLED_PROTOCOLS="TLS_Version_${vtmp}_Only" 
+  # KFW_ORBPARM used for TEPS vers >= 6.3 FP7 SP8
+  vtmp2=`echo $TLSVER | sed 's/TLSv/TLS/' | sed 's/\./_/'` # change from TLSvn.n to TLSn_n
+  KFW_ORBPARM="-Dvbroker.security.server.socket.minTLSProtocol=$vtmp2 -Dvbroker.security.server.socket.maxTLSProtocol=TLS_MAX" 
+
+  i1=0
+  if [ $tepsver_current -lt $tepsver_sp8 ] ; then
+      grep -i "KFW_ORB_ENABLED_PROTOCOLS=$KFW_ORB_ENABLED_PROTOCOLS" $cqini | grep "^[^#].*"  > /dev/null
+      i1=$?
+      if  [ $i1 -eq 0 ] ; then message="contains 'KFW_ORB_ENABLED_PROTOCOLS=$KFW_ORB_ENABLED_PROTOCOLS'" ; fi
+  else
+      grep -i "KFW_ORBPARM=" $cqini | grep "^[^#].*"  > /dev/null
+      if [ $? -eq 0 ] ; then 
+          for p in $KFW_ORBPARM 
+          do
+              temp=`echo $p | sed 's/-//g'`
+              grep -i "$temp" $cqini | grep "^[^#].*"  > /dev/null
+              it=$?
+              i1=$(( i1+it ))
+          done 
+          if  [ $i1 -eq 0 ] ; then message="contains 'KFW_ORBPARM=$KFW_ORBPARM'" ; fi
+      else
+          i1=4    
+      fi
+  fi
+  if [ $i1 -eq 0 ] ; then
       grep -i "KDEBE_${ver}_CIPHER_SPECS=$KDEBE_TLSVNN_CIPHER_SPECS" $cqini | grep "^[^#].*" > /dev/null
       if [  $? -eq 0  ] ; then
-          echo "INFO - modcqini - $cqini contains 'KFW_ORB_ENABLED_PROTOCOLS=$KFW_ORB_ENABLED_PROTOCOLS' and the '$KDEBE_TLSVNN_CIPHER_SPECS' and will not be modified"
+          echo "INFO - modcqini - $message  and the '$KDEBE_TLSVNN_CIPHER_SPECS' and will not be modified"
           return 4
       fi
   fi
@@ -361,22 +435,36 @@ modcqini () # modcqini [path to cq.ini]
   savecqini=$SAVEORGFILE
   
   tlsvdis=`echo $KDEBE_TLS_DISABLE| sed 's/,/ /g'`
-  ver=`echo ${TLSVER^^} | sed 's/\.//g'` # change e.g. from TLSvn.n to TLSVnn
-  foundKFWORB=1
+  ver=`echo ${TLSVER^^} | sed 's/\.//g'` # change from TLSvn.n to TLSVnn
+  foundORBENABLED=1
+  foundORBPARM=1
   foundTLSdisable=1
   foundTLSn=1
   shopt -s nocasematch
   while IFS= read -r line || [[ -n "$line" ]]
   do
-      #echo "$line"
+      #echo "DEBUG - modcqini : $line"
       if [ "${line:0:1}" = "#" ] ; then
           echo  "$line"  >> $newcqini 
           #echo  "DEBUG - modcqini - line=$line"
 	        continue 
       fi    
       if [[ $line =~ .*KFW_ORB_ENABLED_PROTOCOLS.* ]] ; then 
-          echo "KFW_ORB_ENABLED_PROTOCOLS=$KFW_ORB_ENABLED_PROTOCOLS" >> $newcqini 
-          foundKFWORB=0 
+          if [ $tepsver_current -lt $tepsver_sp8 ] ; then
+              #vtmp=`echo $TLSVER | cut -d'v' -f2| sed 's/\./_/'` # will be e.g. "1_2" 
+              echo "KFW_ORB_ENABLED_PROTOCOLS=$KFW_ORB_ENABLED_PROTOCOLS" >> $newcqini 
+              foundORBENABLED=0
+          else 
+              echo "#$line" >> $newcqini         
+          fi
+      elif [[ $line =~ .*KFW_ORBPARM.* ]] ; then
+          if [ $tepsver_current -lt $tepsver_sp8 ] ; then
+              echo "$line" >> $newcqini
+          else 
+              #echo "#$line" >> $newcqini
+              echo "$line $KFW_ORBPARM" >> $newcqini
+              foundORBPARM=0
+          fi
       elif [[ $line =~ .*KDEBE_(TLS[0-9]{2})_ON.* ]] ; then
           if [ $foundTLSdisable -eq 1 ] ; then
               for p in $tlsvdis ; do  echo "KDEBE_${p}_ON=NO" >> $newcqini ; done
@@ -391,11 +479,15 @@ modcqini () # modcqini [path to cq.ini]
   done < $SAVEORGFILE
   shopt -u nocasematch
   
-  #echo "DEBUG - modcqini - foundKFWORB=$foundKFWORB foundTLSdisable=$foundTLSdisable foundTLSn=$foundTLSn"
-  if [ $foundKFWORB -eq 1 ]     ; then echo "KFW_ORB_ENABLED_PROTOCOLS=$KFW_ORB_ENABLED_PROTOCOLS" >> $newcqini ; fi  
+  #echo "DEBUG - modcqini - foundORBENABLED=$foundKFWORB foundORBPARM=$foundORBPARM foundTLSdisable=$foundTLSdisable foundTLSn=$foundTLSn"
+  if [ $tepsver_current -lt $tepsver_sp8 ] ; then
+      if [ $foundORBENABLED -eq 1 ] ; then echo "KFW_ORB_ENABLED_PROTOCOLS=$KFW_ORB_ENABLED_PROTOCOLS" >> $newcqini ; fi  
+  else
+      if [ $foundORBPARM -eq 1 ]    ; then echo "KFW_ORBPARM=$KFW_ORBPARM" >> $newcqini ; fi  
+  fi
   if [ $foundTLSdisable -eq 1 ] ; then for p in $tlsvdis ; do  echo "KDEBE_${p}_ON=NO" >> $newcqini ; done ; fi
   if [ $foundTLSn -eq 1 ]       ; then echo "KDEBE_${ver}_CIPHER_SPECS=$KDEBE_TLSVNN_CIPHER_SPECS">> $newcqini ; fi
-  cp -p $newcqini $cqini 
+  \cp -p $newcqini $cqini 
   echo  "INFO - modcqini - $newcqini created and copied on $cqini"  
   return 0
 }
@@ -469,11 +561,11 @@ modtepjnlpt () # modtepjnlpt [path to tep.jnlpt]
               echo "${line}"  >> $tempfile 
           fi
       done < $newtepjnlpt
-      cp $tempfile $newtepjnlpt
+      \cp $tempfile $newtepjnlpt
       rm -f $tempfile
   fi
   
-  cp -p $newtepjnlpt $tepjnlpt
+  \cp -p $newtepjnlpt $tepjnlpt
   echo  "INFO - modtepjnlpt - $newtepjnlpt created and copied on $tepjnlpt"
   return 0
 }
@@ -494,11 +586,11 @@ modcompjnlpt () #  modcompjnlpt [path to component.jnlpt]
   newcompjnlpt=$NEWORGFILE
   savecompjnlpt=$SAVEORGFILE
   
-  cp $savecompjnlpt $newcompjnlpt
+  \cp $savecompjnlpt $newcompjnlpt
   sed -i -e "s/\\\$PORT\\$/$TEPSHTTPSPORT/g"  $newcompjnlpt
   sed -i -e "s/http:/https:/g"  $newcompjnlpt
   
-  cp -p $newcompjnlpt $compjnlpt
+  \cp -p $newcompjnlpt $compjnlpt
   echo  "INFO - modcompjnlpt - $newcompjnlpt created and copied on $compjnlpt"
   return 0
 }
@@ -550,7 +642,7 @@ modapplethtmlupdateparams () #  modapplethtmlupdateparams [path to applet.html.u
       if [ $foundport -eq 1  ] ;    then echo "tep.connection.protocol.url.port|override|'$TEPSHTTPSPORT'" >> $newapplethtmlupdateparams ;fi
       if [ $foundTLSn -eq 1 ] ;     then echo "tep.sslcontext.protocol|override|'$TLSVER'" >> $newapplethtmlupdateparams; fi
   fi
-  cp -p $newapplethtmlupdateparams $applethtmlupdateparams
+  \cp -p $newapplethtmlupdateparams $applethtmlupdateparams
   echo "INFO - modapplethtmlupdateparams - $newapplethtmlupdateparams created and copied on $applethtmlupdateparams"
   return 0
 }
@@ -601,7 +693,7 @@ modcjenvironment () # modcjenvironment [path to cj.environment]
       echo "TEP_JAVA_HOME=$JAVAHOME" >> $newcjenvironment 
   fi
 
-  cp $newcjenvironment $cjenvironment 
+  \cp $newcjenvironment $cjenvironment 
   echo "INFO - modcjenvironment - $newcjenvironment created and copied on $cjenvironment"
   return 0
 }
@@ -725,7 +817,7 @@ modjavasecurity () # modjavasecurity [path to java.security]
   fi
   
   rm -f $tempvarset $tempvarval
-  cp $newjavasecurity $javasecurity
+  \cp $newjavasecurity $javasecurity
   echo "INFO - modjavasecurity - $newjavasecurity created and copied on $javasecurity"
 }
 
@@ -770,17 +862,21 @@ modsslclientprops () # modsslclientprops [path to ssl.client.props]
       echo "INFO - modsslclientprops - 'com.ibm.ssl.protocol' set $TLSVER at the end of props file"
       echo  "com.ibm.ssl.protocol=$TLSVER" >> $newsslclientprops 
   fi
-  cp $newsslclientprops $sslclientprops
+  \cp $newsslclientprops $sslclientprops
   echo  "INFO - modsslclientprops - $newsslclientprops created and copied on $sslclientprops"
   return 0
 }
 
 importSelfSignedToJREcacerts ()
 { 
-  # returns rc=4 if file already modified 
-  # required otherwise tacmd tesplogin will not work
+  # returns rc=4 if file already modified and rc=5 if KEYKDB does not contain ITM selfsigned certs
+  # required otherwise tacmd https tesplogin may not work
   cacerts=$1
-  
+  $GSKCAPI -cert -details -stashed -db $KEYKDB -label "IBM_Tivoli_Monitoring_Certificate"| grep "does not contain"
+  if [  $? -eq 0  ] ; then
+      echo "INFO - importSelfSignedToJREcacerts - $KEYKDB does not contain label 'IBM_Tivoli_Monitoring_Certificate'. Hence the self seigned certs cannot be copied to the $cacerts file. Continue..."
+      return 5
+  fi
   certsca=`$KEYTOOL -list -v -keystore ${cacerts}  -storepass changeit|grep -i "IBM Tivoli Monitoring Self-Signed Certificate"`
   if [ -n "$certsca" ] ; then # Checks if the length of the string is nonzero
       serialkeyfile=`$GSKCAPI -cert -details -stashed -db $KEYKDB -label "IBM_Tivoli_Monitoring_Certificate"| grep "Serial "| sed 's/ //g'| cut -d':' -f2`
@@ -810,7 +906,7 @@ importSelfSignedToJREcacerts ()
       return 1
   fi
   
-  cp -p $cacerts $newcacert
+  \cp -p $cacerts $newcacert
   echo  "INFO - importSelfSignedToJREcacerts - Imported self signed certs into JRE cacerts"
   return 0
 }
