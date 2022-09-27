@@ -157,7 +157,7 @@ The manual process described in the IBM Support document section: "_TLS v1.2 onl
 
 1. `activate_teps-tlsv.ps1`&nbsp;(main script)
 2. `functions_sources.ps1`&nbsp;&nbsp;&nbsp;(functions used; sourced by activate_teps-tlsv.ps1) 
-3. `init_global_vars.ps1`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(global variables; sourced byfunctions_sources.ps1)
+3. `init_global_vars.ps1`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(global variables; sourced by functions_sources.ps1)
 4. `init_tlsv1.2.ps1`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(TLSv1.2 specific variables; **must** be sourced before starting activate_teps-tlsv.ps1 or sourcing functions_sources.ps1) 
 
 **For Linux/Unix**
@@ -172,7 +172,6 @@ The files `init_tlsv1.2` (Linux) and `init_tlsv1.2.ps1` Windows contain the TLS 
 
     TLSVER="TLSv1.2" 
     KDEBE_TLSVNN_CIPHER_SPECS="TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384,TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384"
-    KFW_ORB_ENABLED_PROTOCOLS="TLS_Version_1_2_Only" 
     KDEBE_TLS_DISABLE="TLS10,TLS11"
     HTTP_SSLCIPHERSPEC="ALL -SSL_RSA_WITH_3DES_EDE_CBC_SHA"
     JAVASEC_DISABLED_ALGORITHMS="SSLv3, TLSv1, TLSv1.1, RC4, DES, SHA1, DHE, MD5withRSA, DH keySize < 2048, DESede, \ EC keySize < 224, 3DES_EDE_CBC, anon, NULL, DES_CBC"
@@ -181,12 +180,11 @@ About **init_tlsvn.n** variables:
 
    | Variable | Description | 
    | -------- | ----------- | 
-   | TLSVER | Contains the TLS Version which should be implemented. Used in several functions | 
-   | KDEBE_TLSVNN_CIPHER_SPECS | User defined. Contains the CIPHER SPECS which have to be set on TEPS. Values will be set in TEPS cq.ini/KFWENV into variable "KDEBE_TLSV**12**\_CIPHER_SPECS". The version number (here "**12**") is derived from the TLSVER userd defined variable | 
-   | KFW_ORB_ENABLED_PROTOCOLS | ITM TEPS variable. Will be set in in TEPS cq.ini/KFWENV  file | 
+   | TLSVER | Contains the TLS Version which should be implemented. Used in almost all functions | 
+   | KDEBE_TLSVNN_CIPHER_SPECS | Contains the CIPHER SPECS which have to be set on TEPS. Values will be set in TEPS cq.ini/KFWENV into variable "KDEBE_TLSV**12**\_CIPHER_SPECS". The version number (here "**12**") is derived from the TLSVER userd defined variable |  
    | KDEBE_TLS_DISABLE | Used to get protocols which have to be disabled on the TEPS (function modcqin/modkfwenv, e.g. : KDEBE_**TLS11**\_ON=NO) and HTTP Server (function modhttpconf, e.g: SSLProtocolDisable **TLS**v**11** ) | 
-   | HTTP_SSLCIPHERSPEC | Used to set variable SSLCipherSpec in httpd.conf file | 
-   | JAVASEC_DISABLED_ALGORITHMS | Values used to set variable jdk.tls.disabledAlgorithms in java.security file. **NOTE**: For long values it is required to use "\\" to split settings into two lines | 
+   | HTTP_SSLCIPHERSPEC | Used to set variable SSLCipherSpec in httpd.conf file (function modhttpconf) | 
+   | JAVASEC_DISABLED_ALGORITHMS | Values used to set variable jdk.tls.disabledAlgorithms in java.security file. **NOTE**: For long values it is required to use "\\" to split settings into two lines. Used in modjavasecurity function | 
 
 
 The Bash shell functions and files ware tested on RedHat linux only, but should run on other Linux Distributions and Unix systems as well.
@@ -211,12 +209,11 @@ Download latest version and unzip/tar the downloaded archive to a temporary fold
 
 Use these links:
  
-- For Windows: [ZIP format](https://github.ibm.com/NIEWOLIK/ITM-TLS1.n-implementation/archive/2.2.zip) 
-- For Unix/linux: [TAR format](https://github.ibm.com/NIEWOLIK/ITM-TLS1.n-implementation/archive/2.2.tar.gz) 
+- For Windows: [ZIP format](https://github.ibm.com/NIEWOLIK/ITM-TLS1.n-implementation/archive/2.3.zip) 
+- For Unix/linux: [TAR format](https://github.ibm.com/NIEWOLIK/ITM-TLS1.n-implementation/archive/2.3.tar.gz) 
 
 Or Use "Download ZIP" to save asset to a temporary folder. Then unzip it.
 
-https://github.ibm.com/NIEWOLIK/ITM-TLS1.n-implementation/archive/2.zip
 <img src="https://media.github.ibm.com/user/85313/files/a8ede000-b0df-11ec-86d9-bf7e122e6f83" width="55%" height="55%">
 
 
@@ -225,11 +222,13 @@ https://github.ibm.com/NIEWOLIK/ITM-TLS1.n-implementation/archive/2.zip
 
 **Windows:**
     
-`.\activate_teps-tlsv.ps1 { -h ITM home } { -r [no, yes] } [-b {no, yes[default]} ] `
+`.\activate_teps-tlsv.ps1 { -h ITM home } { -r [no, yes] } { -d [no, yes] } -b {no, yes[default]} ] `
 
 `-h` = Mandatory. ITM home folder. 
 <BR>
 `-r` = Mandatory [yes, no]. If set to `no` the ITM default cert will NOT be renewed. 
+<BR>
+`-d` = Mandatory [yes, no]. If set to `yes` the ITM TEPS port 15200 will be disabled for remote access.
 <BR>
 `-b` = Optional [yes, no]. If backup should be performed or not, default is 'yes'. **Optional. Please use that parameter carefully!!**
     
@@ -237,11 +236,13 @@ https://github.ibm.com/NIEWOLIK/ITM-TLS1.n-implementation/archive/2.zip
 
 **Unix/Linux**
 
-`./activate_teps-tlsv.sh { -h ITM home } { -r [no, yes] } [ -a arch ] [-b {no, yes[default]} ] `
+`./activate_teps-tlsv.sh { -h ITM home } { -r [no, yes] } { -d [no, yes] }  -a arch ] [-b {no, yes[default]} ] `
 
 `-h` = Mandatory. ITM home folder. 
 <BR>
 `-r` = Mandatory [yes, no]. If set to `no` the ITM default cert will NOT be renewed. 
+<BR>
+`-d` = Mandatory [yes, no]. If set to `yes` the ITM TEPS port 15200 will be disabled for remote access.
 <BR>
 `-a` = Optional.. Arch folder name (e.g. lx8266). 
 <BR>
@@ -268,10 +269,10 @@ The prefered way would be to use the script. The second alternative is more usef
 
  `> cd c:\temp\ITM-TLS1.n-implementation-2.2\windows` <BR>
     
-       > . .\init_tlsv1.2.ps1 ; .\activate_teps-tlsv.ps1 -h C:\IBM\ITM -r yes                 # Backup is performed. Default keystore is renewed"
-       > . .\init_tlsv1.2.ps1 ; .\activate_teps-tlsv.ps1 -h "C:\Program Files\IBM\ITM" -r yes # Backup is performed. Default keystore is renewed"
-       > . .\init_tlsv1.2.ps1 ; .\activate_teps-tlsv.ps1 -h C:\IBM\ITM -b yes -r no           # Backup is performed, default keystore is not renewed"
-       > . .\init_tlsv1.2.ps1 ; .\activate_teps-tlsv.ps1 -h C:\IBM\ITM -b no -r no            # NO backup is performed and default keystore is not renewed"
+       > . .\init_tlsv1.2.ps1 ; .\activate_teps-tlsv.ps1 -h C:\IBM\ITM -r yes -d yes                # Backup is performed. Default keystore is renewed. TEPS port 15200 disabled for remote access
+       > . .\init_tlsv1.2.ps1 ; .\activate_teps-tlsv.ps1 -h "C:\Program Files\IBM\ITM" -r yes -d no # Backup is performed. Default keystore is renewed. TEPS port 15200 not disabled for remote access"
+       > . .\init_tlsv1.2.ps1 ; .\activate_teps-tlsv.ps1 -h C:\IBM\ITM -b yes -r no -d yes          # Backup is performed, default keystore is not renewed. TEPS port 15200 disabled for remote access""
+       > . .\init_tlsv1.2.ps1 ; .\activate_teps-tlsv.ps1 -h C:\IBM\ITM -b no -r no -d no           # NO backup is performed and default keystore is not renewed. TEPS port 15200 not disabled for remote access""
 
 &nbsp;&nbsp;&nbsp;**On UNIX/Linux**:
 
@@ -284,9 +285,9 @@ The prefered way would be to use the script. The second alternative is more usef
 `> cd /tmp/ITM-TLS1.n-implementation-2.2/unix`
 
 
-    > . ./init_tlsv1.2 ; ./activate_teps-tlsv.sh -h /opt/IBM/ITM -r yes                 # A backup is performed and default keystore is renewed"
-    > . ./init_tlsv1.2 ; ./activate_teps-tlsv.sh -h /opt/IBM/ITM -b no -r yes -a lx8266 # NO backup is performed, default keystore is renewed, arch folder is lx8266"
-    > . ./init_tlsv1.2 ; ./activate_teps-tlsv.sh -h /opt/IBM/ITM -b no -r no            # NO backup is performed and default keystore is not renewed"
+    > . ./init_tlsv1.2 ; ./activate_teps-tlsv.sh -h /opt/IBM/ITM -r yes -d yes                # A backup is performed and default keystore is renewed. TEPS port 15200 disabled for remote access""
+    > . ./init_tlsv1.2 ; ./activate_teps-tlsv.sh -h /opt/IBM/ITM -b no -r yes -a lx8266 -d no # NO backup is performed, default keystore is renewed, arch folder is lx8266. TEPS port 15200 not disabled for remote access""
+    > . ./init_tlsv1.2 ; ./activate_teps-tlsv.sh -h /opt/IBM/ITM -b no -r no -d yes           # NO backup is performed and default keystore is not renewed. TEPS port 15200 disabled for remote access""
 
 <BR>
 
@@ -301,28 +302,28 @@ Alternatively, you can execute each function from the command prompt. It is more
 Open a Linux terminal or Powershell command prompt and execute each function manually to modify the required option or files. <BR>
 Below the recommended sequence (example for TLSv1.2 changes on Linux; but it applies to Windows as well, you only need to adjust the syntax):
 
-    # cd /tmp/ITM-TLS1.n-implementation-2.2/unix
-    # . ./init_tlsv1.2 ; . ./functions_sources.h  /opt/IBM/ITM
-    # checkIfFileExists
-    # EnableICSLite "true"
-    # renewCert
-    # restartTEPS ; EnableICSLite "true" # if required
-    # modQop
-    # disableAlgorithms
-    # modsslclientprops "${AFILES["ssl.client.props"]}" 
-    # modcqini "${AFILES["cq.ini"]}"
-    # modhttpconf "${AFILES["httpd.conf"]}"
-    # restartTEPS ; EnableICSLite "true" # if required
-    # modjavasecurity "${AFILES["java.security"]}"
-    # importSelfSignedToJREcacerts "${AFILES["cacerts"]}"
-    # modtepjnlpt "${AFILES["tep.jnlpt"]}"
-    # modcompjnlpt "${AFILES["component.jnlpt"]}"
-    # modapplethtmlupdateparams "${AFILES["applet.html.updateparams"]}"
-    # ${ITMHOME}/bin/itmcmd config -A cw
-    # modcjenvironment "${AFILES["cj.environment"]}"
-    # ${ITMHOME}/bin/itmcmd config -A cj
+    $ cd /tmp/ITM-TLS1.n-implementation-2.2/unix
+    $ . ./init_tlsv1.2 ; . ./functions_sources.h  /opt/IBM/ITM
+    $ checkIfFileExists
+    $ EnableICSLite "true"
+    $ renewCert
+    $ restartTEPS ; EnableICSLite "true" # if required
+    $ modQop
+    $ disableAlgorithms
+    $ modsslclientprops "${AFILES["ssl.client.props"]}" 
+    $ modcqini "${AFILES["cq.ini"]}"
+    $ modhttpconf "${AFILES["httpd.conf"]}" yes # or "modhttpconf [httpd.conf file] no"
+    $ restartTEPS ; EnableICSLite "true" # if required
+    $ modjavasecurity "${AFILES["java.security"]}"
+    $ importSelfSignedToJREcacerts "${AFILES["cacerts"]}"
+    $ modtepjnlpt "${AFILES["tep.jnlpt"]}"
+    $ modcompjnlpt "${AFILES["component.jnlpt"]}"
+    $ modapplethtmlupdateparams "${AFILES["applet.html.updateparams"]}"
+    $ ${ITMHOME}/bin/itmcmd config -A cw
+    $ modcjenvironment "${AFILES["cj.environment"]}"
+    $ ${ITMHOME}/bin/itmcmd config -A cj
 
-As you can see  `modtepjnlpt "${AFILES["tep.jnlpt"]}"` (on windows the option would be `$HFILES["tep.jnlpt"]`), an array/hash element containing the file path is passed to some functions. The FILES variable is declared by file `init_global_vars` ( or `init_global_vars.ps1` on Windows) which is sourced by the `functions_sources.h` (or `functions_sources.ps1` on Windows).
+As you can see  `modtepjnlpt "${AFILES["tep.jnlpt"]}"` (on windows the option would be `$HFILES["tep.jnlpt"]`), an array/hash element containing the file path is passed to some functions. The AFILES variable is declared by file `init_global_vars` ( HFILES in `init_global_vars.ps1` on Windows) which is sourced by the `functions_sources.h` (or `functions_sources.ps1` on Windows). You can also use the real file names instead of the array elements.
 
 However, you can choose another sequence, but make sure you know when a TEPS restart is required.
 
@@ -360,7 +361,7 @@ On Linux/Unix
 
 Export your DISPLAY Variable and then execute: `itmcmd agent -o [your instance] start cj`. Please note, there is also a TEPD instance for which a system service is defined (for example /usr/lib/systemd/system/ITMAgents1.cj.service). Such instance must be started like: `ITMsystemctl=yes itmcmd agent start cj`. (`ITMsystemctl=yes itmcmd agent -o falcate1 stop cj` respectively).
 
-NOTE: the changes made by the script are global. If your have defined TEPD instances to connect to another TEPS running on a remote host, and this TEPS is not TLSV1.n enabled, you must modify the `ITMHOME/lx8266/cj/bin/cnp_[instance].sh`. Locate the code and replace  with: 
+NOTE: The changes made by the script are global. If your have defined TEPD instances to connect to another TEPS running on a remote host, and this TEPS is not TLSV1.n enabled, you must modify the `ITMHOME/lx8266/cj/bin/cnp_[remote instance name].sh`. Locate the code and replace  with: 
 
     61: # Check if TEP_JAVA_HOME defined; if not, set to same value as JAVA_HOME
     62: if [ ! ${TEP_JAVA_HOME} ]; then
@@ -371,6 +372,8 @@ NOTE: the changes made by the script are global. If your have defined TEPD insta
 **Test HTTPS tacmd tepslogin**
 
 - Command <BR>`tacmd tepslogin -s https://[yourhost]:15201 -u [yuor user] - p [your password]`
+
+You may encounter SSL related errors if tepslogin runs remotely (is not executed on the same host as the TEPS). In such a case copy the new "cacerts" file which was created during the above steps for the TEPS (for example "c:\IBM\ITM\java\java80\jre\lib\security\cacerts" on Windows and "/opt/IBM/ITM/JRE/lx8266/lib/security/cacerts" on Linux) to the appropriate ITM folder where tepslogin should be executed. 
 
 **To verify certs usage for ports 15206 (eWas Console) or 15201 (TEPS HTTPS). Sample outputs for port 15206:**
 
@@ -406,6 +409,8 @@ Configure and check if the S&P Agent is connecting through HTTPS port (if you di
 You  **must**  perform this step just after you have configured the TEPS to use HTTPS only, otherwise your Warehouse Database will not be summarized and pruned:
 
 <img src="https://media.github.ibm.com/user/85313/files/dc6d4d00-c640-11ec-9f31-40b1c555503f" width="40%" height="40%">
+
+You may encounter SSL related errors if KSY is not running on the same host as the TEPS. In such a case copy the new "cacerts" file which was created during the steps for the TEPS (for example "c:\IBM\ITM\java\java80\jre\lib\security\cacerts" on Windows and "/opt/IBM/ITM/JRE/lx8266/lib/security/cacerts" on Linux) to the appropriate folder on the KSY host. 
 
 Also do not forget to set Cipher variables as shown in the Agent section.
 
@@ -639,8 +644,9 @@ UNIX: open terminal
 
 Sample run of the activate_teps-tlsv1.2.sh script on Linux:
 ```
-[root@falcate1 scripts]# clear; ./activate_teps-tlsv.sh -h /opt/IBM/ITM -r yes -b yes
-INFO - Script Version 2.2
+[root@falcate1 scripts]# clear; ./activate_teps-tlsv.sh -h /opt/IBM/ITM -r yes -b yes -d yes
+INFO - Script Version 2.3
+INFO - check_param - Option '-d' = 'yes'
 INFO - check_param - Option '-r' = 'yes'
 INFO - check_param - Option '-b' = 'yes'
 INFO - check_param - Option '-h' = '/opt/IBM/ITM'
@@ -715,7 +721,7 @@ TEPSEWASBundle loaded.
 '\nCWPKI0704I: The personal certificate with the default alias in the NodeDefaultKeyStore keystore has been RENEWED.'
 ''
 INFO - renewCert - Running gsk8capicmd_64 commands
-INFO - renewCert - Successfully renewed Certificate (previous renew was 121 days ago)
+INFO - renewCert - Successfully renewed Certificate (previous renew was 181 days ago)
 INFO - restartTEPS - Restarting TEPS ...
 Processing. Please wait...
 systemctl stop ITMAgents1.cq.service RC: 0
@@ -730,7 +736,7 @@ Eclipse Help Server is required by Tivoli Enterprise Portal Server (TEPS) and wi
 Eclipse Help Server was successfully started
 Tivoli Enterprise Portal Server started
 INFO - restartTEPS - Waiting for TEPS to initialize....
-..............
+............
 INFO - restartTEPS - TEPS restarted successfully.
 INFO - EnableICSLite - Set ISCLite to 'true'
 WASX7209I: Connected to process "ITMServer" on node ITMNode using SOAP connector;  The type of process is: UnManagedProcess
@@ -751,7 +757,9 @@ INFO - modsslclientprops - Modifying /opt/IBM/ITM/lx8266/iw/profiles/ITMProfile/
 INFO - modsslclientprops - /opt/IBM/ITM/lx8266/iw/profiles/ITMProfile/properties/ssl.client.props.TLSv1.2 created and copied on /opt/IBM/ITM/lx8266/iw/profiles/ITMProfile/properties/ssl.client.props
 INFO - modcqini - Modifying /opt/IBM/ITM/config/cq.ini
 INFO - modcqini - /opt/IBM/ITM/config/cq.ini.TLSv1.2 created and copied on /opt/IBM/ITM/config/cq.ini
-INFO - modhttpconf - Modifying /opt/IBM/ITM/lx8266/iu/ihs/HTTPServer/conf/httpd.conf
+INFO - modhttpconf - Modifying /opt/IBM/ITM/lx8266/iu/ihs/HTTPServer/conf/httpd.conf (2,0)
+INFO - modhttpconf - TEPS port 15200 control set to 'HTTPD_DISABLE_15200=yes'
+INFO - modhttpconf - adding ServerName falcate1.fyre.ibm.com:15201
 INFO - modhttpconf - /opt/IBM/ITM/lx8266/iu/ihs/HTTPServer/conf/httpd.conf.TLSv1.2 created and copied on /opt/IBM/ITM/lx8266/iu/ihs/HTTPServer/conf/httpd.conf
 INFO - restartTEPS - Restarting TEPS ...
 Processing. Please wait...
@@ -767,7 +775,7 @@ Eclipse Help Server is required by Tivoli Enterprise Portal Server (TEPS) and wi
 Eclipse Help Server was successfully started
 Tivoli Enterprise Portal Server started
 INFO - restartTEPS - Waiting for TEPS to initialize....
-..............
+..........
 INFO - restartTEPS - TEPS restarted successfully.
 INFO - EnableICSLite - Set ISCLite to 'true'
 WASX7209I: Connected to process "ITMServer" on node ITMNode using SOAP connector;  The type of process is: UnManagedProcess
@@ -800,11 +808,12 @@ INFO - main - Reconfiguring TEP Desktop Client 'cj'
 | to select 'CREATE HOST SPECIFIC CONFIGURATION' (on the  |
 | GUI) or use the command line '-t' option.               |
 +---------------------------------------------------------+
+
 Agent configuration started...
 Agent configuration completed...
 
 ------------------------------------------------------------------------------------------
-INFO - main - Procedure successfully finished Elapsedtime: 6 min
+INFO - main - Procedure successfully finished Elapsedtime: 5 min
  - Original files saved in folder /opt/IBM/ITM/backup/backup_before_TLSv1.2
  - To restore the level before update run '/opt/IBM/ITM/backup/backup_before_TLSv1.2/SCRIPTrestore.sh'
 ----- POST script execution steps ---
