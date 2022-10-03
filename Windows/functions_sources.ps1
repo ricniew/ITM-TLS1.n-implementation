@@ -361,7 +361,7 @@ function modkfwenv ($kfwenv) # modkfwenv $HFILES["kfwenv"]
   $tmp = Invoke-Expression $cmd
   $tmparray = $($tmp -replace '\s+',' ').Split(" ")
   $tepsver_current = [int]$($tmparray[8] -replace '\.', '')
-  $tepsver_current = 06300704
+  #$tepsver_current = 06300704
 
   $ver=$TLSVER.ToUpper() ; $ver = $ver -replace "\.","" # change e.g. from TLSvn.n to TLSVnn
   # KFW_ORB_ENABLED_PROTOCOLS used for TEPS vers < 6.3 FP7 SP8
