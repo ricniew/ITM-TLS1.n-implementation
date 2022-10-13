@@ -209,8 +209,8 @@ Download latest version and unzip/tar the downloaded archive to a temporary fold
 
 Use these links:
  
-- For Windows: [ZIP format](https://github.com/ricniew/ITM-TLS1.n-implementation/archive/refs/tags/2.3.zip) 
-- For Unix/linux: [TAR format](https://github.com/ricniew/ITM-TLS1.n-implementation/archive/refs/tags/2.3.tar.gz) 
+- For Windows: [ZIP format](https://github.com/ricniew/ITM-TLS1.n-implementation/archive/refs/tags/2.31.zip) 
+- For Unix/linux: [TAR format](https://github.com/ricniew/ITM-TLS1.n-implementation/archive/refs/tags/2.31.tar.gz) 
 
 Or Use "Download ZIP" to save asset to a temporary folder. Then unzip it.
 
