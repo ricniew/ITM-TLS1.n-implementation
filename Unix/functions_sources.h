@@ -19,7 +19,7 @@
 #             - Function modhttpconf was modified to evaluate new variable HTTPD_DISABLE_15200 
 #               Now it will be exeuted:  modhttpconf [httpd.conf file] [yes,no].
 #               It was done to control if the HTTP port 15200 should be still allowed to be accessed outside of the localhost. 
-#             - Function modkfwenv was modfied to support KFW_ORBPARM for TEPS version >= 6.3 fp7 sp8
+#             - Function modcqini was modfied to support KFW_ORBPARM for TEPS version >= 6.3 fp7 sp8
 #             - Modified function importSelfSignedToJREcacerts to check if label "IBM_Tivoli_Monitoring_Certificate" exists in $KEYKDB.
 #               If not function returns rc=5 and Self Signed Cert is not copied from $KEYKDB To JRE cacerts 
 ##
