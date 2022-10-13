@@ -13,13 +13,15 @@
 #             - Modified saveorgcreatenew 
 # 22.07.2022: Version 2.1      R. Niewolik EMEA AVP Team
 #             - Modfied modjavasecurity to support "\" in jdk.tls.disabledAlgorithms value (set in init_tlsvn.n)
-# 27.09.2023: Version 2.3 R. Niewolik EMEA AVp Team
+# 27.09.2022: Version 2.3 R. Niewolik EMEA AVp Team
 #             - Function modhttpconf was modified to evaluate new variable HTTPD_DISABLE_15200 introduced
 #               Now it will be exeuted like: modhttpconf [httpd.conf file] [yes,no].
 #               It was done to control if the HTTP port 15200 should be still allowed to be accessed outside of the localhost.
 #             - Function modkfwenv was modfied to support KFW_ORBPARM FOR TEPS VERSION >= 6.3 fp7 sp8
 #             - Modified function importSelfSignedToJREcacerts to check if label "IBM_Tivoli_Monitoring_Certificate" exists in $KEYKDB.
 #               If not function returns rc=5 and Self Signed Cert is not copied from $KEYKDB To JRE cacerts 
+# 13.10.2022: Version 2.31 R. Niewolik EMEA AVp Team
+#             - removed test statement in modkfwenv
 ##
 
 if (  $Args ) {
