@@ -100,10 +100,10 @@ To get a picture about current agent conenctions  (whether connected over "pipe"
       > [root@falcate1 ~]# **kdstsns=`find $ITMHOME -name kdstsns|grep "ms"`**\
       > [root@falcate1 ~]# **echo "SELECT NODE, HOSTADDR FROM O4SRV.INODESTS;" > itm_get_node_address.sql**\
       > [root@falcate1 ~]# **$kdstsns  itm_get_node_address.sql *HUB |grep "/NM"| awk -F'<' '{print $1} '**\
-      > falcate1:Warehouse               ip.spipe:#10.51.7.99[65101]\
-      > falcate1:LZ                      ip.spipe:#10.51.7.99[7757]\
-      > falcate1:SY                      ip.spipe:#10.51.7.99[11853]\
-      > falcate1:TEPS                    ip.spipe:#10.51.7.99[15949]\
+      > falcate1:Warehouse  &emsp;&emsp;&emsp;ip.**spipe**:#10.51.7.99[65101]\
+      > falcate1:LZ &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&nbsp;&nbsp;&nbsp;ip.**pipe**:#10.51.7.99[7757]\
+      > falcate1:SY &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&nbsp;&nbsp;&nbsp;ip.**pipe**:#10.51.7.99[11853]\
+      > falcate1:TEPS &emsp;&emsp;&emsp;&emsp;&emsp;&nbsp;&nbsp;&nbsp;ip.**spipe**:#10.51.7.99[15949]\
       > [root@falcate1 ~]#
  
 
