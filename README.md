@@ -106,7 +106,13 @@ To get a picture about current agent connections (whether connected over "pipe" 
       > falcate1:TEPS &emsp;&emsp;&emsp;&emsp;&emsp;&nbsp;&nbsp;&nbsp;ip.**spipe**:#10.51.7.99[15949]\
       > [root@falcate1 ~]#
  
+**Note**: If you are not logged in on the HUB TEMS Host, you need to set also the variables listed below (for Unix/Linux change "set" to "export") before running `kdstsns` tool. However the program `kdstsns` must be installed on that host:
 
+    set KDC_PORTS=(2 135 3661)                   # for ip.pipe use port 1918
+    echo IP.SPIPE:falcate1 >runCMSsql_site.txt   # for ip.pipe use IP.PIPE
+    set KDC_GLBSITES=runCMSsql_site.txt
+
+          
 **A.** If all your TEMS and Agents are **already using IP.SPIPE** you need:
   
   1. Leave the TEMS configuration as it is.
