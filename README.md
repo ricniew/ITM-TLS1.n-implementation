@@ -51,7 +51,7 @@ A step by step description for TLSv1.2 created by IBM Support exists: https://ww
 - automation scripts for the TEPS related configuration changes 
 - and some additional details
 
-1.2 Prerequisites<a id='1.1'></a>
+1.1 Prerequisites<a id='1.1'></a>
 -----------------
 
 **For TLSv1.2**
@@ -74,7 +74,8 @@ If a WAS 855 uplift was not performed in the TEPS host as described in the updat
     
     
 1.2 Get an overview<a id='1.2'></a>
-
+-----------------
+    
 To get a picture about current agent connections (whether connected over "pipe" or "spipe") **or** to check it after you have updated the agents to use SPIPE, you can use the following commands. Go to a temporary folder and execute the commands below:
 
 - UNIX/Linux:
