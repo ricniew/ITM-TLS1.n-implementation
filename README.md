@@ -74,6 +74,39 @@ If a WAS 855 uplift was not performed in the TEPS host as described in the updat
 1.2 General Approaches<a id='1.2'></a>
 ----------------------
 
+To get a picture about current agent conenctions  (whether connected over "pipe" or "spipe") **or** to check agents after you performed and update to HTTPS, you can use the following commands. Go to a temporary folder and:
+
+- UNIX/Linux:
+    ```
+    export ITMHOME=/opt/IBM/ITM
+    export SQLLIB=.
+    kdstsns=`find $ITMHOME -name kdstsns|grep "ms"`
+    echo "SELECT NODE, HOSTADDR FROM O4SRV.INODESTS;" > itm_get_node_address.sql
+    ```
+
+ - Windows:
+    ```
+    set SQLLIB=.
+    echo SELECT NODE, HOSTADDR FROM O4SRV.INODESTS; >  itm_get_node_address.sql
+    kdstsns itm_get_node_address.sql *HUB  | findstr "\/NM" > itm_get_node_address.out
+    for /F "tokens=1 delims=<" %i in (itm_get_node_address.out) do @echo %i 
+    ```
+
+
+ - Sample output:
+    
+      > [root@falcate1 ~]# **export ITMHOME=/opt/IBM/ITM**\
+      > [root@falcate1 ~]# **export SQLLIB=.**\
+      > [root@falcate1 ~]# kdstsns=`find $ITMHOME -name kdstsns|grep "ms"`\
+      > [root@falcate1 ~]# echo "SELECT NODE, HOSTADDR FROM O4SRV.INODESTS;" > itm_get_node_address.sql\
+      > [root@falcate1 ~]# $kdstsns  itm_get_node_address.sql *HUB |grep "/NM"| awk -F'<' '{print $1} '\
+      > falcate1:Warehouse               ip.spipe:#10.51.7.99[65101]\
+      > falcate1:LZ                      ip.spipe:#10.51.7.99[7757]\
+      > falcate1:SY                      ip.spipe:#10.51.7.99[11853]\
+      > falcate1:TEPS                    ip.spipe:#10.51.7.99[15949]\
+      > [root@falcate1 ~]#
+ 
+
 **A.** If all your TEMS and Agents are **already using IP.SPIPE** you need:
   
   1. Leave the TEMS configuration as it is.
@@ -209,8 +242,8 @@ Download latest version and unzip/tar the downloaded archive to a temporary fold
 
 Use these links:
  
-- For Windows: [ZIP format](https://github.com/ricniew/ITM-TLS1.n-implementation/archive/refs/tags/2.31.zip) 
-- For Unix/linux: [TAR format](https://github.com/ricniew/ITM-TLS1.n-implementation/archive/refs/tags/2.31.tar.gz) 
+- For Windows: [ZIP format](https://github.ibm.com/NIEWOLIK/ITM-TLS1.n-implementation/archive/2.31.zip) 
+- For Unix/linux: [TAR format](https://github.ibm.com/NIEWOLIK/ITM-TLS1.n-implementation/archive/2.31.tar.gz) 
 
 Or Use "Download ZIP" to save asset to a temporary folder. Then unzip it.
 
@@ -296,32 +329,32 @@ The prefered way would be to use the script. The second alternative is more usef
 
 Alternatively, you can execute each function from the command prompt. It is more usefull for testing and verification purposes. But before starting to modify files or options you must:
 
-- **Perform a backup of all files and settings you want to modify**. Otherwise you cannot go back in case of failures.
-- Execute `. .\init_tlsv1.2.ps1` for Windows or `. ./init_tlsv1.2` for Unix/Linux to initialize TLS version specific variables
-
-Open a Linux terminal or Powershell command prompt and execute each function manually to modify the required option or files. <BR>
-Below the recommended sequence (example for TLSv1.2 changes on Linux; but it applies to Windows as well, you only need to adjust the syntax):
-
-    $ cd /tmp/ITM-TLS1.n-implementation-2.2/unix
-    $ . ./init_tlsv1.2 ; . ./functions_sources.h  /opt/IBM/ITM
-    $ checkIfFileExists
-    $ EnableICSLite "true"
-    $ renewCert
-    $ restartTEPS ; EnableICSLite "true" # if required
-    $ modQop
-    $ disableAlgorithms
-    $ modsslclientprops "${AFILES["ssl.client.props"]}" 
-    $ modcqini "${AFILES["cq.ini"]}"
-    $ modhttpconf "${AFILES["httpd.conf"]}" yes # or "modhttpconf [httpd.conf file] no"
-    $ restartTEPS ; EnableICSLite "true" # if required
-    $ modjavasecurity "${AFILES["java.security"]}"
-    $ importSelfSignedToJREcacerts "${AFILES["cacerts"]}"
-    $ modtepjnlpt "${AFILES["tep.jnlpt"]}"
-    $ modcompjnlpt "${AFILES["component.jnlpt"]}"
-    $ modapplethtmlupdateparams "${AFILES["applet.html.updateparams"]}"
-    $ ${ITMHOME}/bin/itmcmd config -A cw
-    $ modcjenvironment "${AFILES["cj.environment"]}"
-    $ ${ITMHOME}/bin/itmcmd config -A cj
+ - **Perform a backup of all files and settings you want to modify**. Otherwise you cannot go back in case of failures.
+ - Execute `. .\init_tlsv1.2.ps1` for Windows or `. ./init_tlsv1.2` for Unix/Linux to initialize TLS version specific variables
+    
+   Open a Linux terminal or Powershell command prompt and execute each function manually to modify the required option or files. <BR>
+   Below the recommended sequence (example for TLSv1.2 changes on Linux; but it applies to Windows as well, you only need to adjust the syntax):
+    
+      > $ cd /tmp/ITM-TLS1.n-implementation-2.2/unix\
+      > $ . ./init_tlsv1.2 ; . ./functions_sources.h  /opt/IBM/ITM\
+      > $ checkIfFileExists\
+      > $ EnableICSLite "true"\
+      > $ renewCert\
+      > $ restartTEPS ; EnableICSLite "true" # if required\
+      > $ modQop\
+      > $ disableAlgorithms\
+      > $ modsslclientprops "${AFILES["ssl.client.props"]}" \
+      > $ modcqini "${AFILES["cq.ini"]}"\
+      > $ modhttpconf "${AFILES["httpd.conf"]}" yes # or "modhttpconf [httpd.conf file] no"\
+      > $ restartTEPS ; EnableICSLite "true" # if required\
+      > $ modjavasecurity "${AFILES["java.security"]}"\
+      > $ importSelfSignedToJREcacerts "${AFILES["cacerts"]}"\
+      > $ modtepjnlpt "${AFILES["tep.jnlpt"]}"\\
+      > $ modcompjnlpt "${AFILES["component.jnlpt"]}"\
+      > $ modapplethtmlupdateparams "${AFILES["applet.html.updateparams"]}"\
+      > $ ${ITMHOME}/bin/itmcmd config -A cw\
+      > $ modcjenvironment "${AFILES["cj.environment"]}"\
+      > $ ${ITMHOME}/bin/itmcmd config -A cj
 
 As you can see  `modtepjnlpt "${AFILES["tep.jnlpt"]}"` (on windows the option would be `$HFILES["tep.jnlpt"]`), an array/hash element containing the file path is passed to some functions. The AFILES variable is declared by file `init_global_vars` ( HFILES in `init_global_vars.ps1` on Windows) which is sourced by the `functions_sources.h` (or `functions_sources.ps1` on Windows). You can also use the real file names instead of the array elements.
 
