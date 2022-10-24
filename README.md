@@ -97,9 +97,9 @@ To get a picture about current agent conenctions  (whether connected over "pipe"
     
       > [root@falcate1 ~]# **export ITMHOME=/opt/IBM/ITM**\
       > [root@falcate1 ~]# **export SQLLIB=.**\
-      > [root@falcate1 ~]# kdstsns=`find $ITMHOME -name kdstsns|grep "ms"`\
-      > [root@falcate1 ~]# echo "SELECT NODE, HOSTADDR FROM O4SRV.INODESTS;" > itm_get_node_address.sql\
-      > [root@falcate1 ~]# $kdstsns  itm_get_node_address.sql *HUB |grep "/NM"| awk -F'<' '{print $1} '\
+      > [root@falcate1 ~]# **kdstsns=`find $ITMHOME -name kdstsns|grep "ms"`\**
+      > [root@falcate1 ~]# **echo "SELECT NODE, HOSTADDR FROM O4SRV.INODESTS;" > itm_get_node_address.sql\**
+      > [root@falcate1 ~]# **$kdstsns  itm_get_node_address.sql *HUB |grep "/NM"| awk -F'<' '{print $1} '\**
       > falcate1:Warehouse               ip.spipe:#10.51.7.99[65101]\
       > falcate1:LZ                      ip.spipe:#10.51.7.99[7757]\
       > falcate1:SY                      ip.spipe:#10.51.7.99[11853]\
