@@ -12,8 +12,7 @@ Content
 
 [1 General](#1-general) <BR>
 [1.1 Prerequisites](#1.1) <BR>
-[1.2 Get an overview](#1.2) <BR>
-[1.3 General Approaches](#1.3)
+[1.2 General Approaches](#1.3)
 
 [2 Tivoli Enterprise Management Server](#2-tems) <BR>
 [2.1 Get an overview](#2.1) <BR>
