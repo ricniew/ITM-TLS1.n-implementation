@@ -15,7 +15,9 @@ Content
 [1.2 Get an overview](#1.2) <BR>
 [1.3 General Approaches](#1.3)
 
-[2 Tivoli Enterprise Management Server](#2-tems)
+[2 Tivoli Enterprise Management Server](#2-tems) <BR>
+[2.1 Get an overview](#2.1) <BR>
+[2.2 HUB Config](#2.2)
 
 [3 Tivoli Enterprise Portal Server](#3-teps) <BR>
 [3.1 Prerequisites](#3.1) <BR>
@@ -72,8 +74,39 @@ If a WAS 855 uplift was not performed in the TEPS host as described in the updat
     - Also, if you use a local firewalls (TEMS,TEPS, WPA hsots), you need to allow incomming traffic on port 3660, 15201 (if you did not modify the default set in `ìnit_global_vars`) and 65100
 
     
+1.2 General Approaches<a id='1.3'></a>
+----------------------
+          
+**A.** If all your TEMS and Agents are **already using IP.SPIPE** you need:
+  
+  1. Leave the TEMS configuration as it is.
+  2. Configure your TEPS to use IP.SPIPE with TLSV1.2 and the specific ciphers for the TEMS connection (**how to**: See TEPS section for further config TEPS actions related to TLSv1.2 only usage)
+  3. Check if the Summarization and Pruning Agent is using HTTPS and port 15201 (if you did not modify the default set in `ìnit_global_vars`) to connect to TEPS. If not, configure it accordignly.
+  4. Configure all your Agents to use TLSV1.2 and the specific ciphers for the TEMS connenction (**how to**: see Agents section)
+  
+
+**B.** If all your TEMS and Agents **use only IP.PIPE** you need:
+
+  1. Make sure that port 3660 is open on the firewall (Agent/TEPS - TEMS connection). If a local firewall is in use, also here allow incomming connection on 3660.
+  2. First configure your TEMS and the WPA to use IP.SPIPE and IP.PIPE (**how to**: see TEMS and WPA section). By default TLSV1.x and all existing ciphers are allowed to be used.
+  3. Configure your TEPS to use IP.SPIPE with TLSV1.2 and the specific ciphers for the TEMS connection (**how to**: See TEPS section for further config TEPS actions related to TLSv1.2 only usage)
+  4. Configure the Summarization and Pruning Agent to use HTTPS and port 15201 (if you did not modify the default set in `ìnit_global_vars`) to connect to TEPS.
+  5. Configure all your Agents to use IP.SPIPE with  TLSV1.2 and the specific ciphers only for the TEMS connenction (**how to**: see Agents section)
+
+**C.**
+If all your TEMS use **both IP.SPIPE and IP.PIPE** and **some Agents use IP.PIPE and others IP.SPIPE** you need:
+
+  1. Leave the TEMS configuration as it is.
+  2. Configure your TEPS to use IP.SPIPE with TLSV1.2 and the specific ciphers for the TEMS connection (**how to**: See TEPS section for further config TEPS actions related to TLSv1.2 only usage)
+  3. Check if the Summarization and Pruning Agent is using HTTPS and port 15201 (if you did not modify the default set in `ìnit_global_vars`) to connect to TEPS. If not, configure it accordignly.
+  4. Configure all your Agents to use IP.SPIPE with TLSV1.2 and the specific ciphers only for the TEMS connenction (**how to**: see Agents section)
+
+<BR> [\[goto top\]](#content)
     
-1.2 Get an overview<a id='1.2'></a>
+2 TEMS
+=======
+
+2.1 Get an overview<a id='2.1'></a>
 -----------------
     
 To get a picture about current agent connections (whether connected over "pipe" or "spipe") **or** to check it after you have updated the agents to use SPIPE, you can use the following commands. Go to a temporary folder and execute the commands below:
@@ -114,40 +147,10 @@ To get a picture about current agent connections (whether connected over "pipe" 
     echo IP.SPIPE:falcate1 >runCMSsql_site.txt   # for ip.pipe use IP.PIPE
     set KDC_GLBSITES=runCMSsql_site.txt
 
-    
-1.3 General Approaches<a id='1.3'></a>
-----------------------
-
-          
-**A.** If all your TEMS and Agents are **already using IP.SPIPE** you need:
-  
-  1. Leave the TEMS configuration as it is.
-  2. Configure your TEPS to use IP.SPIPE with TLSV1.2 and the specific ciphers for the TEMS connection (**how to**: See TEPS section for further config TEPS actions related to TLSv1.2 only usage)
-  3. Check if the Summarization and Pruning Agent is using HTTPS and port 15201 (if you did not modify the default set in `ìnit_global_vars`) to connect to TEPS. If not, configure it accordignly.
-  4. Configure all your Agents to use TLSV1.2 and the specific ciphers for the TEMS connenction (**how to**: see Agents section)
-  
-
-**B.** If all your TEMS and Agents **use only IP.PIPE** you need:
-
-  1. Make sure that port 3660 is open on the firewall (Agent/TEPS - TEMS connection). If a local firewall is in use, also here allow incomming connection on 3660.
-  2. First configure your TEMS and the WPA to use IP.SPIPE and IP.PIPE (**how to**: see TEMS and WPA section). By default TLSV1.x and all existing ciphers are allowed to be used.
-  3. Configure your TEPS to use IP.SPIPE with TLSV1.2 and the specific ciphers for the TEMS connection (**how to**: See TEPS section for further config TEPS actions related to TLSv1.2 only usage)
-  4. Configure the Summarization and Pruning Agent to use HTTPS and port 15201 (if you did not modify the default set in `ìnit_global_vars`) to connect to TEPS.
-  5. Configure all your Agents to use IP.SPIPE with  TLSV1.2 and the specific ciphers only for the TEMS connenction (**how to**: see Agents section)
-
-**C.**
-If all your TEMS use **both IP.SPIPE and IP.PIPE** and **some Agents use IP.PIPE and others IP.SPIPE** you need:
-
-  1. Leave the TEMS configuration as it is.
-  2. Configure your TEPS to use IP.SPIPE with TLSV1.2 and the specific ciphers for the TEMS connection (**how to**: See TEPS section for further config TEPS actions related to TLSv1.2 only usage)
-  3. Check if the Summarization and Pruning Agent is using HTTPS and port 15201 (if you did not modify the default set in `ìnit_global_vars`) to connect to TEPS. If not, configure it accordignly.
-  4. Configure all your Agents to use IP.SPIPE with TLSV1.2 and the specific ciphers only for the TEMS connenction (**how to**: see Agents section)
-
 <BR> [\[goto top\]](#content)
 
-2 TEMS
-=======
-
+2.2 HUB Config <a id='2.2'></a>
+-----------------
 To use TLSV1.n, all TEMS server (HUB and remote TEMS) **must** use IP.SPIPE (HTTPS) for communication.
 
 **CONFIGURE IP.SPIPE on TEMS:**
