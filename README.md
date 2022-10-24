@@ -12,7 +12,8 @@ Content
 
 [1 General](#1-general) <BR>
 [1.1 Prerequisites](#1.1) <BR>
-[1.2 General Approaches](#1.2)
+[1.2 Get an overview](#1.2) <BR>
+[1.3 General Approaches](#1.3)
 
 [2 Tivoli Enterprise Management Server](#2-tems)
 
@@ -70,9 +71,9 @@ If a WAS 855 uplift was not performed in the TEPS host as described in the updat
     - If you did not use HTTPS so far and firewall is in use, port 3660 needs to be opened on the firewall between the Agents and the TEMS. 
     - Also, if you use a local firewalls (TEMS,TEPS, WPA hsots), you need to allow incomming traffic on port 3660, 15201 (if you did not modify the default set in `ìnit_global_vars`) and 65100
 
-
-1.2 General Approaches<a id='1.2'></a>
-----------------------
+    
+    
+1.2 Get an overview<a id='1.2'></a>
 
 To get a picture about current agent connections (whether connected over "pipe" or "spipe") **or** to check it after you have updated the agents to use SPIPE, you can use the following commands. Go to a temporary folder and execute the commands below:
 
@@ -111,6 +112,10 @@ To get a picture about current agent connections (whether connected over "pipe" 
     set KDC_PORTS=(2 135 3661)                   # for ip.pipe use port 1918
     echo IP.SPIPE:falcate1 >runCMSsql_site.txt   # for ip.pipe use IP.PIPE
     set KDC_GLBSITES=runCMSsql_site.txt
+
+    
+1.3 General Approaches<a id='1.3'></a>
+----------------------
 
           
 **A.** If all your TEMS and Agents are **already using IP.SPIPE** you need:
