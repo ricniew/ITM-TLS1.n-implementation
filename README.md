@@ -74,7 +74,7 @@ If a WAS 855 uplift was not performed in the TEPS host as described in the updat
 1.2 General Approaches<a id='1.2'></a>
 ----------------------
 
-To get a picture about current agent connections (whether connected over "pipe" or "spipe") **or** to check agents after you have updated the agents to use SPIPE, you can use the following commands. Go to a temporary folder and execute the commands below:
+    To get a picture about current agent connections (whether connected over "pipe" or "spipe") **or** to check it after you have updated the agents to use SPIPE, you can use the following commands. Go to a temporary folder and execute the commands below:
 
 - UNIX/Linux:
     ```
