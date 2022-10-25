@@ -4,7 +4,7 @@ Author: Richard Niewolik
 
 Contact: niewolik@de.ibm.com
 
-Revision: 2.31
+Revision: 2.32
 
 
 Content
@@ -117,7 +117,8 @@ To get a picture about current agent connections (whether connected over "pipe" 
     kdstsns=`find $ITMHOME -name kdstsns|grep "ms"`
     echo "SELECT NODE, HOSTADDR FROM O4SRV.INODESTS;" > itm_get_node_address.sql
     ```
-
+    Sample script: [list_agents_ip.sh](https://github.com/ricniew/ITM-TLS1.n-implementation/blob/main/Unix/list_agents_ip.sh)
+    
  - Windows:
     ```
     set SQLLIB=.
@@ -125,7 +126,7 @@ To get a picture about current agent connections (whether connected over "pipe" 
     kdstsns itm_get_node_address.sql *HUB  | findstr "\/NM" > itm_get_node_address.out
     for /F "tokens=1 delims=<" %i in (itm_get_node_address.out) do @echo %i 
     ```
-
+    Sample script: [list_agents_ip.bat](https://github.com/ricniew/ITM-TLS1.n-implementation/blob/main/Windows/list_agents_ip.bat)
 
  - Sample output:
     
