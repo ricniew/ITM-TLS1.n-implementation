@@ -8,7 +8,7 @@ kdstsns=`find $ITMHOME -name kdstsns|grep "ms"`
 echo "SELECT NODE, HOSTADDR FROM O4SRV.INODESTS;" > itm_get_node_address.sql
 
 # for ip.pipe use port 1918
-#export KDC_PORTS="(2 135 3661)"
+export KDC_PORTS="(2 135 3661)"
 
 # for ip.pipe use IP.PIPE and change hostname if running remotely
 # if running remotely change hostname "localhost" to your HUB hostname 
