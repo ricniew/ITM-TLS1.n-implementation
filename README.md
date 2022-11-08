@@ -354,7 +354,7 @@ Alternatively, you can execute each function from the command prompt. It is more
       > $ . ./init_tlsv1.2 ; . ./functions_sources.h  /opt/IBM/ITM\
       > $ checkIfFileExists\
       > $ EnableICSLite "true"\
-      > $ renewCert\
+      > $ renewCert # ONLY if your NOT using your own CA certs\
       > $ restartTEPS ; EnableICSLite "true" # if required\
       > $ modQop\
       > $ disableAlgorithms\
@@ -364,7 +364,7 @@ Alternatively, you can execute each function from the command prompt. It is more
       > $ restartTEPS ; EnableICSLite "true" # if required\
       > $ modjavasecurity "${AFILES["java.security"]}"\
       > $ importSelfSignedToJREcacerts "${AFILES["cacerts"]}"\
-      > $ modtepjnlpt "${AFILES["tep.jnlpt"]}"\\
+      > $ modtepjnlpt "${AFILES["tep.jnlpt"]}"\
       > $ modcompjnlpt "${AFILES["component.jnlpt"]}"\
       > $ modapplethtmlupdateparams "${AFILES["applet.html.updateparams"]}"\
       > $ ${ITMHOME}/bin/itmcmd config -A cw\
