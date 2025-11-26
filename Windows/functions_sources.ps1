@@ -480,7 +480,7 @@ function modtepjnlpt ($tepjnlpt) # modtepjnlpt $HFILES["tep.jnlpt"]
 
   $foundprotocol = $foundport = $foundTLSn = 1
   foreach( $line in Get-Content $savetepjnlpt ) {
-      if ( "$line" -match 'codebase="http://\$HOST\$:(.*)/' ) {
+      if ( "$line" -match 'codebase="(.*)/' ) {
           Add-Content $newtepjnlpt "  codebase=`"https://`$HOST`$:${TEPSHTTPSPORT}/`"> "
       } elseif ( "$line" -match '\s*<property name="jnlp.tep.connection.protocol"\s*value=.*' ) {
           Add-Content $newtepjnlpt '    <property name="jnlp.tep.connection.protocol" value="https"/> '
@@ -536,7 +536,7 @@ function modcomponentjnlpt ($componentjnlpt) # modcomponentjnlpt $HFILES["compon
   $savecomponentjnlpt = $rc.save
 
   foreach( $line in Get-Content $savecomponentjnlpt ) {
-      if ( "$line" -match 'codebase="http://\$HOST\$:(.*)/' ) {
+      if ( "$line" -match 'codebase="(.*)/' ) {
           Add-Content $newcomponentjnlpt "  codebase=`"https://`$HOST`$:${TEPSHTTPSPORT}/`""
       } else { Add-Content $newcomponentjnlpt "${line}" }
   }
@@ -961,3 +961,4 @@ function disableAlgorithms ()
   }
 
 }
+
