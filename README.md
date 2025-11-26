@@ -64,7 +64,7 @@ If a WAS 855 uplift was not performed in the TEPS host as described in the updat
     - `KDEBE_TLSV12_CIPHER_SPECS="TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384,TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384"` 
 
     **Note:** If other cipher specs needs to be used, you **must** modify the `init_tlsv[n].[n]` file ( for example "init_tlsv1.2" ) and use them everywhere they are set in this document.
-    The list above is a subset of the allowed ciphers which considered as save. A complete list of TLSv1.2 ciphers available in ITM is [here](https://github.ibm.com/NIEWOLIK/ITM-TLS1.n-implementation/blob/main/itm_allowed_TLSV1.2.cipherspecs.txt)
+    The list above is a subset of the allowed ciphers which considered as save. A complete list of TLSv1.2 ciphers available in ITM is [here](https://github.com/ricniew/ITM-TLS1.n-implementatio/blob/main/itm_allowed_TLSV1.2.cipherspecs.txt)
 
 3. Following new ports will be used and needs to be opened on the firewall **and** on the local firewall on the hosts where the Warehouse Proxy Agent and the Tivoli Enterprise Portal Server are running:
     - 15201 (if you did not modify the default set in `ìnit_global_vars`) port to connect to the TEPS. 
@@ -598,7 +598,8 @@ You can perform local config steps or modify/create the correspondig config file
 
 On Windows you may try to edit or add configuration settings directly in the registry  `HKEY_LOCAL_MACHINE\SOFTWARE\Candle\K[pc]\Ver610\Primary\Environment`:
 
-<img src="https://media.github.ibm.com/user/85313/files/b72bde00-b9b4-11ec-98cb-f210ff3d4edb" width="55%" height="55%">
+<img width="1062" height="276" alt="image" src="https://github.com/user-attachments/assets/b449ad54-3ff0-4034-b2a9-37919d0c117c" />
+
 
 Please always check if the registry settings are taken over by the agents after restart. Also, always check that the `ITMHOME\TMAITM6_64\k[pc]cma.ini` file does not contain an `[Override Local Settings]` section with the same variable names as that one you manually set in the registry. The `[Override Local Settings]` section overrides your manual registry changes the next time an agent is reconfigured by the MTEMS tools.  
 
