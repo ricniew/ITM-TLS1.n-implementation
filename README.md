@@ -456,7 +456,7 @@ You may encounter SSL related errors if tepslogin runs remotely (is not executed
 Configure and check if the S&P Agent is connecting through HTTPS port (if you did not modify the default set in `ìnit_global_vars`) to the TEPS. <BR>
 You  **must**  perform this step just after you have configured the TEPS to use HTTPS only, otherwise your Warehouse Database will not be summarized and pruned:
 
-<img src="https://media.github.ibm.com/user/85313/files/dc6d4d00-c640-11ec-9f31-40b1c555503f" width="40%" height="40%">
+<img width="656" height="547" alt="image" src="https://github.com/user-attachments/assets/cf92ffb5-ad12-4ae0-876c-eaf6f182d6ae" />
 
 You may encounter SSL related errors if KSY is not running on the same host as the TEPS. In such a case copy the new "cacerts" file which was created during the steps for the TEPS (for example "c:\IBM\ITM\java\java80\jre\lib\security\cacerts" on Windows and "/opt/IBM/ITM/JRE/lx8266/lib/security/cacerts" on Linux) to the appropriate folder on the KSY host. 
 
