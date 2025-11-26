@@ -158,7 +158,9 @@ To use TLSV1.n, all TEMS server (HUB and remote TEMS) **must** use IP.SPIPE (HTT
 To do so you need to reconfigure your **HUB and each RTEMS**:
 
   - Windows: Use MTEMS tool to configure and **add** IP.SPIPE protocol to your TEMS 
- <img src="https://media.github.ibm.com/user/85313/files/567d2e00-b415-11ec-9930-33bc3a4c462e" width="25%" height="25%">
+
+<img width="25%" height="25%" alt="image" src="https://github.com/user-attachments/assets/4f570274-3b0d-4897-891c-319d7d98936e" />
+
  
   - Linux/AIX: Use `itmcmd config -S -t TEMS` tool to configure and **add** IP.SPIPE protocol to your TEMS 
   - Restart TEMS
