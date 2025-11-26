@@ -61,7 +61,7 @@ A step by step description for TLSv1.2 created by IBM Support exists: https://ww
 If a WAS 855 uplift was not performed in the TEPS host as described in the update readme files, you must execute _Appendix B_ action as described in the IBM Support document. To check if a WAS uplift was made use `ITMHOME/[arch]/iw/bin/versionInfo.sh` or `ITMHOME\CNPSJ\bin\versionInfo.bat`. The version must be at least `8.5.5.16`
 
 2. Following ciphers are used in the provided `init_tlsv1.2` files. If you want to use them, you need to set it wherever the variable `KDEBE_TLSV12_CIPHER_SPECS`is referanced in this document. 
-    - `KDEBE_TLSVNN_CIPHER_SPECS="TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384,TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384"` 
+    - `KDEBE_TLSV12_CIPHER_SPECS="TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384,TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384"` 
 
     **Note:** If other cipher specs needs to be used, you **must** modify the `init_tlsv[n].[n]` file ( for example "init_tlsv1.2" ) and use them everywhere they are set in this document.
     The list above is a subset of the allowed ciphers which considered as save. A complete list of TLSv1.2 ciphers available in ITM is [here](https://github.ibm.com/NIEWOLIK/ITM-TLS1.n-implementation/blob/main/itm_allowed_TLSV1.2.cipherspecs.txt)
