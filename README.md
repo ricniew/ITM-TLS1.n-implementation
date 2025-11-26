@@ -48,7 +48,7 @@ Content
 =========
 
 This asset can be used to configure ITM components to use only TLS v1.n. So far only TLSv1.2 can be implemented. 
-A step by step description for TLSv1.2 created by IBM Support exists: https://www.ibm.com/support/pages/tivoli-monitoring-v6307-tls-v12-only-configuration-tep-ihs-teps-teps-ewas-components-and-ewas-default-certificate-renewal. **This** Github entry provides 
+A step by step description for TLSv1.2 created by IBM Support exists: https://www.ibm.com/support/pages/tlsv12-configuration-and-lockdown. **This** Github entry provides 
 - automation scripts for the TEPS related configuration changes 
 - and some additional details
 
