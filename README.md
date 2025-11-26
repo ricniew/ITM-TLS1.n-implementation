@@ -262,7 +262,7 @@ Use these links:
 
 Or Use "Download ZIP" to save asset to a temporary folder. Then unzip it.
 
-<img src="https://media.github.ibm.com/user/85313/files/a8ede000-b0df-11ec-86d9-bf7e122e6f83" width="55%" height="55%">
+<img width="55%" height="55%" alt="image" src="https://github.com/user-attachments/assets/7e1c2b4b-4c63-4beb-9b2d-e60f960aead1" />
 
 
 3.3 Syntax<a id='3.3'></a>
