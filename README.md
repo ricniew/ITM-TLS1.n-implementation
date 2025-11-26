@@ -180,7 +180,9 @@ WINDOWS (sample for TLSv1.2):
   KDEBE_TLSV12_CIPHER_SPECS=[your cipher settings]
 ```
   2. Reconfigure TEMS using MTEMS tool and disable IP.PIPE protocol
-  <img src="https://media.github.ibm.com/user/85313/files/3d25b300-b410-11ec-8f0b-36670dee661b" width="25%" height="25%">
+
+  <img width="510" height="391" alt="image" src="https://github.com/user-attachments/assets/4a2cbb9d-fb45-486c-b6a2-00a7cf3f8f44" />
+
   
   3. Restart the TEMSs
 
